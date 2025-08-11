@@ -1,0 +1,24 @@
+[project]
+dependencies = [
+  "fastmcp>=2.11.2",
+  "httpx>=0.28.1",
+  "pydantic>=2.11.7",
+  "pydantic-settings>=2.10.1",
+]
+description = "Add your description here"
+name = "lampyrid"
+readme = "README.md"
+requires-python = ">=3.13"
+version = "0.1.0"
+
+[project.scripts]
+lampyrid = "lampyrid.__main__:main"
+
+[dependency-groups]
+dev = [
+  "datamodel-code-generator>=0.32.0",
+]
+
+[build-system]
+build-backend = "uv_build"
+requires = ["uv_build"]
