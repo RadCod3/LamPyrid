@@ -22,3 +22,11 @@ dev = [
 [build-system]
 build-backend = "uv_build"
 requires = ["uv_build"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
+docstring-code-format = true

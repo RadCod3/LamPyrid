@@ -4,15 +4,15 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    # Explicitly set environment variables config
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+	# Explicitly set environment variables config
+	model_config = SettingsConfigDict(
+		env_file='.env',
+		env_file_encoding='utf-8',
+		extra='ignore',
+	)
 
-    firefly_base_url: Optional[HttpUrl] = Field(default=None)
-    firefly_token: Optional[str] = Field(default=None)
+	firefly_base_url: Optional[HttpUrl] = Field(default=None)
+	firefly_token: Optional[str] = Field(default=None)
 
 
 # Initialize settings
