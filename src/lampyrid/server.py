@@ -5,6 +5,7 @@ from fastmcp import FastMCP
 from .clients.firefly import FireflyClient
 from .models.lampyrid_models import (
 	Account,
+	CreateDepositRequest,
 	CreateWithdrawalRequest,
 	ListAccountRequest,
 	SearchAccountRequest,
@@ -41,4 +42,12 @@ async def search_accounts(req: SearchAccountRequest) -> List[Account]:
 @mcp.tool()
 async def create_withdrawal(req: CreateWithdrawalRequest):
 	"""Create a new Firefly-III withdrawal."""
-	pass
+	transaction = await _client.create_withdrawal(req)
+	return transaction
+
+
+@mcp.tool()
+async def create_deposit(req: CreateDepositRequest):
+	"""Create a new Firefly-III deposit."""
+	transaction = await _client.create_deposit(req)
+	return transaction

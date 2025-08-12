@@ -1,10 +1,21 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from .firefly_models import AccountRead, AccountTypeFilter, TransactionSingle
+from .firefly_models import (
+	AccountRead,
+	AccountTypeFilter,
+	TransactionSingle,
+	TransactionSplitStore,
+	TransactionTypeProperty,
+)
+
+
+def utc_now():
+	"""Return current UTC time with timezone info"""
+	return datetime.now(timezone.utc)
 
 
 class Account(BaseModel):
@@ -62,6 +73,14 @@ class Transaction(BaseModel):
 			destination_id=inner_trx.destination_id,
 		)
 
+	def to_transaction_split_store(self) -> TransactionSplitStore:
+		return TransactionSplitStore(
+			type=TransactionTypeProperty(self.type),
+			date=self.date,
+			amount=str(self.amount),
+			description=self.description,
+		)
+
 
 class ListAccountRequest(BaseModel):
 	type: AccountTypeFilter = Field(..., description='Type of account to filter by')
@@ -77,9 +96,7 @@ class SearchAccountRequest(BaseModel):
 class CreateWithdrawalRequest(BaseModel):
 	amount: float = Field(..., description='Amount of the withdrawal')
 	description: str = Field(..., description='Description of the withdrawal')
-	date: datetime = Field(
-		default_factory=datetime.now, description='Date and time of the withdrawal'
-	)
+	date: datetime = Field(default_factory=utc_now, description='Date and time of the withdrawal')
 	source_id: str = Field(
 		...,
 		description='ID of the source account for the withdrawal. This must always be an asset account.',
@@ -87,4 +104,18 @@ class CreateWithdrawalRequest(BaseModel):
 	destination_name: Optional[str] = Field(
 		default=None,
 		description='Name of the destination account for the withdrawal. This account is automatically created if it does not exist. Leave it blank for cash withdrawals.',
+	)
+
+
+class CreateDepositRequest(BaseModel):
+	amount: float = Field(..., description='Amount of the deposit')
+	description: str = Field(..., description='Description of the deposit')
+	date: datetime = Field(default_factory=utc_now, description='Date and time of the deposit')
+	source_name: Optional[str] = Field(
+		default=None,
+		description='Name of the source account for the deposit. This account is automatically created if it does not exist.',
+	)
+	destination_id: str = Field(
+		...,
+		description='ID of the destination account for the deposit. This must always be an asset account.',
 	)

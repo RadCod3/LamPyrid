@@ -11,8 +11,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, EmailStr, Field, RootModel
 
-from .lampyrid_models import Transaction as LampyridTransaction
-
 
 class AutocompleteAccount(BaseModel):
 	id: str = Field(..., examples=['2'])
@@ -3173,7 +3171,7 @@ class TransactionSplitStore(BaseModel):
 		..., description='Description of the transaction.', examples=['Vegetables']
 	)
 	order: Optional[int] = Field(
-		default=None,
+		default=0,
 		description='Order of this entry in the list of transactions.',
 		examples=[0],
 	)
@@ -3241,7 +3239,7 @@ class TransactionSplitStore(BaseModel):
 		examples=['Buy and Large'],
 	)
 	reconciled: Optional[bool] = Field(
-		default=None,
+		default=False,
 		description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
 		examples=[False],
 	)
@@ -3290,15 +3288,6 @@ class TransactionSplitStore(BaseModel):
 	due_date: Optional[datetime] = None
 	payment_date: Optional[datetime] = None
 	invoice_date: Optional[datetime] = None
-
-	@classmethod
-	def from_lampyrid_transaction(cls, transaction: LampyridTransaction) -> TransactionSplitStore:
-		return TransactionSplitStore(
-			type=TransactionTypeProperty(transaction.type),
-			date=transaction.date,
-			amount=str(transaction.amount),
-			description=transaction.description,
-		)
 
 
 class TransactionSplitUpdate(BaseModel):
@@ -3966,12 +3955,12 @@ class Transaction(BaseModel):
 
 class TransactionStore(BaseModel):
 	error_if_duplicate_hash: Optional[bool] = Field(
-		default=None,
+		default=False,
 		description='Break if the submitted transaction exists already.',
 		examples=[False],
 	)
 	apply_rules: Optional[bool] = Field(
-		default=None,
+		default=False,
 		description='Whether or not to apply rules when submitting transaction.',
 		examples=[False],
 	)

@@ -11,7 +11,12 @@ from ..models.firefly_models import (
 	TransactionStore,
 	TransactionTypeProperty,
 )
-from ..models.lampyrid_models import CreateWithdrawalRequest, SearchAccountRequest, Transaction
+from ..models.lampyrid_models import (
+	CreateDepositRequest,
+	CreateWithdrawalRequest,
+	SearchAccountRequest,
+	Transaction,
+)
 
 
 class FireflyClient:
@@ -55,9 +60,9 @@ class FireflyClient:
 		return r.json()
 
 	async def create_transaction(self, transaction: Transaction) -> TransactionSingle:
-		trx_split_store = TransactionSplitStore.from_lampyrid_transaction(transaction)
+		trx_split_store = transaction.to_transaction_split_store()
 		trx_store = TransactionStore(transactions=[trx_split_store])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump())
+		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
 		r.raise_for_status()
 		return TransactionSingle.model_validate(r.json())
 
@@ -67,13 +72,27 @@ class FireflyClient:
 			description=withdrawal.description,
 			type=TransactionTypeProperty.withdrawal,
 			date=withdrawal.date,
+			source_id=withdrawal.source_id,
+			destination_name=withdrawal.destination_name,
 		)
 		trx_store = TransactionStore(transactions=[trx])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump())
+		print(f'Creating withdrawal: {trx_store.model_dump_json()}')
+		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
 
-
-	# async def aclose(self) -> None:
-	# 	await self._client.aclose()
+	async def create_deposit(self, deposit: CreateDepositRequest) -> Transaction:
+		trx = TransactionSplitStore(
+			amount=str(deposit.amount),
+			description=deposit.description,
+			type=TransactionTypeProperty.deposit,
+			date=deposit.date,
+			source_name=deposit.source_name,
+			destination_id=deposit.destination_id,
+		)
+		trx_store = TransactionStore(transactions=[trx])
+		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
+		r.raise_for_status()
+		res = TransactionSingle.model_validate(r.json())
+		return Transaction.from_transaction_single(res)
