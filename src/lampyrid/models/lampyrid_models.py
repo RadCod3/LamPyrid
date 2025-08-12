@@ -119,3 +119,17 @@ class CreateDepositRequest(BaseModel):
 		...,
 		description='ID of the destination account for the deposit. This must always be an asset account.',
 	)
+
+
+class CreateTransferRequest(BaseModel):
+	amount: float = Field(..., description='Amount of the transfer')
+	description: str = Field(..., description='Description of the transfer')
+	date: datetime = Field(default_factory=utc_now, description='Date and time of the transfer')
+	source_id: str = Field(
+		...,
+		description='ID of the source account for the transfer. This must always be an asset account.',
+	)
+	destination_id: str = Field(
+		...,
+		description='ID of the destination account for the transfer. This must always be an asset account.',
+	)

@@ -13,6 +13,7 @@ from ..models.firefly_models import (
 )
 from ..models.lampyrid_models import (
 	CreateDepositRequest,
+	CreateTransferRequest,
 	CreateWithdrawalRequest,
 	SearchAccountRequest,
 	Transaction,
@@ -90,6 +91,21 @@ class FireflyClient:
 			date=deposit.date,
 			source_name=deposit.source_name,
 			destination_id=deposit.destination_id,
+		)
+		trx_store = TransactionStore(transactions=[trx])
+		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
+		r.raise_for_status()
+		res = TransactionSingle.model_validate(r.json())
+		return Transaction.from_transaction_single(res)
+
+	async def create_transfer(self, transfer: CreateTransferRequest) -> Transaction:
+		trx = TransactionSplitStore(
+			amount=str(transfer.amount),
+			description=transfer.description,
+			type=TransactionTypeProperty.transfer,
+			date=transfer.date,
+			source_id=transfer.source_id,
+			destination_id=transfer.destination_id,
 		)
 		trx_store = TransactionStore(transactions=[trx])
 		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
