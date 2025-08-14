@@ -8,8 +8,11 @@ from .models.lampyrid_models import (
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
+	GetTransactionsRequest,
 	ListAccountRequest,
 	SearchAccountRequest,
+	SearchTransactionsRequest,
+	TransactionListResponse,
 )
 
 mcp = FastMCP('lampyrid')
@@ -59,3 +62,23 @@ async def create_transfer(req: CreateTransferRequest):
 	"""Create a new Firefly-III transfer."""
 	transaction = await _client.create_transfer(req)
 	return transaction
+
+
+@mcp.tool()
+async def get_transactions(req: GetTransactionsRequest) -> TransactionListResponse:
+	"""Get past transactions with optional time range and type filtering."""
+	transaction_array = await _client.get_transactions(req)
+
+	return TransactionListResponse.from_transaction_array(
+		transaction_array, current_page=req.page or 1, per_page=req.limit or 50
+	)
+
+
+@mcp.tool()
+async def search_transactions(req: SearchTransactionsRequest) -> TransactionListResponse:
+	"""Search transactions by description or other text fields."""
+	transaction_array = await _client.search_transactions(req)
+
+	return TransactionListResponse.from_transaction_array(
+		transaction_array, current_page=req.page or 1, per_page=req.limit or 50
+	)

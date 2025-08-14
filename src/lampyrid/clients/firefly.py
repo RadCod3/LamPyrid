@@ -6,6 +6,7 @@ from ..config import settings
 from ..models.firefly_models import (
 	AccountArray,
 	AccountTypeFilter,
+	TransactionArray,
 	TransactionSingle,
 	TransactionSplitStore,
 	TransactionStore,
@@ -15,7 +16,9 @@ from ..models.lampyrid_models import (
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
+	GetTransactionsRequest,
 	SearchAccountRequest,
+	SearchTransactionsRequest,
 	Transaction,
 )
 
@@ -55,10 +58,17 @@ class FireflyClient:
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
-	async def search_transactions(self, query: str, page: int = 1) -> Dict[str, Any]:
-		r = await self._client.get('/api/v1/transactions', params={'query': query, 'page': page})
+	async def search_transactions(self, req: SearchTransactionsRequest) -> TransactionArray:
+		"""Search transactions by description or other text fields."""
+		params: Dict[str, Any] = {
+			'query': req.query,
+			'page': req.page,
+			'limit': req.limit,
+		}
+
+		r = await self._client.get('/api/v1/search/transactions', params=params)
 		r.raise_for_status()
-		return r.json()
+		return TransactionArray.model_validate(r.json())
 
 	async def create_transaction(self, transaction: Transaction) -> TransactionSingle:
 		trx_split_store = transaction.to_transaction_split_store()
@@ -112,3 +122,23 @@ class FireflyClient:
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
+
+	async def get_transactions(self, req: GetTransactionsRequest) -> TransactionArray:
+		"""Get transactions with optional time range and type filtering."""
+		params: Dict[str, Any] = {
+			'page': req.page,
+			'limit': req.limit,
+		}
+
+		if req.start_date:
+			params['start'] = req.start_date.strftime('%Y-%m-%d')
+
+		if req.end_date:
+			params['end'] = req.end_date.strftime('%Y-%m-%d')
+
+		if req.transaction_type:
+			params['type'] = req.transaction_type.value
+
+		r = await self._client.get('/api/v1/transactions', params=params)
+		r.raise_for_status()
+		return TransactionArray.model_validate(r.json())

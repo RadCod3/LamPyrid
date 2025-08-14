@@ -1,14 +1,17 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
 from .firefly_models import (
 	AccountRead,
 	AccountTypeFilter,
+	TransactionArray,
+	TransactionRead,
 	TransactionSingle,
 	TransactionSplitStore,
+	TransactionTypeFilter,
 	TransactionTypeProperty,
 )
 
@@ -75,7 +78,7 @@ class Transaction(BaseModel):
 
 	def to_transaction_split_store(self) -> TransactionSplitStore:
 		return TransactionSplitStore(
-			type=TransactionTypeProperty(self.type),
+			type=TransactionTypeProperty(self.type.value),
 			date=self.date,
 			amount=str(self.amount),
 			description=self.description,
@@ -133,3 +136,80 @@ class CreateTransferRequest(BaseModel):
 		...,
 		description='ID of the destination account for the transfer. This must always be an asset account.',
 	)
+
+
+class GetTransactionsRequest(BaseModel):
+	start_date: Optional[date] = Field(
+		None, description='Start date for transaction range (YYYY-MM-DD), inclusive'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for transaction range (YYYY-MM-DD), inclusive'
+	)
+	transaction_type: Optional[TransactionTypeFilter] = Field(
+		None, description='Optional filter on transaction type'
+	)
+	page: Optional[int] = Field(1, description='Page number for pagination', ge=1)
+	limit: Optional[int] = Field(50, description='Number of items per page', ge=1, le=500)
+
+
+class SearchTransactionsRequest(BaseModel):
+	query: str = Field(
+		..., description='Search query to find transactions (e.g., "groceries", "salary")'
+	)
+	page: Optional[int] = Field(1, description='Page number for pagination', ge=1)
+	limit: Optional[int] = Field(50, description='Number of items per page', ge=1, le=500)
+
+
+class TransactionSummary(BaseModel):
+	"""Simplified transaction model for listing transactions."""
+
+	id: str = Field(..., description='Transaction ID')
+	description: str = Field(..., description='Transaction description')
+	amount: float = Field(..., description='Transaction amount')
+	date: datetime = Field(..., description='Transaction date')
+	type: str = Field(..., description='Transaction type (withdrawal, deposit, transfer)')
+	source_name: Optional[str] = Field(None, description='Source account name')
+	destination_name: Optional[str] = Field(None, description='Destination account name')
+	currency_code: Optional[str] = Field(None, description='Currency code')
+
+	@classmethod
+	def from_transaction_read(cls, transaction_read: TransactionRead) -> 'TransactionSummary':
+		"""Create a TransactionSummary from a Firefly TransactionRead object."""
+		first_trx = transaction_read.attributes.transactions[0]
+		return cls(
+			id=transaction_read.id,
+			description=first_trx.description,
+			amount=float(first_trx.amount),
+			date=first_trx.date,
+			type=first_trx.type.value if first_trx.type else 'unknown',
+			source_name=first_trx.source_name,
+			destination_name=first_trx.destination_name,
+			currency_code=first_trx.currency_code,
+		)
+
+
+class TransactionListResponse(BaseModel):
+	"""Response model for transaction listings."""
+
+	transactions: List[TransactionSummary] = Field(..., description='List of transactions')
+	total_count: Optional[int] = Field(None, description='Total number of transactions available')
+	current_page: int = Field(..., description='Current page number')
+	per_page: int = Field(..., description='Number of items per page')
+
+	@classmethod
+	def from_transaction_array(
+		cls, transaction_array: TransactionArray, current_page: int, per_page: int
+	) -> 'TransactionListResponse':
+		"""Create a TransactionListResponse from a Firefly TransactionArray."""
+		transactions = [
+			TransactionSummary.from_transaction_read(trx_read)
+			for trx_read in transaction_array.data
+		]
+		return cls(
+			transactions=transactions,
+			total_count=transaction_array.meta.pagination.total
+			if transaction_array.meta.pagination
+			else None,
+			current_page=current_page,
+			per_page=per_page,
+		)
