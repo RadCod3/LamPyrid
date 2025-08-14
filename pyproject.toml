@@ -17,6 +17,15 @@ lampyrid = "lampyrid.__main__:main"
 [dependency-groups]
 dev = [
   "datamodel-code-generator>=0.32.0",
+  "ruff>=0.12.9",
+]
+test = [
+  "pytest>=8.0.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=6.2.1",
+  "pytest-httpx>=0.32.0",
+  "pytest-mock>=3.14.0",
+  "respx>=0.21.0",
 ]
 
 [build-system]
@@ -30,3 +39,20 @@ line-length = 100
 quote-style = "single"
 indent-style = "tab"
 docstring-code-format = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--disable-warnings",
+    "-v"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests"
+]

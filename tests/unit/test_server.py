@@ -1,0 +1,197 @@
+import pytest
+from unittest.mock import AsyncMock, patch, MagicMock
+
+import lampyrid.server as server_module
+from lampyrid.models.lampyrid_models import (
+	Account,
+	ListAccountRequest,
+	SearchAccountRequest,
+	CreateWithdrawalRequest,
+	CreateDepositRequest,
+	CreateTransferRequest,
+	GetTransactionsRequest,
+	SearchTransactionsRequest,
+	TransactionListResponse,
+	Transaction,
+	TransactionType,
+)
+from lampyrid.models.firefly_models import AccountTypeFilter, AccountArray, TransactionArray
+
+
+class TestMCPTools:
+	"""Test MCP server tools"""
+
+	@pytest.mark.asyncio
+	async def test_list_accounts(self, sample_account_array: AccountArray):
+		"""Test list_accounts tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.list_accounts = AsyncMock(return_value=sample_account_array)
+
+			request = ListAccountRequest(type=AccountTypeFilter.asset)
+			# Access the underlying function from the tool
+			result = await server_module.list_accounts.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 1
+			assert isinstance(result[0], Account)
+			assert result[0].id == '123'
+			assert result[0].name == 'Test Account'
+
+			mock_client.list_accounts.assert_called_once_with(type=AccountTypeFilter.asset)
+
+	@pytest.mark.asyncio
+	async def test_search_accounts(self, sample_account_array: AccountArray):
+		"""Test search_accounts tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.search_accounts = AsyncMock(return_value=sample_account_array)
+
+			request = SearchAccountRequest(query='checking', type=AccountTypeFilter.asset)
+			result = await server_module.search_accounts.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 1
+			assert isinstance(result[0], Account)
+
+			mock_client.search_accounts.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_create_withdrawal(self):
+		"""Test create_withdrawal tool"""
+		mock_transaction = Transaction(
+			amount=100.0,
+			description='Test withdrawal',
+			type=TransactionType.withdrawal,
+			source_id='1',
+			destination_id='2',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.create_withdrawal = AsyncMock(return_value=mock_transaction)
+
+			request = CreateWithdrawalRequest(
+				amount=100.0, description='Test withdrawal', source_id='1', destination_name='Cash'
+			)
+
+			result = await server_module.create_withdrawal.fn(request)
+
+			assert result == mock_transaction
+			mock_client.create_withdrawal.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_create_deposit(self):
+		"""Test create_deposit tool"""
+		mock_transaction = Transaction(
+			amount=200.0,
+			description='Test deposit',
+			type=TransactionType.deposit,
+			source_id='1',
+			destination_id='2',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.create_deposit = AsyncMock(return_value=mock_transaction)
+
+			request = CreateDepositRequest(
+				amount=200.0, description='Test deposit', source_name='Employer', destination_id='1'
+			)
+
+			result = await server_module.create_deposit.fn(request)
+
+			assert result == mock_transaction
+			mock_client.create_deposit.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_create_transfer(self):
+		"""Test create_transfer tool"""
+		mock_transaction = Transaction(
+			amount=150.0,
+			description='Test transfer',
+			type=TransactionType.transfer,
+			source_id='1',
+			destination_id='2',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.create_transfer = AsyncMock(return_value=mock_transaction)
+
+			request = CreateTransferRequest(
+				amount=150.0, description='Test transfer', source_id='1', destination_id='2'
+			)
+
+			result = await server_module.create_transfer.fn(request)
+
+			assert result == mock_transaction
+			mock_client.create_transfer.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_list_accounts_empty_result(self):
+		"""Test list_accounts with empty result"""
+		empty_account_array = MagicMock()
+		empty_account_array.data = []
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.list_accounts = AsyncMock(return_value=empty_account_array)
+
+			request = ListAccountRequest(type=AccountTypeFilter.asset)
+			result = await server_module.list_accounts.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 0
+
+	@pytest.mark.asyncio
+	async def test_search_accounts_empty_result(self):
+		"""Test search_accounts with empty result"""
+		empty_account_array = MagicMock()
+		empty_account_array.data = []
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.search_accounts = AsyncMock(return_value=empty_account_array)
+
+			request = SearchAccountRequest(query='nonexistent', type=AccountTypeFilter.asset)
+			result = await server_module.search_accounts.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 0
+
+	@pytest.mark.asyncio
+	async def test_get_transactions(self, sample_transaction_array: TransactionArray):
+		"""Test get_transactions tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.get_transactions = AsyncMock(return_value=sample_transaction_array)
+
+			request = GetTransactionsRequest(page=1, limit=50)
+			result = await server_module.get_transactions.fn(request)
+
+			assert isinstance(result, TransactionListResponse)
+			assert len(result.transactions) == 1
+			assert result.current_page == 1
+			assert result.per_page == 50
+
+			mock_client.get_transactions.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_search_transactions(self, sample_transaction_array: TransactionArray):
+		"""Test search_transactions tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.search_transactions = AsyncMock(return_value=sample_transaction_array)
+
+			request = SearchTransactionsRequest(query='groceries', page=1, limit=50)
+			result = await server_module.search_transactions.fn(request)
+
+			assert isinstance(result, TransactionListResponse)
+			assert len(result.transactions) == 1
+			assert result.current_page == 1
+			assert result.per_page == 50
+
+			mock_client.search_transactions.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_client_error_propagation(self):
+		"""Test that client errors are properly propagated"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.list_accounts = AsyncMock(side_effect=Exception('API Error'))
+
+			request = ListAccountRequest(type=AccountTypeFilter.asset)
+
+			with pytest.raises(Exception, match='API Error'):
+				await server_module.list_accounts.fn(request)
