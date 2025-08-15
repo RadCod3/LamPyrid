@@ -9,6 +9,9 @@ from lampyrid.models.lampyrid_models import (
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
+	DeleteTransactionRequest,
+	GetAccountRequest,
+	GetTransactionRequest,
 	GetTransactionsRequest,
 	SearchTransactionsRequest,
 	TransactionListResponse,
@@ -38,6 +41,20 @@ class TestMCPTools:
 			assert result[0].name == 'Test Account'
 
 			mock_client.list_accounts.assert_called_once_with(type=AccountTypeFilter.asset)
+
+	@pytest.mark.asyncio
+	async def test_get_account(self, sample_account: Account):
+		"""Test get_account tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.get_account = AsyncMock(return_value=sample_account)
+
+			request = GetAccountRequest(id='123')
+			result = await server_module.get_account.fn(request)
+
+			assert isinstance(result, Account)
+			assert result.id == '123'
+			assert result.name == 'Test Account'
+			mock_client.get_account.assert_called_once_with(request)
 
 	@pytest.mark.asyncio
 	async def test_search_accounts(self, sample_account_array: AccountArray):
@@ -184,6 +201,43 @@ class TestMCPTools:
 			assert result.per_page == 50
 
 			mock_client.search_transactions.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_get_transaction(self):
+		"""Test get_transaction tool"""
+		from datetime import datetime
+
+		mock_transaction = Transaction(
+			amount=50.0,
+			description='Test transaction',
+			type=TransactionType.withdrawal,
+			date=datetime.now(),
+			source_id='1',
+			destination_id='2',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.get_transaction = AsyncMock(return_value=mock_transaction)
+
+			request = GetTransactionRequest(id='123')
+			result = await server_module.get_transaction.fn(request)
+
+			assert isinstance(result, Transaction)
+			assert result.amount == 50.0
+			assert result.description == 'Test transaction'
+			mock_client.get_transaction.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_delete_transaction(self):
+		"""Test delete_transaction tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.delete_transaction = AsyncMock(return_value=True)
+
+			request = DeleteTransactionRequest(id='123')
+			result = await server_module.delete_transaction.fn(request)
+
+			assert result is True
+			mock_client.delete_transaction.assert_called_once_with(request)
 
 	@pytest.mark.asyncio
 	async def test_client_error_propagation(self):

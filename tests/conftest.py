@@ -6,6 +6,7 @@ from lampyrid.clients.firefly import FireflyClient
 from lampyrid.models.firefly_models import (
 	AccountArray,
 	AccountRead,
+	AccountSingle,
 	Account as FireflyAccount,
 	ShortAccountTypeProperty,
 	TransactionArray,
@@ -55,6 +56,12 @@ def sample_account_array(sample_account_read: AccountRead) -> AccountArray:
 			pagination=Pagination(total=1, count=1, per_page=10, current_page=1, total_pages=1)
 		),
 	)
+
+
+@pytest.fixture
+def sample_account_single(sample_account_read: AccountRead) -> AccountSingle:
+	"""Sample AccountSingle for testing"""
+	return AccountSingle(data=sample_account_read)
 
 
 @pytest.fixture

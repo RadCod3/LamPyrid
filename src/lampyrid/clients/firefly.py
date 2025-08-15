@@ -5,6 +5,7 @@ import httpx
 from ..config import settings
 from ..models.firefly_models import (
 	AccountArray,
+	AccountSingle,
 	AccountTypeFilter,
 	TransactionArray,
 	TransactionSingle,
@@ -13,9 +14,13 @@ from ..models.firefly_models import (
 	TransactionTypeProperty,
 )
 from ..models.lampyrid_models import (
+	Account,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
+	DeleteTransactionRequest,
+	GetAccountRequest,
+	GetTransactionRequest,
 	GetTransactionsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
@@ -43,6 +48,13 @@ class FireflyClient:
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
+	async def get_account(self, req: GetAccountRequest) -> Account:
+		"""Get a single account by ID."""
+		r = await self._client.get(f'/api/v1/accounts/{req.id}')
+		r.raise_for_status()
+		account_single = AccountSingle.model_validate(r.json())
+		return Account.from_account_read(account_single.data)
+
 	async def search_accounts(self, req: SearchAccountRequest) -> AccountArray:
 		r = await self._client.get(
 			'/api/v1/search/accounts',
@@ -69,13 +81,6 @@ class FireflyClient:
 		r = await self._client.get('/api/v1/search/transactions', params=params)
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
-
-	async def create_transaction(self, transaction: Transaction) -> TransactionSingle:
-		trx_split_store = transaction.to_transaction_split_store()
-		trx_store = TransactionStore(transactions=[trx_split_store])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
-		r.raise_for_status()
-		return TransactionSingle.model_validate(r.json())
 
 	async def create_withdrawal(self, withdrawal: CreateWithdrawalRequest) -> Transaction:
 		trx = TransactionSplitStore(
@@ -142,3 +147,16 @@ class FireflyClient:
 		r = await self._client.get('/api/v1/transactions', params=params)
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
+
+	async def get_transaction(self, req: GetTransactionRequest) -> Transaction:
+		"""Get a single transaction by ID."""
+		r = await self._client.get(f'/api/v1/transactions/{req.id}')
+		r.raise_for_status()
+		transaction_single = TransactionSingle.model_validate(r.json())
+		return Transaction.from_transaction_single(transaction_single)
+
+	async def delete_transaction(self, req: DeleteTransactionRequest) -> bool:
+		"""Delete a transaction by ID."""
+		r = await self._client.delete(f'/api/v1/transactions/{req.id}')
+		r.raise_for_status()
+		return r.status_code == 204

@@ -8,6 +8,9 @@ from lampyrid.models.lampyrid_models import (
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
+	DeleteTransactionRequest,
+	GetAccountRequest,
+	GetTransactionRequest,
 	GetTransactionsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
@@ -90,6 +93,33 @@ class TestFireflyClient:
 						'page': 1,
 					},
 				)
+
+	@pytest.mark.asyncio
+	async def test_get_account(self, sample_account_single):
+		"""Test getting a single account"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_account_single.model_dump()
+			mock_client.get.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = GetAccountRequest(id='123')
+
+				result = await client.get_account(request)
+
+				assert result.id == '123'
+				assert result.name == 'Test Account'
+				assert result.currency_code == 'USD'
+				assert result.current_balance == 1000.0
+				mock_client.get.assert_called_once_with('/api/v1/accounts/123')
+				mock_response.raise_for_status.assert_called_once()
 
 	@pytest.mark.asyncio
 	async def test_create_withdrawal(self, sample_transaction_single):
@@ -279,3 +309,52 @@ class TestFireflyClient:
 						'limit': 25,
 					},
 				)
+
+	@pytest.mark.asyncio
+	async def test_get_transaction(self, sample_transaction_single):
+		"""Test getting a single transaction"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_transaction_single.model_dump()
+			mock_client.get.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = GetTransactionRequest(id='123')
+
+				result = await client.get_transaction(request)
+
+				assert result.amount == 100.0
+				assert result.description == 'Test transaction'
+				mock_client.get.assert_called_once_with('/api/v1/transactions/123')
+				mock_response.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_delete_transaction(self):
+		"""Test deleting a transaction"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.status_code = 204
+			mock_client.delete.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = DeleteTransactionRequest(id='123')
+
+				result = await client.delete_transaction(request)
+
+				assert result is True
+				mock_client.delete.assert_called_once_with('/api/v1/transactions/123')
+				mock_response.raise_for_status.assert_called_once()

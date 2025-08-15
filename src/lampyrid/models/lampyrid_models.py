@@ -49,31 +49,58 @@ class TransactionType(Enum):
 
 
 class Transaction(BaseModel):
+	id: Optional[str] = Field(None, description='Transaction ID')
 	amount: float = Field(..., description='Amount of the transaction')
 	description: str = Field(..., description='Description of the transaction')
 	type: TransactionType = Field(..., description='Type of the transaction')
 	date: datetime = Field(
 		default_factory=datetime.now, description='Date and time of the transaction'
 	)
-	source_id: str = Field(
-		...,
+	source_id: Optional[str] = Field(
+		None,
 		description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
 	)
-	destination_id: str = Field(
-		...,
+	destination_id: Optional[str] = Field(
+		None,
 		description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
 	)
+	source_name: Optional[str] = Field(None, description='Source account name')
+	destination_name: Optional[str] = Field(None, description='Destination account name')
+	currency_code: Optional[str] = Field(None, description='Currency code')
 
 	@classmethod
 	def from_transaction_single(cls, trx: TransactionSingle) -> 'Transaction':
 		inner_trx = trx.data.attributes.transactions[0]
 		return cls(
+			id=trx.data.id,
 			amount=float(inner_trx.amount),
 			description=inner_trx.description,
 			type=TransactionType[inner_trx.type.value],
 			date=inner_trx.date,
 			source_id=inner_trx.source_id,
 			destination_id=inner_trx.destination_id,
+			source_name=inner_trx.source_name,
+			destination_name=inner_trx.destination_name,
+			currency_code=inner_trx.currency_code,
+		)
+
+	@classmethod
+	def from_transaction_read(cls, transaction_read: TransactionRead) -> 'Transaction':
+		"""Create a Transaction from a Firefly TransactionRead object."""
+		first_trx = transaction_read.attributes.transactions[0]
+		return cls(
+			id=transaction_read.id,
+			description=first_trx.description,
+			amount=float(first_trx.amount),
+			date=first_trx.date,
+			type=TransactionType[first_trx.type.value]
+			if first_trx.type
+			else TransactionType.withdrawal,
+			source_id=first_trx.source_id,
+			destination_id=first_trx.destination_id,
+			source_name=first_trx.source_name,
+			destination_name=first_trx.destination_name,
+			currency_code=first_trx.currency_code,
 		)
 
 	def to_transaction_split_store(self) -> TransactionSplitStore:
@@ -82,6 +109,8 @@ class Transaction(BaseModel):
 			date=self.date,
 			amount=str(self.amount),
 			description=self.description,
+			source_id=self.source_id,
+			destination_id=self.destination_id,
 		)
 
 
@@ -94,6 +123,10 @@ class SearchAccountRequest(BaseModel):
 	type: AccountTypeFilter = Field(
 		AccountTypeFilter.all, description='Optional type filter for accounts'
 	)
+
+
+class GetAccountRequest(BaseModel):
+	id: str = Field(..., description='ID of the account to retrieve')
 
 
 class CreateWithdrawalRequest(BaseModel):
@@ -160,38 +193,18 @@ class SearchTransactionsRequest(BaseModel):
 	limit: Optional[int] = Field(50, description='Number of items per page', ge=1, le=500)
 
 
-class TransactionSummary(BaseModel):
-	"""Simplified transaction model for listing transactions."""
+class DeleteTransactionRequest(BaseModel):
+	id: str = Field(..., description='ID of the transaction to delete')
 
-	id: str = Field(..., description='Transaction ID')
-	description: str = Field(..., description='Transaction description')
-	amount: float = Field(..., description='Transaction amount')
-	date: datetime = Field(..., description='Transaction date')
-	type: str = Field(..., description='Transaction type (withdrawal, deposit, transfer)')
-	source_name: Optional[str] = Field(None, description='Source account name')
-	destination_name: Optional[str] = Field(None, description='Destination account name')
-	currency_code: Optional[str] = Field(None, description='Currency code')
 
-	@classmethod
-	def from_transaction_read(cls, transaction_read: TransactionRead) -> 'TransactionSummary':
-		"""Create a TransactionSummary from a Firefly TransactionRead object."""
-		first_trx = transaction_read.attributes.transactions[0]
-		return cls(
-			id=transaction_read.id,
-			description=first_trx.description,
-			amount=float(first_trx.amount),
-			date=first_trx.date,
-			type=first_trx.type.value if first_trx.type else 'unknown',
-			source_name=first_trx.source_name,
-			destination_name=first_trx.destination_name,
-			currency_code=first_trx.currency_code,
-		)
+class GetTransactionRequest(BaseModel):
+	id: str = Field(..., description='ID of the transaction to retrieve')
 
 
 class TransactionListResponse(BaseModel):
 	"""Response model for transaction listings."""
 
-	transactions: List[TransactionSummary] = Field(..., description='List of transactions')
+	transactions: List[Transaction] = Field(..., description='List of transactions')
 	total_count: Optional[int] = Field(None, description='Total number of transactions available')
 	current_page: int = Field(..., description='Current page number')
 	per_page: int = Field(..., description='Number of items per page')
@@ -202,8 +215,7 @@ class TransactionListResponse(BaseModel):
 	) -> 'TransactionListResponse':
 		"""Create a TransactionListResponse from a Firefly TransactionArray."""
 		transactions = [
-			TransactionSummary.from_transaction_read(trx_read)
-			for trx_read in transaction_array.data
+			Transaction.from_transaction_read(trx_read) for trx_read in transaction_array.data
 		]
 		return cls(
 			transactions=transactions,

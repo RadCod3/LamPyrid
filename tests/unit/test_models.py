@@ -11,7 +11,6 @@ from lampyrid.models.lampyrid_models import (
 	CreateTransferRequest,
 	GetTransactionsRequest,
 	SearchTransactionsRequest,
-	TransactionSummary,
 	TransactionListResponse,
 	utc_now,
 )
@@ -200,13 +199,13 @@ class TestGetTransactionsModels:
 		assert request.limit == 50
 
 	def test_transaction_summary(self):
-		"""Test TransactionSummary model"""
-		summary = TransactionSummary(
+		"""Test Transaction model with summary fields"""
+		summary = Transaction(
 			id='123',
 			description='Test transaction',
 			amount=100.0,
 			date=datetime(2023, 1, 1, 12, 0, 0),
-			type='withdrawal',
+			type=TransactionType.withdrawal,
 			source_name='Source Account',
 			destination_name='Destination Account',
 			currency_code='USD',
@@ -215,7 +214,7 @@ class TestGetTransactionsModels:
 		assert summary.id == '123'
 		assert summary.description == 'Test transaction'
 		assert summary.amount == 100.0
-		assert summary.type == 'withdrawal'
+		assert summary.type == TransactionType.withdrawal
 		assert summary.source_name == 'Source Account'
 		assert summary.destination_name == 'Destination Account'
 		assert summary.currency_code == 'USD'
@@ -223,12 +222,12 @@ class TestGetTransactionsModels:
 	def test_transaction_list_response(self):
 		"""Test TransactionListResponse model"""
 		transactions = [
-			TransactionSummary(
+			Transaction(
 				id='123',
 				description='Test',
 				amount=100.0,
 				date=datetime(2023, 1, 1, 12, 0, 0),
-				type='withdrawal',
+				type=TransactionType.withdrawal,
 			)
 		]
 
