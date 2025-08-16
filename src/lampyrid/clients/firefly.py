@@ -7,11 +7,14 @@ from ..models.firefly_models import (
 	AccountArray,
 	AccountSingle,
 	AccountTypeFilter,
+	BudgetArray,
 	TransactionArray,
 	TransactionSingle,
 	TransactionSplitStore,
+	TransactionSplitUpdate,
 	TransactionStore,
 	TransactionTypeProperty,
+	TransactionUpdate,
 )
 from ..models.lampyrid_models import (
 	Account,
@@ -22,9 +25,11 @@ from ..models.lampyrid_models import (
 	GetAccountRequest,
 	GetTransactionRequest,
 	GetTransactionsRequest,
+	ListBudgetsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
 	Transaction,
+	UpdateTransactionBudgetRequest,
 )
 
 
@@ -90,6 +95,8 @@ class FireflyClient:
 			date=withdrawal.date,
 			source_id=withdrawal.source_id,
 			destination_name=withdrawal.destination_name,
+			budget_id=withdrawal.budget_id,
+			budget_name=withdrawal.budget_name,
 		)
 		trx_store = TransactionStore(transactions=[trx])
 		print(f'Creating withdrawal: {trx_store.model_dump_json()}')
@@ -160,3 +167,34 @@ class FireflyClient:
 		r = await self._client.delete(f'/api/v1/transactions/{req.id}')
 		r.raise_for_status()
 		return r.status_code == 204
+
+	async def list_budgets(self, req: ListBudgetsRequest) -> BudgetArray:
+		"""List all budgets."""
+		params: Dict[str, Any] = {}
+
+		if req.active is not None:
+			params['active'] = req.active
+
+		r = await self._client.get('/api/v1/budgets', params=params)
+		r.raise_for_status()
+		return BudgetArray.model_validate(r.json())
+
+	async def update_transaction_budget(self, req: UpdateTransactionBudgetRequest) -> Transaction:
+		"""Update a transaction's budget allocation."""
+		# Create the transaction update payload
+		trx_split_update = TransactionSplitUpdate(
+			budget_id=req.budget_id,
+			budget_name=req.budget_name,
+		)
+
+		trx_update = TransactionUpdate(
+			apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
+		)
+
+		r = await self._client.put(
+			f'/api/v1/transactions/{req.transaction_id}',
+			json=trx_update.model_dump(mode='json', exclude_unset=True),
+		)
+		r.raise_for_status()
+		transaction_single = TransactionSingle.model_validate(r.json())
+		return Transaction.from_transaction_single(transaction_single)

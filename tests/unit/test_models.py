@@ -2,9 +2,11 @@ from datetime import date, datetime, timezone
 
 from lampyrid.models.lampyrid_models import (
 	Account,
+	Budget,
 	Transaction,
 	TransactionType,
 	ListAccountRequest,
+	ListBudgetsRequest,
 	SearchAccountRequest,
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
@@ -12,6 +14,7 @@ from lampyrid.models.lampyrid_models import (
 	GetTransactionsRequest,
 	SearchTransactionsRequest,
 	TransactionListResponse,
+	UpdateTransactionBudgetRequest,
 	utc_now,
 )
 from lampyrid.models.firefly_models import AccountTypeFilter, TransactionTypeFilter
@@ -259,6 +262,115 @@ class TestGetTransactionsModels:
 		assert request.query == 'test'
 		assert request.page == 1
 		assert request.limit == 50
+
+
+class TestBudget:
+	"""Test Budget model"""
+
+	def test_from_budget_read(self, sample_budget_read):
+		"""Test creating Budget from BudgetRead"""
+		budget = Budget.from_budget_read(sample_budget_read)
+
+		assert budget.id == '789'
+		assert budget.name == 'Groceries'
+		assert budget.active is True
+		assert budget.notes == 'Monthly grocery budget'
+		assert budget.order == 1
+
+	def test_budget_creation(self):
+		"""Test Budget model creation"""
+		budget = Budget(
+			id='123',
+			name='Entertainment',
+			active=False,
+			notes='Monthly entertainment budget',
+			order=2,
+		)
+
+		assert budget.id == '123'
+		assert budget.name == 'Entertainment'
+		assert budget.active is False
+		assert budget.notes == 'Monthly entertainment budget'
+		assert budget.order == 2
+
+
+class TestBudgetRequests:
+	"""Test budget-related request models"""
+
+	def test_list_budgets_request(self):
+		"""Test ListBudgetsRequest"""
+		request = ListBudgetsRequest(active=True)
+		assert request.active is True
+
+	def test_list_budgets_request_defaults(self):
+		"""Test ListBudgetsRequest with default values"""
+		request = ListBudgetsRequest()
+		assert request.active is None
+
+	def test_update_transaction_budget_request(self):
+		"""Test UpdateTransactionBudgetRequest"""
+		request = UpdateTransactionBudgetRequest(
+			transaction_id='456',
+			budget_id='789',
+			budget_name='Groceries',
+		)
+		assert request.transaction_id == '456'
+		assert request.budget_id == '789'
+		assert request.budget_name == 'Groceries'
+
+	def test_update_transaction_budget_request_clear(self):
+		"""Test UpdateTransactionBudgetRequest to clear budget"""
+		request = UpdateTransactionBudgetRequest(
+			transaction_id='456',
+			budget_id=None,
+			budget_name=None,
+		)
+		assert request.transaction_id == '456'
+		assert request.budget_id is None
+		assert request.budget_name is None
+
+
+class TestTransactionWithBudget:
+	"""Test Transaction model with budget fields"""
+
+	def test_transaction_with_budget(self):
+		"""Test Transaction model with budget information"""
+		transaction = Transaction(
+			id='123',
+			description='Grocery shopping',
+			amount=50.0,
+			date=datetime(2023, 1, 1, 12, 0, 0),
+			type=TransactionType.withdrawal,
+			source_id='1',
+			destination_name='Supermarket',
+			budget_id='789',
+			budget_name='Groceries',
+		)
+
+		assert transaction.id == '123'
+		assert transaction.description == 'Grocery shopping'
+		assert transaction.amount == 50.0
+		assert transaction.type == TransactionType.withdrawal
+		assert transaction.budget_id == '789'
+		assert transaction.budget_name == 'Groceries'
+
+	def test_create_withdrawal_request_with_budget(self):
+		"""Test CreateWithdrawalRequest with budget fields"""
+		request = CreateWithdrawalRequest(
+			amount=100.0,
+			description='Grocery shopping',
+			source_id='1',
+			destination_name='Supermarket',
+			budget_id='789',
+			budget_name='Groceries',
+		)
+
+		assert request.amount == 100.0
+		assert request.description == 'Grocery shopping'
+		assert request.source_id == '1'
+		assert request.destination_name == 'Supermarket'
+		assert request.budget_id == '789'
+		assert request.budget_name == 'Groceries'
 
 
 class TestUtilityFunctions:
