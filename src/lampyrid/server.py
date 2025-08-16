@@ -5,6 +5,7 @@ from fastmcp import FastMCP
 from .clients.firefly import FireflyClient
 from .models.lampyrid_models import (
 	Account,
+	Budget,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
@@ -13,10 +14,12 @@ from .models.lampyrid_models import (
 	GetTransactionRequest,
 	GetTransactionsRequest,
 	ListAccountRequest,
+	ListBudgetsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
 	Transaction,
 	TransactionListResponse,
+	UpdateTransactionBudgetRequest,
 )
 
 mcp = FastMCP('lampyrid')
@@ -104,3 +107,21 @@ async def search_transactions(req: SearchTransactionsRequest) -> TransactionList
 async def delete_transaction(req: DeleteTransactionRequest) -> bool:
 	"""Delete a transaction by ID."""
 	return await _client.delete_transaction(req)
+
+
+@mcp.tool(tags={'budgets'})
+async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
+	"""List Firefly-III budgets."""
+	budget_array = await _client.list_budgets(req)
+
+	budgets: List[Budget] = [
+		Budget.from_budget_read(budget_read) for budget_read in budget_array.data
+	]
+
+	return budgets
+
+
+@mcp.tool(tags={'transactions', 'budgets', 'manage'})
+async def update_transaction_budget(req: UpdateTransactionBudgetRequest) -> Transaction:
+	"""Update a transaction's budget allocation."""
+	return await _client.update_transaction_budget(req)

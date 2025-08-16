@@ -4,7 +4,9 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import lampyrid.server as server_module
 from lampyrid.models.lampyrid_models import (
 	Account,
+	Budget,
 	ListAccountRequest,
+	ListBudgetsRequest,
 	SearchAccountRequest,
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
@@ -17,6 +19,7 @@ from lampyrid.models.lampyrid_models import (
 	TransactionListResponse,
 	Transaction,
 	TransactionType,
+	UpdateTransactionBudgetRequest,
 )
 from lampyrid.models.firefly_models import AccountTypeFilter, AccountArray, TransactionArray
 
@@ -249,3 +252,52 @@ class TestMCPTools:
 
 			with pytest.raises(Exception, match='API Error'):
 				await server_module.list_accounts.fn(request)
+
+	@pytest.mark.asyncio
+	async def test_list_budgets(self, sample_budget_array):
+		"""Test list_budgets tool"""
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.list_budgets = AsyncMock(return_value=sample_budget_array)
+
+			request = ListBudgetsRequest(active=True)
+			result = await server_module.list_budgets.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 1
+			assert isinstance(result[0], Budget)
+			assert result[0].id == '789'
+			assert result[0].name == 'Groceries'
+			assert result[0].active is True
+
+			mock_client.list_budgets.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_update_transaction_budget(self):
+		"""Test update_transaction_budget tool"""
+		from datetime import datetime
+
+		mock_transaction = Transaction(
+			amount=50.0,
+			description='Test transaction',
+			type=TransactionType.withdrawal,
+			date=datetime.now(),
+			source_id='1',
+			destination_id='2',
+			budget_id='789',
+			budget_name='Groceries',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.update_transaction_budget = AsyncMock(return_value=mock_transaction)
+
+			request = UpdateTransactionBudgetRequest(
+				transaction_id='456',
+				budget_id='789',
+				budget_name='Groceries',
+			)
+			result = await server_module.update_transaction_budget.fn(request)
+
+			assert isinstance(result, Transaction)
+			assert result.budget_id == '789'
+			assert result.budget_name == 'Groceries'
+			mock_client.update_transaction_budget.assert_called_once_with(request)

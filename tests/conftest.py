@@ -8,6 +8,9 @@ from lampyrid.models.firefly_models import (
 	AccountRead,
 	AccountSingle,
 	Account as FireflyAccount,
+	Budget as FireflyBudget,
+	BudgetArray,
+	BudgetRead,
 	ShortAccountTypeProperty,
 	TransactionArray,
 	TransactionSingle,
@@ -20,7 +23,7 @@ from lampyrid.models.firefly_models import (
 	Pagination,
 	PageLink,
 )
-from lampyrid.models.lampyrid_models import Account
+from lampyrid.models.lampyrid_models import Account, Budget
 
 
 @pytest.fixture
@@ -181,3 +184,37 @@ def mock_httpx_client():
 	client.get.return_value = response
 	client.post.return_value = response
 	return client
+
+
+@pytest.fixture
+def sample_firefly_budget() -> FireflyBudget:
+	"""Sample Firefly Budget attributes for testing"""
+	return FireflyBudget(
+		name='Groceries',
+		active=True,
+		notes='Monthly grocery budget',
+		order=1,
+	)
+
+
+@pytest.fixture
+def sample_budget_read(sample_firefly_budget: FireflyBudget) -> BudgetRead:
+	"""Sample BudgetRead object for testing"""
+	return BudgetRead(id='789', type='budgets', attributes=sample_firefly_budget)
+
+
+@pytest.fixture
+def sample_budget_array(sample_budget_read: BudgetRead) -> BudgetArray:
+	"""Sample BudgetArray for testing"""
+	return BudgetArray(
+		data=[sample_budget_read],
+		meta=Meta(
+			pagination=Pagination(total=1, count=1, per_page=10, current_page=1, total_pages=1)
+		),
+	)
+
+
+@pytest.fixture
+def sample_budget(sample_budget_read: BudgetRead) -> Budget:
+	"""Sample Budget model for testing"""
+	return Budget.from_budget_read(sample_budget_read)
