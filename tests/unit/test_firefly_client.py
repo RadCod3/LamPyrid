@@ -12,8 +12,10 @@ from lampyrid.models.lampyrid_models import (
 	GetAccountRequest,
 	GetTransactionRequest,
 	GetTransactionsRequest,
+	ListBudgetsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
+	UpdateTransactionBudgetRequest,
 )
 
 
@@ -357,4 +359,126 @@ class TestFireflyClient:
 
 				assert result is True
 				mock_client.delete.assert_called_once_with('/api/v1/transactions/123')
+				mock_response.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_list_budgets(self, sample_budget_array):
+		"""Test listing budgets"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_budget_array.model_dump()
+			mock_client.get.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = ListBudgetsRequest(active=True)
+
+				result = await client.list_budgets(request)
+
+				assert len(result.data) == 1
+				assert result.data[0].id == '789'
+				mock_client.get.assert_called_once_with('/api/v1/budgets', params={'active': True})
+				mock_response.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_list_budgets_no_filter(self, sample_budget_array):
+		"""Test listing budgets without filter"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_budget_array.model_dump()
+			mock_client.get.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = ListBudgetsRequest()
+
+				result = await client.list_budgets(request)
+
+				assert len(result.data) == 1
+				mock_client.get.assert_called_once_with('/api/v1/budgets', params={})
+
+	@pytest.mark.asyncio
+	async def test_create_withdrawal_with_budget(self, sample_transaction_single):
+		"""Test creating a withdrawal with budget allocation"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_transaction_single.model_dump()
+			mock_client.post.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = CreateWithdrawalRequest(
+					amount=100.0,
+					description='Test withdrawal',
+					source_id='1',
+					destination_name='Cash',
+					budget_id='789',
+					budget_name='Groceries',
+				)
+
+				result = await client.create_withdrawal(request)
+
+				assert result.amount == 100.0
+				# Verify the endpoint was called correctly
+				mock_client.post.assert_called_once()
+				assert mock_client.post.call_args[0][0] == '/api/v1/transactions'
+
+				# Check that budget information was included in the payload
+				call_args = mock_client.post.call_args
+				payload = call_args[1]['json']
+				assert payload['transactions'][0]['budget_id'] == '789'
+				assert payload['transactions'][0]['budget_name'] == 'Groceries'
+
+	@pytest.mark.asyncio
+	async def test_update_transaction_budget(self, sample_transaction_single):
+		"""Test updating a transaction's budget allocation"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_transaction_single.model_dump()
+			mock_client.put.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = UpdateTransactionBudgetRequest(
+					transaction_id='456',
+					budget_id='789',
+					budget_name='Groceries',
+				)
+
+				result = await client.update_transaction_budget(request)
+
+				assert result.amount == 100.0
+				mock_client.put.assert_called_once_with(
+					'/api/v1/transactions/456',
+					json={
+						'apply_rules': False,
+						'fire_webhooks': True,
+						'group_title': None,
+						'transactions': [{'budget_id': '789', 'budget_name': 'Groceries'}],
+					},
+				)
 				mock_response.raise_for_status.assert_called_once()
