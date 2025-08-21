@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .firefly_models import (
 	AccountRead,
@@ -278,3 +278,9 @@ class UpdateTransactionBudgetRequest(BaseModel):
 		None,
 		description='Name of the budget to allocate the transaction to. If the budget name is unknown, the ID will be used or the value will be ignored.',
 	)
+
+	@model_validator(mode='after')
+	def validate_budget_specification(self):
+		if self.budget_id is None and self.budget_name is None:
+			raise ValueError('Either budget_id or budget_name must be provided')
+		return self
