@@ -5,12 +5,19 @@ from fastmcp import FastMCP
 from .clients.firefly import FireflyClient
 from .models.lampyrid_models import (
 	Account,
+	AvailableBudget,
 	Budget,
+	BudgetSpending,
+	BudgetSummary,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
 	DeleteTransactionRequest,
 	GetAccountRequest,
+	GetAvailableBudgetRequest,
+	GetBudgetRequest,
+	GetBudgetSpendingRequest,
+	GetBudgetSummaryRequest,
 	GetTransactionRequest,
 	GetTransactionsRequest,
 	ListAccountRequest,
@@ -125,3 +132,27 @@ async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 async def update_transaction_budget(req: UpdateTransactionBudgetRequest) -> Transaction:
 	"""Update a transaction's budget allocation."""
 	return await _client.update_transaction_budget(req)
+
+
+@mcp.tool(tags={'budgets'})
+async def get_budget(req: GetBudgetRequest) -> Budget:
+	"""Get a single budget by ID."""
+	return await _client.get_budget(req)
+
+
+@mcp.tool(tags={'budgets', 'analysis'})
+async def get_budget_spending(req: GetBudgetSpendingRequest) -> BudgetSpending:
+	"""Get budget spending data for a specific budget and period."""
+	return await _client.get_budget_spending(req)
+
+
+@mcp.tool(tags={'budgets', 'analysis'})
+async def get_budget_summary(req: GetBudgetSummaryRequest) -> BudgetSummary:
+	"""Get summary of all budgets with spending information."""
+	return await _client.get_budget_summary(req)
+
+
+@mcp.tool(tags={'budgets', 'analysis'})
+async def get_available_budget(req: GetAvailableBudgetRequest) -> AvailableBudget:
+	"""Get available budget for a period."""
+	return await _client.get_available_budget(req)

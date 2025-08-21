@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from .firefly_models import (
 	AccountRead,
@@ -279,8 +279,74 @@ class UpdateTransactionBudgetRequest(BaseModel):
 		description='Name of the budget to allocate the transaction to. If the budget name is unknown, the ID will be used or the value will be ignored.',
 	)
 
-	@model_validator(mode='after')
-	def validate_budget_specification(self):
-		if self.budget_id is None and self.budget_name is None:
-			raise ValueError('Either budget_id or budget_name must be provided')
-		return self
+
+class GetBudgetRequest(BaseModel):
+	"""Request for getting a single budget by ID."""
+
+	id: str = Field(..., description='ID of the budget to retrieve')
+
+
+class BudgetSpending(BaseModel):
+	"""Budget spending information for a specific period."""
+
+	budget_id: str = Field(..., description='ID of the budget')
+	budget_name: str = Field(..., description='Name of the budget')
+	spent: float = Field(..., description='Amount spent in this budget during the period')
+	budgeted: Optional[float] = Field(None, description='Budgeted amount for this period')
+	remaining: Optional[float] = Field(None, description='Remaining budget amount')
+	percentage_spent: Optional[float] = Field(None, description='Percentage of budget spent')
+
+
+class GetBudgetSpendingRequest(BaseModel):
+	"""Request for getting budget spending data."""
+
+	budget_id: str = Field(..., description='ID of the budget to get spending for')
+	start_date: Optional[date] = Field(
+		None, description='Start date for spending period (YYYY-MM-DD), inclusive'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for spending period (YYYY-MM-DD), inclusive'
+	)
+
+
+class BudgetSummary(BaseModel):
+	"""Summary of all budgets with spending information."""
+
+	budgets: List[BudgetSpending] = Field(..., description='List of budget spending data')
+	total_budgeted: Optional[float] = Field(None, description='Total budgeted amount')
+	total_spent: float = Field(..., description='Total amount spent across all budgets')
+	total_remaining: Optional[float] = Field(None, description='Total remaining budget')
+	available_budget: Optional[float] = Field(
+		None, description='Available budget amount not allocated to specific budgets'
+	)
+
+
+class GetBudgetSummaryRequest(BaseModel):
+	"""Request for getting budget summary."""
+
+	start_date: Optional[date] = Field(
+		None, description='Start date for summary period (YYYY-MM-DD), inclusive'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for summary period (YYYY-MM-DD), inclusive'
+	)
+
+
+class AvailableBudget(BaseModel):
+	"""Available budget information for a period."""
+
+	amount: float = Field(..., description='Available budget amount')
+	currency_code: str = Field(..., description='Currency code for the amount')
+	start_date: date = Field(..., description='Start date of the budget period')
+	end_date: date = Field(..., description='End date of the budget period')
+
+
+class GetAvailableBudgetRequest(BaseModel):
+	"""Request for getting available budget."""
+
+	start_date: Optional[date] = Field(
+		None, description='Start date for budget period (YYYY-MM-DD), defaults to current month'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for budget period (YYYY-MM-DD), defaults to current month'
+	)

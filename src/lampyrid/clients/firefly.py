@@ -7,7 +7,10 @@ from ..models.firefly_models import (
 	AccountArray,
 	AccountSingle,
 	AccountTypeFilter,
+	AvailableBudgetArray,
 	BudgetArray,
+	BudgetLimitArray,
+	BudgetSingle,
 	TransactionArray,
 	TransactionSingle,
 	TransactionSplitStore,
@@ -18,11 +21,19 @@ from ..models.firefly_models import (
 )
 from ..models.lampyrid_models import (
 	Account,
+	AvailableBudget,
+	Budget,
+	BudgetSpending,
+	BudgetSummary,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
 	DeleteTransactionRequest,
 	GetAccountRequest,
+	GetAvailableBudgetRequest,
+	GetBudgetRequest,
+	GetBudgetSpendingRequest,
+	GetBudgetSummaryRequest,
 	GetTransactionRequest,
 	GetTransactionsRequest,
 	ListBudgetsRequest,
@@ -99,7 +110,6 @@ class FireflyClient:
 			budget_name=withdrawal.budget_name,
 		)
 		trx_store = TransactionStore(transactions=[trx])
-		print(f'Creating withdrawal: {trx_store.model_dump_json()}')
 		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
@@ -198,3 +208,123 @@ class FireflyClient:
 		r.raise_for_status()
 		transaction_single = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(transaction_single)
+
+	async def get_budget(self, req: GetBudgetRequest) -> Budget:
+		"""Get a single budget by ID."""
+		r = await self._client.get(f'/api/v1/budgets/{req.id}')
+		r.raise_for_status()
+		budget_single = BudgetSingle.model_validate(r.json())
+		return Budget.from_budget_read(budget_single.data)
+
+	async def get_budget_spending(self, req: GetBudgetSpendingRequest) -> BudgetSpending:
+		"""Get budget spending data for a specific budget and period."""
+		params: Dict[str, Any] = {}
+
+		if req.start_date:
+			params['start'] = req.start_date.strftime('%Y-%m-%d')
+		if req.end_date:
+			params['end'] = req.end_date.strftime('%Y-%m-%d')
+
+		# Get budget info first
+		budget_r = await self._client.get(f'/api/v1/budgets/{req.budget_id}')
+		budget_r.raise_for_status()
+		budget_single = BudgetSingle.model_validate(budget_r.json())
+		budget_name = budget_single.data.attributes.name
+
+		# Get spending data from budget limits endpoint
+		spending_r = await self._client.get(
+			f'/api/v1/budgets/{req.budget_id}/limits', params=params
+		)
+		spending_r.raise_for_status()
+		limits_array = BudgetLimitArray.model_validate(spending_r.json())
+
+		# Calculate spending from limits data
+		spent = 0.0
+		budgeted = None
+
+		for limit in limits_array.data:
+			spent += abs(float(limit.attributes.spent)) if limit.attributes.spent else 0.0
+			if budgeted is None:
+				budgeted = float(limit.attributes.amount)
+			else:
+				budgeted += float(limit.attributes.amount)
+
+		remaining = (budgeted - spent) if budgeted is not None else None
+		percentage_spent = (spent / budgeted * 100) if budgeted and budgeted > 0 else None
+
+		return BudgetSpending(
+			budget_id=req.budget_id,
+			budget_name=budget_name,
+			spent=spent,
+			budgeted=budgeted,
+			remaining=remaining,
+			percentage_spent=percentage_spent,
+		)
+
+	async def get_budget_summary(self, req: GetBudgetSummaryRequest) -> BudgetSummary:
+		"""Get summary of all budgets with spending information."""
+		# Get all budgets
+		budgets_r = await self._client.get('/api/v1/budgets')
+		budgets_r.raise_for_status()
+		budgets_array = BudgetArray.model_validate(budgets_r.json())
+
+		budget_spendings: list[BudgetSpending] = []
+		total_spent = 0.0
+		total_budgeted = 0.0
+
+		for budget in budgets_array.data:
+			spending_req = GetBudgetSpendingRequest(
+				budget_id=budget.id,
+				start_date=req.start_date,
+				end_date=req.end_date,
+			)
+			budget_spending = await self.get_budget_spending(spending_req)
+			budget_spendings.append(budget_spending)
+
+			total_spent += budget_spending.spent
+			if budget_spending.budgeted:
+				total_budgeted += budget_spending.budgeted
+
+		total_remaining = total_budgeted - total_spent if total_budgeted > 0 else None
+
+		return BudgetSummary(
+			budgets=budget_spendings,
+			total_budgeted=total_budgeted if total_budgeted > 0 else None,
+			total_spent=total_spent,
+			total_remaining=total_remaining,
+			available_budget=None,  # Would need additional API call to get available budget
+		)
+
+	async def get_available_budget(self, req: GetAvailableBudgetRequest) -> AvailableBudget:
+		"""Get available budget for a period."""
+		params: Dict[str, Any] = {}
+
+		if req.start_date:
+			params['start'] = req.start_date.strftime('%Y-%m-%d')
+		if req.end_date:
+			params['end'] = req.end_date.strftime('%Y-%m-%d')
+
+		r = await self._client.get('/api/v1/available-budgets', params=params)
+		r.raise_for_status()
+		available_array = AvailableBudgetArray.model_validate(r.json())
+
+		# Parse the available budget data
+		if available_array.data:
+			first_budget = available_array.data[0]
+			return AvailableBudget(
+				amount=float(first_budget.attributes.amount),
+				currency_code=first_budget.attributes.currency_code or 'USD',
+				start_date=req.start_date or first_budget.attributes.start.date(),
+				end_date=req.end_date or first_budget.attributes.end.date(),
+			)
+		else:
+			# Return default if no data available
+			from datetime import date
+
+			today = date.today()
+			return AvailableBudget(
+				amount=0.0,
+				currency_code='USD',
+				start_date=req.start_date or today.replace(day=1),
+				end_date=req.end_date or today,
+			)
