@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from .firefly_models import (
 	AccountRead,
 	AccountTypeFilter,
+	BudgetRead,
 	TransactionArray,
 	TransactionRead,
 	TransactionSingle,
@@ -42,6 +43,25 @@ class Account(BaseModel):
 		)
 
 
+class Budget(BaseModel):
+	id: str = Field(..., examples=['2'])
+	name: str = Field(..., examples=['Groceries'])
+	active: Optional[bool] = Field(None, examples=[True])
+	notes: Optional[str] = Field(None, examples=['Monthly grocery budget'])
+	order: Optional[int] = Field(None, examples=[1])
+
+	@classmethod
+	def from_budget_read(cls, budget_read: 'BudgetRead') -> 'Budget':
+		"""Create a Budget instance from a Firefly BudgetRead object."""
+		return cls(
+			id=budget_read.id,
+			name=budget_read.attributes.name,
+			active=budget_read.attributes.active,
+			notes=budget_read.attributes.notes,
+			order=budget_read.attributes.order,
+		)
+
+
 class TransactionType(Enum):
 	withdrawal = 'withdrawal'
 	deposit = 'deposit'
@@ -67,6 +87,8 @@ class Transaction(BaseModel):
 	source_name: Optional[str] = Field(None, description='Source account name')
 	destination_name: Optional[str] = Field(None, description='Destination account name')
 	currency_code: Optional[str] = Field(None, description='Currency code')
+	budget_id: Optional[str] = Field(None, description='ID of the budget for this transaction')
+	budget_name: Optional[str] = Field(None, description='Name of the budget for this transaction')
 
 	@classmethod
 	def from_transaction_single(cls, trx: TransactionSingle) -> 'Transaction':
@@ -82,6 +104,8 @@ class Transaction(BaseModel):
 			source_name=inner_trx.source_name,
 			destination_name=inner_trx.destination_name,
 			currency_code=inner_trx.currency_code,
+			budget_id=inner_trx.budget_id,
+			budget_name=inner_trx.budget_name,
 		)
 
 	@classmethod
@@ -101,6 +125,8 @@ class Transaction(BaseModel):
 			source_name=first_trx.source_name,
 			destination_name=first_trx.destination_name,
 			currency_code=first_trx.currency_code,
+			budget_id=first_trx.budget_id,
+			budget_name=first_trx.budget_name,
 		)
 
 	def to_transaction_split_store(self) -> TransactionSplitStore:
@@ -140,6 +166,13 @@ class CreateWithdrawalRequest(BaseModel):
 	destination_name: Optional[str] = Field(
 		default=None,
 		description='Name of the destination account for the withdrawal. This account is automatically created if it does not exist. Leave it blank for cash withdrawals.',
+	)
+	budget_id: Optional[str] = Field(
+		None, description='ID of the budget to allocate this withdrawal to'
+	)
+	budget_name: Optional[str] = Field(
+		None,
+		description='Name of the budget to allocate this withdrawal to. If the budget name is unknown, the ID will be used or the value will be ignored.',
 	)
 
 
@@ -225,3 +258,95 @@ class TransactionListResponse(BaseModel):
 			current_page=current_page,
 			per_page=per_page,
 		)
+
+
+class ListBudgetsRequest(BaseModel):
+	"""Request for listing budgets."""
+
+	active: Optional[bool] = Field(None, description='Filter budgets by active status')
+
+
+class UpdateTransactionBudgetRequest(BaseModel):
+	"""Request for updating a transaction's budget allocation."""
+
+	transaction_id: str = Field(..., description='ID of the transaction to update')
+	budget_id: Optional[str] = Field(
+		None,
+		description='ID of the budget to allocate the transaction to. Set to None to remove budget allocation.',
+	)
+	budget_name: Optional[str] = Field(
+		None,
+		description='Name of the budget to allocate the transaction to. If the budget name is unknown, the ID will be used or the value will be ignored.',
+	)
+
+
+class GetBudgetRequest(BaseModel):
+	"""Request for getting a single budget by ID."""
+
+	id: str = Field(..., description='ID of the budget to retrieve')
+
+
+class BudgetSpending(BaseModel):
+	"""Budget spending information for a specific period."""
+
+	budget_id: str = Field(..., description='ID of the budget')
+	budget_name: str = Field(..., description='Name of the budget')
+	spent: float = Field(..., description='Amount spent in this budget during the period')
+	budgeted: Optional[float] = Field(None, description='Budgeted amount for this period')
+	remaining: Optional[float] = Field(None, description='Remaining budget amount')
+	percentage_spent: Optional[float] = Field(None, description='Percentage of budget spent')
+
+
+class GetBudgetSpendingRequest(BaseModel):
+	"""Request for getting budget spending data."""
+
+	budget_id: str = Field(..., description='ID of the budget to get spending for')
+	start_date: Optional[date] = Field(
+		None, description='Start date for spending period (YYYY-MM-DD), inclusive'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for spending period (YYYY-MM-DD), inclusive'
+	)
+
+
+class BudgetSummary(BaseModel):
+	"""Summary of all budgets with spending information."""
+
+	budgets: List[BudgetSpending] = Field(..., description='List of budget spending data')
+	total_budgeted: Optional[float] = Field(None, description='Total budgeted amount')
+	total_spent: float = Field(..., description='Total amount spent across all budgets')
+	total_remaining: Optional[float] = Field(None, description='Total remaining budget')
+	available_budget: Optional[float] = Field(
+		None, description='Available budget amount not allocated to specific budgets'
+	)
+
+
+class GetBudgetSummaryRequest(BaseModel):
+	"""Request for getting budget summary."""
+
+	start_date: Optional[date] = Field(
+		None, description='Start date for summary period (YYYY-MM-DD), inclusive'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for summary period (YYYY-MM-DD), inclusive'
+	)
+
+
+class AvailableBudget(BaseModel):
+	"""Available budget information for a period."""
+
+	amount: float = Field(..., description='Available budget amount')
+	currency_code: str = Field(..., description='Currency code for the amount')
+	start_date: date = Field(..., description='Start date of the budget period')
+	end_date: date = Field(..., description='End date of the budget period')
+
+
+class GetAvailableBudgetRequest(BaseModel):
+	"""Request for getting available budget."""
+
+	start_date: Optional[date] = Field(
+		None, description='Start date for budget period (YYYY-MM-DD), defaults to current month'
+	)
+	end_date: Optional[date] = Field(
+		None, description='End date for budget period (YYYY-MM-DD), defaults to current month'
+	)

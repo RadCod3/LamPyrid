@@ -8,6 +8,17 @@ from lampyrid.models.firefly_models import (
 	AccountRead,
 	AccountSingle,
 	Account as FireflyAccount,
+	AvailableBudget as FireflyAvailableBudget,
+	AvailableBudgetArray,
+	AvailableBudgetRead,
+	Budget as FireflyBudget,
+	BudgetArray,
+	BudgetLimit,
+	BudgetLimitArray,
+	BudgetLimitRead,
+	BudgetRead,
+	BudgetSingle,
+	BudgetSpent,
 	ShortAccountTypeProperty,
 	TransactionArray,
 	TransactionSingle,
@@ -20,7 +31,7 @@ from lampyrid.models.firefly_models import (
 	Pagination,
 	PageLink,
 )
-from lampyrid.models.lampyrid_models import Account
+from lampyrid.models.lampyrid_models import Account, Budget
 
 
 @pytest.fixture
@@ -181,3 +192,129 @@ def mock_httpx_client():
 	client.get.return_value = response
 	client.post.return_value = response
 	return client
+
+
+@pytest.fixture
+def sample_firefly_budget() -> FireflyBudget:
+	"""Sample Firefly Budget attributes for testing"""
+	return FireflyBudget(
+		name='Groceries',
+		active=True,
+		notes='Monthly grocery budget',
+		order=1,
+	)
+
+
+@pytest.fixture
+def sample_budget_read(sample_firefly_budget: FireflyBudget) -> BudgetRead:
+	"""Sample BudgetRead object for testing"""
+	return BudgetRead(id='789', type='budgets', attributes=sample_firefly_budget)
+
+
+@pytest.fixture
+def sample_budget_array(sample_budget_read: BudgetRead) -> BudgetArray:
+	"""Sample BudgetArray for testing"""
+	return BudgetArray(
+		data=[sample_budget_read],
+		meta=Meta(
+			pagination=Pagination(total=1, count=1, per_page=10, current_page=1, total_pages=1)
+		),
+	)
+
+
+@pytest.fixture
+def sample_budget(sample_budget_read: BudgetRead) -> Budget:
+	"""Sample Budget model for testing"""
+	return Budget.from_budget_read(sample_budget_read)
+
+
+@pytest.fixture
+def sample_budget_single(sample_budget_read: BudgetRead) -> BudgetSingle:
+	"""Sample BudgetSingle for testing"""
+	return BudgetSingle(data=sample_budget_read)
+
+
+@pytest.fixture
+def sample_budget_limit() -> BudgetLimit:
+	"""Sample BudgetLimit for testing"""
+	return BudgetLimit(
+		start=datetime(2023, 1, 1, tzinfo=timezone.utc),
+		end=datetime(2023, 1, 31, 23, 59, 59, tzinfo=timezone.utc),
+		budget_id='789',
+		amount='500.00',
+		spent='-123.45',
+		notes='Monthly limit for groceries',
+	)
+
+
+@pytest.fixture
+def sample_budget_limit_read(sample_budget_limit: BudgetLimit) -> BudgetLimitRead:
+	"""Sample BudgetLimitRead for testing"""
+	return BudgetLimitRead(
+		id='111',
+		type='budget_limits',
+		attributes=sample_budget_limit,
+	)
+
+
+@pytest.fixture
+def sample_budget_limit_array(sample_budget_limit_read: BudgetLimitRead) -> BudgetLimitArray:
+	"""Sample BudgetLimitArray for testing"""
+	return BudgetLimitArray(
+		data=[sample_budget_limit_read],
+		meta=Meta(
+			pagination=Pagination(total=1, count=1, per_page=10, current_page=1, total_pages=1)
+		),
+	)
+
+
+@pytest.fixture
+def sample_available_budget() -> FireflyAvailableBudget:
+	"""Sample AvailableBudget for testing"""
+	return FireflyAvailableBudget(
+		currency_code='USD',
+		amount='1000.00',
+		start=datetime(2023, 1, 1, tzinfo=timezone.utc),
+		end=datetime(2023, 1, 31, 23, 59, 59, tzinfo=timezone.utc),
+		spent_in_budgets=[
+			BudgetSpent(
+				sum='200.00',
+				currency_code='USD',
+				currency_symbol='$',
+				currency_decimal_places=2,
+			)
+		],
+		spent_outside_budget=[
+			BudgetSpent(
+				sum='50.00',
+				currency_code='USD',
+				currency_symbol='$',
+				currency_decimal_places=2,
+			)
+		],
+	)
+
+
+@pytest.fixture
+def sample_available_budget_read(
+	sample_available_budget: FireflyAvailableBudget,
+) -> AvailableBudgetRead:
+	"""Sample AvailableBudgetRead for testing"""
+	return AvailableBudgetRead(
+		id='222',
+		type='available_budgets',
+		attributes=sample_available_budget,
+	)
+
+
+@pytest.fixture
+def sample_available_budget_array(
+	sample_available_budget_read: AvailableBudgetRead,
+) -> AvailableBudgetArray:
+	"""Sample AvailableBudgetArray for testing"""
+	return AvailableBudgetArray(
+		data=[sample_available_budget_read],
+		meta=Meta(
+			pagination=Pagination(total=1, count=1, per_page=10, current_page=1, total_pages=1)
+		),
+	)

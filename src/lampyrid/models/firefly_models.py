@@ -3292,130 +3292,132 @@ class TransactionSplitStore(BaseModel):
 
 class TransactionSplitUpdate(BaseModel):
 	transaction_journal_id: Optional[str] = Field(
-		None,
+		default=None,
 		description='Transaction journal ID of current transaction (split).',
 		examples=['123'],
 	)
 	type: Optional[TransactionTypeProperty] = None
 	date: Optional[datetime] = Field(
-		None,
+		default=None,
 		description='Date of the transaction',
 		examples=['2018-09-17T12:46:47+01:00'],
 	)
 	amount: Optional[str] = Field(
-		None, description='Amount of the transaction.', examples=['123.45']
+		default=None, description='Amount of the transaction.', examples=['123.45']
 	)
 	description: Optional[str] = Field(
-		None, description='Description of the transaction.', examples=['Vegetables']
+		default=None, description='Description of the transaction.', examples=['Vegetables']
 	)
 	order: Optional[int] = Field(
-		None,
+		default=None,
 		description='Order of this entry in the list of transactions.',
 		examples=[0],
 	)
 	currency_id: Optional[str] = Field(
-		None,
+		default=None,
 		description="Currency ID. Default is the source account's currency, or the user's default currency. Can be used instead of currency_code.",
 		examples=['12'],
 	)
 	currency_code: Optional[str] = Field(
-		None,
+		default=None,
 		description="Currency code. Default is the source account's currency, or the user's default currency. Can be used instead of currency_id.",
 		examples=['EUR'],
 	)
-	currency_symbol: Optional[str] = Field(None, examples=['$'])
-	currency_name: Optional[str] = Field(None, examples=['Euro'])
+	currency_symbol: Optional[str] = Field(default=None, examples=['$'])
+	currency_name: Optional[str] = Field(default=None, examples=['Euro'])
 	currency_decimal_places: Optional[int] = Field(
-		None, description='Number of decimals used in this currency.', examples=[2]
+		default=None, description='Number of decimals used in this currency.', examples=[2]
 	)
 	foreign_amount: Optional[str] = Field(
-		None, description='The amount in a foreign currency.', examples=['123.45']
+		default=None, description='The amount in a foreign currency.', examples=['123.45']
 	)
 	foreign_currency_id: Optional[str] = Field(
-		None,
+		default=None,
 		description='Currency ID of the foreign currency. Default is null. Is required when you submit a foreign amount.',
 		examples=['17'],
 	)
 	foreign_currency_code: Optional[str] = Field(
-		None,
+		default=None,
 		description='Currency code of the foreign currency. Default is NULL. Can be used instead of the foreign_currency_id, but this or the ID is required when submitting a foreign amount.',
 		examples=['USD'],
 	)
-	foreign_currency_symbol: Optional[str] = Field(None, examples=['$'])
+	foreign_currency_symbol: Optional[str] = Field(default=None, examples=['$'])
 	foreign_currency_decimal_places: Optional[int] = Field(
-		None, description='Number of decimals in the currency', examples=[2]
+		default=None, description='Number of decimals in the currency', examples=[2]
 	)
 	budget_id: Optional[str] = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
+		default=None, description='The budget ID for this transaction.', examples=['4']
 	)
 	budget_name: Optional[str] = Field(
-		None,
+		default=None,
 		description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
 		examples=['Groceries'],
 	)
 	category_id: Optional[str] = Field(
-		None, description='The category ID for this transaction.', examples=['43']
+		default=None, description='The category ID for this transaction.', examples=['43']
 	)
 	category_name: Optional[str] = Field(
-		None,
+		default=None,
 		description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
 		examples=['Groceries'],
 	)
 	source_id: Optional[str] = Field(
-		None,
+		default=None,
 		description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
 		examples=['2'],
 	)
 	source_name: Optional[str] = Field(
-		None,
+		default=None,
 		description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
 		examples=['Checking account'],
 	)
-	source_iban: Optional[str] = Field(None, examples=['NL02ABNA0123456789'])
+	source_iban: Optional[str] = Field(default=None, examples=['NL02ABNA0123456789'])
 	destination_id: Optional[str] = Field(
-		None,
+		default=None,
 		description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
 		examples=['2'],
 	)
 	destination_name: Optional[str] = Field(
-		None,
+		default=None,
 		description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
 		examples=['Buy and Large'],
 	)
-	destination_iban: Optional[str] = Field(None, examples=['NL02ABNA0123456789'])
+	destination_iban: Optional[str] = Field(default=None, examples=['NL02ABNA0123456789'])
 	reconciled: Optional[bool] = Field(
-		None,
+		default=None,
 		description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
 		examples=[False],
 	)
 	bill_id: Optional[str] = Field(
-		None, description='Optional. Use either this or the bill_name', examples=['111']
+		default=None, description='Optional. Use either this or the bill_name', examples=['111']
 	)
 	bill_name: Optional[str] = Field(
-		None,
+		default=None,
 		description='Optional. Use either this or the bill_id',
 		examples=['Monthly rent'],
 	)
-	tags: Optional[List[str]] = Field(None, description='Array of tags.', examples=[None])
-	notes: Optional[str] = Field(None, examples=['Some example notes'])
+	tags: Optional[List[str]] = Field(default=None, description='Array of tags.', examples=[None])
+	notes: Optional[str] = Field(default=None, examples=['Some example notes'])
 	internal_reference: Optional[str] = Field(
-		None, description='Reference to internal reference of other systems.'
+		default=None, description='Reference to internal reference of other systems.'
 	)
 	external_id: Optional[str] = Field(
-		None, description='Reference to external ID in other systems.'
+		default=None, description='Reference to external ID in other systems.'
 	)
 	external_url: Optional[str] = Field(
-		None, description='External, custom URL for this transaction.'
+		default=None, description='External, custom URL for this transaction.'
 	)
-	bunq_payment_id: Optional[str] = Field(None, description='Internal ID of bunq transaction.')
-	sepa_cc: Optional[str] = Field(None, description='SEPA Clearing Code')
-	sepa_ct_op: Optional[str] = Field(None, description='SEPA Opposing Account Identifier')
-	sepa_ct_id: Optional[str] = Field(None, description='SEPA end-to-end Identifier')
-	sepa_db: Optional[str] = Field(None, description='SEPA mandate identifier')
-	sepa_country: Optional[str] = Field(None, description='SEPA Country')
-	sepa_ep: Optional[str] = Field(None, description='SEPA External Purpose indicator')
-	sepa_ci: Optional[str] = Field(None, description='SEPA Creditor Identifier')
-	sepa_batch_id: Optional[str] = Field(None, description='SEPA Batch ID')
+	bunq_payment_id: Optional[str] = Field(
+		default=None, description='Internal ID of bunq transaction.'
+	)
+	sepa_cc: Optional[str] = Field(default=None, description='SEPA Clearing Code')
+	sepa_ct_op: Optional[str] = Field(default=None, description='SEPA Opposing Account Identifier')
+	sepa_ct_id: Optional[str] = Field(default=None, description='SEPA end-to-end Identifier')
+	sepa_db: Optional[str] = Field(default=None, description='SEPA mandate identifier')
+	sepa_country: Optional[str] = Field(default=None, description='SEPA Country')
+	sepa_ep: Optional[str] = Field(default=None, description='SEPA External Purpose indicator')
+	sepa_ci: Optional[str] = Field(default=None, description='SEPA Creditor Identifier')
+	sepa_batch_id: Optional[str] = Field(default=None, description='SEPA Batch ID')
 	interest_date: Optional[datetime] = None
 	book_date: Optional[datetime] = None
 	process_date: Optional[datetime] = None
