@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server providing comprehensive tools for interact
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.13+
 - [uv](https://github.com/astral-sh/uv) package manager
 - Access to a Firefly III instance with API token
 
@@ -49,9 +49,50 @@ uv run lampyrid
 LamPyrid uses environment variables for configuration:
 
 - `FIREFLY_BASE_URL`: URL of your Firefly III instance
-- `FIREFLY_TOKEN`: Bearer token for API authentication
+- `FIREFLY_TOKEN`: Personal access token for API authentication
 
 Configuration can be provided via a `.env` file in the project root or as environment variables.
+
+## Claude Desktop Integration
+
+To use LamPyrid with Claude Desktop, add the following configuration to your Claude Desktop MCP settings:
+
+### Configuration Steps
+
+1. **Install LamPyrid**: Ensure LamPyrid is installed and configured with your Firefly III credentials
+2. **Configure Claude Desktop**: Add the server configuration to your Claude Desktop settings file
+
+### Claude Desktop Settings
+
+Add the following to your Claude Desktop MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "lampyrid": {
+      "command": "uv",
+      "args": ["run", "lampyrid"],
+      "cwd": "/path/to/your/LamPyrid",
+      "env": {
+        "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
+        "FIREFLY_TOKEN": "your-personal-access-token"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+You can also use a `.env` file in your LamPyrid directory instead of inline environment variables:
+
+```bash
+# .env file in LamPyrid directory
+FIREFLY_BASE_URL=https://your-firefly-instance.com
+FIREFLY_TOKEN=your-personal-access-token
+```
+
+After configuration, restart Claude Desktop. LamPyrid tools will be available for account management, transaction operations, and budget analysis.
 
 ## Available MCP Tools
 
