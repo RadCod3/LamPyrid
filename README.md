@@ -53,6 +53,76 @@ LamPyrid uses environment variables for configuration:
 
 Configuration can be provided via a `.env` file in the project root or as environment variables.
 
+## Docker Deployment
+
+LamPyrid supports containerized deployment using Docker with optimized uv integration.
+
+### Quick Start with Docker
+
+1. **Using Docker Compose (Recommended)**:
+```bash
+# Clone and configure
+git clone <repository-url>
+cd LamPyrid
+
+# Create .env file with your Firefly III credentials
+echo "FIREFLY_BASE_URL=https://your-firefly-instance.com" >> .env
+echo "FIREFLY_TOKEN=your-api-token" >> .env
+
+# Start the service
+docker-compose up -d
+```
+
+2. **Using Docker directly**:
+```bash
+docker run -d \
+  --name lampyrid \
+  -p 3000:3000 \
+  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
+  -e FIREFLY_TOKEN=your-api-token \
+  ghcr.io/radcod3/lampyrid:latest
+```
+
+3. **Using pre-built images from GHCR**:
+```bash
+docker pull ghcr.io/radcod3/lampyrid:latest
+```
+
+### Docker Configuration
+
+**Environment Variables:**
+- `MCP_TRANSPORT`: Set to `http` for containerized deployment (default in Docker)
+- `MCP_HOST`: Bind address (default: `0.0.0.0`)
+- `MCP_PORT`: Server port (default: `3000`)
+- `FIREFLY_BASE_URL`: Your Firefly III instance URL
+- `FIREFLY_TOKEN`: Firefly III API token
+
+**Development Mode:**
+```bash
+# Start with development profile for live reloading
+docker-compose --profile dev up lampyrid-dev
+```
+
+### Health Checks
+
+The Docker container includes health checks to ensure the service is running properly:
+```bash
+# Check container health
+docker ps
+# or
+docker-compose ps
+```
+
+### Building from Source
+
+```bash
+# Build the image locally
+docker build -t lampyrid .
+
+# Build with cache optimization
+docker build --cache-from ghcr.io/radcod3/lampyrid:latest -t lampyrid .
+```
+
 ## Claude Desktop Integration
 
 To use LamPyrid with Claude Desktop, add the following configuration to your Claude Desktop MCP settings:
@@ -64,8 +134,7 @@ To use LamPyrid with Claude Desktop, add the following configuration to your Cla
 
 ### Claude Desktop Settings
 
-Add the following to your Claude Desktop MCP configuration:
-
+**Option 1: Local Installation (stdio mode)**
 ```json
 {
   "mcpServers": {
@@ -77,6 +146,36 @@ Add the following to your Claude Desktop MCP configuration:
         "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
         "FIREFLY_TOKEN": "your-personal-access-token"
       }
+    }
+  }
+}
+```
+
+**Option 2: Docker Container (HTTP mode)**
+```json
+{
+  "mcpServers": {
+    "lampyrid": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "MCP_TRANSPORT=stdio",
+        "-e", "FIREFLY_BASE_URL=https://your-firefly-instance.com",
+        "-e", "FIREFLY_TOKEN=your-personal-access-token",
+        "ghcr.io/radcod3/lampyrid:latest"
+      ]
+    }
+  }
+}
+```
+
+**Option 3: HTTP Connection to Running Container**
+If you have LamPyrid running in HTTP mode (e.g., via docker-compose), you can connect directly:
+```json
+{
+  "mcpServers": {
+    "lampyrid": {
+      "url": "http://localhost:3000"
     }
   }
 }
