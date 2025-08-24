@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Field, RootModel
+from pydantic import AnyUrl, BaseModel, EmailStr, Field, RootModel, field_validator
 
 
 class AutocompleteAccount(BaseModel):
@@ -681,6 +681,14 @@ class BudgetSpent(BaseModel):
 	currency_decimal_places: Optional[int] = Field(
 		None, description='Number of decimals supported by the currency', examples=[2]
 	)
+
+	@field_validator('currency_id', mode='before')
+	@classmethod
+	def convert_currency_id_to_str(cls, v):
+		"""Convert currency_id from int to str if needed."""
+		if v is not None and isinstance(v, int):
+			return str(v)
+		return v
 
 
 class CategoryUpdate(BaseModel):
