@@ -1,8 +1,6 @@
 services:
   lampyrid:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/radcod3/lampyrid:docker-support
     ports:
       - "3000:3000"
     environment:
@@ -12,12 +10,11 @@ services:
       - MCP_PORT=3000
       
       # Firefly III Configuration (set these values)
-      - FIREFLY_BASE_URL=${FIREFLY_BASE_URL:-https://your-firefly-instance.com}
-      - FIREFLY_TOKEN=${FIREFLY_TOKEN:-your-api-token-here}
-    
-    # Mount .env file for easier configuration
-    volumes:
-      - ./.env:/app/.env:ro
-    
-    # Restart policy
+      - FIREFLY_BASE_URL=${FIREFLY_BASE_URL}
+      - FIREFLY_TOKEN=${FIREFLY_TOKEN}
+      
+      # AuthKit Configuration (optional - for remote MCP server authentication)
+      # Uncomment and set these values if you want to enable WorkOS AuthKit authentication
+      # - AUTHKIT_DOMAIN=${AUTHKIT_DOMAIN}
+      # - SERVER_BASE_URL=${SERVER_BASE_URL}
     restart: unless-stopped

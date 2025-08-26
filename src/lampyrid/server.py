@@ -1,8 +1,10 @@
 from typing import List
 
 from fastmcp import FastMCP
+from fastmcp.server.auth.providers.workos import AuthKitProvider
 
 from .clients.firefly import FireflyClient
+from .config import settings
 from .models.lampyrid_models import (
 	Account,
 	AvailableBudget,
@@ -29,7 +31,20 @@ from .models.lampyrid_models import (
 	UpdateTransactionBudgetRequest,
 )
 
-mcp = FastMCP('lampyrid')
+
+def create_auth_provider() -> AuthKitProvider | None:
+	"""Create AuthKit provider if configured, otherwise return None for no auth."""
+	if not settings.is_authkit_enabled:
+		return None
+
+	return AuthKitProvider(
+		authkit_domain=settings.authkit_domain,  # type: ignore
+		base_url=settings.server_base_url,  # type: ignore
+	)
+
+
+auth_provider = create_auth_provider()
+mcp = FastMCP('lampyrid', auth=auth_provider)
 _client = FireflyClient()
 
 
