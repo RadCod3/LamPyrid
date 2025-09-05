@@ -137,6 +137,10 @@ class Transaction(BaseModel):
 			description=self.description,
 			source_id=self.source_id,
 			destination_id=self.destination_id,
+			source_name=self.source_name,
+			destination_name=self.destination_name,
+			budget_id=self.budget_id,
+			budget_name=self.budget_name,
 		)
 
 
@@ -349,4 +353,15 @@ class GetAvailableBudgetRequest(BaseModel):
 	)
 	end_date: Optional[date] = Field(
 		None, description='End date for budget period (YYYY-MM-DD), defaults to current month'
+	)
+
+
+class CreateBulkTransactionsRequest(BaseModel):
+	"""Create multiple transactions in one operation."""
+
+	transactions: List[Transaction] = Field(
+		...,
+		description='List of transactions to create (can be mixed types: withdrawals, deposits, transfers)',
+		min_length=1,
+		max_length=100,
 	)

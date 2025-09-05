@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import httpx
 
@@ -25,6 +25,7 @@ from ..models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
@@ -144,6 +145,29 @@ class FireflyClient:
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
+
+	async def create_bulk_transactions(
+		self, req: CreateBulkTransactionsRequest
+	) -> List[Transaction]:
+		"""Create multiple transactions using individual API calls."""
+		created_transactions: List[Transaction] = []
+
+		for transaction in req.transactions:
+			trx_split = transaction.to_transaction_split_store()
+			trx_store = TransactionStore(
+				transactions=[trx_split],
+				apply_rules=False,
+				fire_webhooks=True,
+				error_if_duplicate_hash=False,
+			)
+			r = await self._client.post(
+				'/api/v1/transactions', json=trx_store.model_dump(mode='json')
+			)
+			r.raise_for_status()
+			res = TransactionSingle.model_validate(r.json())
+			created_transactions.append(Transaction.from_transaction_single(res))
+
+		return created_transactions
 
 	async def get_transactions(self, req: GetTransactionsRequest) -> TransactionArray:
 		"""Get transactions with optional time range and type filtering."""

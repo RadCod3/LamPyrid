@@ -9,6 +9,7 @@ from .models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
@@ -82,6 +83,13 @@ async def create_transfer(req: CreateTransferRequest) -> Transaction:
 	"""Create a new Firefly-III transfer."""
 	transaction = await _client.create_transfer(req)
 	return transaction
+
+
+@mcp.tool(tags={'transactions', 'create', 'bulk'})
+async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> List[Transaction]:
+	"""Create multiple transactions at once (can be mixed types: withdrawals, deposits, transfers)."""
+	transactions = await _client.create_bulk_transactions(req)
+	return transactions
 
 
 @mcp.tool(tags={'transactions', 'query'})

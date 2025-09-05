@@ -5,6 +5,7 @@ import httpx
 from lampyrid.clients.firefly import FireflyClient
 from lampyrid.models.firefly_models import AccountArray, AccountTypeFilter
 from lampyrid.models.lampyrid_models import (
+	CreateBulkTransactionsRequest,
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
@@ -19,6 +20,8 @@ from lampyrid.models.lampyrid_models import (
 	ListBudgetsRequest,
 	SearchAccountRequest,
 	SearchTransactionsRequest,
+	Transaction,
+	TransactionType,
 	UpdateTransactionBudgetRequest,
 )
 
@@ -713,3 +716,73 @@ class TestFireflyClient:
 					},
 				)
 				mock_response.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_create_bulk_transactions(self, sample_transaction_single):
+		"""Test creating multiple transactions in bulk"""
+		from datetime import datetime
+
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			# Mock response for each transaction creation
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_transaction_single.model_dump()
+			mock_client.post.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				# Create sample transactions for bulk creation
+				transactions = [
+					Transaction(
+						amount=50.0,
+						description='Grocery shopping',
+						type=TransactionType.withdrawal,
+						date=datetime.now(),
+						source_id='1',
+						destination_name='Supermarket',
+					),
+					Transaction(
+						amount=25.0,
+						description='Coffee',
+						type=TransactionType.withdrawal,
+						date=datetime.now(),
+						source_id='1',
+						destination_name='Cafe',
+					),
+				]
+
+				client = FireflyClient()
+				request = CreateBulkTransactionsRequest(transactions=transactions)
+				result = await client.create_bulk_transactions(request)
+
+				# Should return list of created transactions
+				assert isinstance(result, list)
+				assert len(result) == 2
+
+				# Verify each transaction was created via individual API calls
+				assert mock_client.post.call_count == 2
+
+				# Verify the correct API endpoint was called
+				all_calls = mock_client.post.call_args_list
+				assert all(call[0][0] == '/api/v1/transactions' for call in all_calls)
+
+				# Verify payload structure
+				first_call_json = all_calls[0][1]['json']
+				assert first_call_json['apply_rules'] is False
+				assert first_call_json['fire_webhooks'] is True
+				assert first_call_json['error_if_duplicate_hash'] is False
+				assert len(first_call_json['transactions']) == 1
+
+				# Check first transaction details
+				first_trx = first_call_json['transactions'][0]
+				assert first_trx['type'] == 'withdrawal'
+				assert first_trx['amount'] == '50.0'
+				assert first_trx['description'] == 'Grocery shopping'
+				assert first_trx['source_id'] == '1'
+				assert first_trx['destination_name'] == 'Supermarket'
+
+				mock_response.raise_for_status.assert_called()

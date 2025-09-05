@@ -5,6 +5,7 @@ import lampyrid.server as server_module
 from lampyrid.models.lampyrid_models import (
 	Account,
 	Budget,
+	CreateBulkTransactionsRequest,
 	ListAccountRequest,
 	ListBudgetsRequest,
 	SearchAccountRequest,
@@ -301,3 +302,56 @@ class TestMCPTools:
 			assert result.budget_id == '789'
 			assert result.budget_name == 'Groceries'
 			mock_client.update_transaction_budget.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_create_bulk_transactions(self):
+		"""Test create_bulk_transactions tool"""
+		from datetime import datetime
+
+		# Create sample transactions for bulk creation
+		transactions = [
+			Transaction(
+				amount=50.0,
+				description='Grocery shopping',
+				type=TransactionType.withdrawal,
+				date=datetime.now(),
+				source_id='1',
+				destination_name='Supermarket',
+			),
+			Transaction(
+				amount=25.0,
+				description='Coffee',
+				type=TransactionType.withdrawal,
+				date=datetime.now(),
+				source_id='1',
+				destination_name='Cafe',
+			),
+			Transaction(
+				amount=100.0,
+				description='Salary',
+				type=TransactionType.deposit,
+				date=datetime.now(),
+				source_name='Employer',
+				destination_id='1',
+			),
+		]
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.create_bulk_transactions = AsyncMock(return_value=transactions)
+
+			request = CreateBulkTransactionsRequest(transactions=transactions)
+			result = await server_module.create_bulk_transactions.fn(request)
+
+			assert isinstance(result, list)
+			assert len(result) == 3
+			assert all(isinstance(trx, Transaction) for trx in result)
+
+			# Verify transaction details
+			assert result[0].description == 'Grocery shopping'
+			assert result[0].amount == 50.0
+			assert result[1].description == 'Coffee'
+			assert result[1].amount == 25.0
+			assert result[2].description == 'Salary'
+			assert result[2].amount == 100.0
+
+			mock_client.create_bulk_transactions.assert_called_once_with(request)
