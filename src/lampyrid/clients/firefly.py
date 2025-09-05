@@ -25,6 +25,7 @@ from ..models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	BulkUpdateTransactionsRequest,
 	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
@@ -208,6 +209,24 @@ class FireflyClient:
 		r.raise_for_status()
 		transaction_single = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(transaction_single)
+
+	async def bulk_update_transactions(
+		self, req: BulkUpdateTransactionsRequest
+	) -> List[Transaction]:
+		"""Update multiple transactions using individual API calls."""
+		updated_transactions: List[Transaction] = []
+
+		for update_req in req.updates:
+			try:
+				updated_transaction = await self.update_transaction(update_req)
+				updated_transactions.append(updated_transaction)
+			except Exception as e:
+				# Re-raise with transaction ID context
+				raise Exception(
+					f'Failed to update transaction {update_req.transaction_id}: {e}'
+				) from e
+
+		return updated_transactions
 
 	async def get_transactions(self, req: GetTransactionsRequest) -> TransactionArray:
 		"""Get transactions with optional time range and type filtering."""

@@ -366,3 +366,14 @@ class UpdateTransactionRequest(BaseModel):
 		None, description='New budget ID (set to None to clear budget)'
 	)
 	category_name: Optional[str] = Field(None, description='New category name')
+
+
+class BulkUpdateTransactionsRequest(BaseModel):
+	"""Update multiple transactions in one operation."""
+
+	updates: List[UpdateTransactionRequest] = Field(
+		...,
+		description='List of transaction updates to apply',
+		min_length=1,
+		max_length=50,
+	)

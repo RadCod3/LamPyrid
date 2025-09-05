@@ -9,6 +9,7 @@ from .models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	BulkUpdateTransactionsRequest,
 	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
@@ -128,6 +129,12 @@ async def delete_transaction(req: DeleteTransactionRequest) -> bool:
 async def update_transaction(req: UpdateTransactionRequest) -> Transaction:
 	"""Update an existing transaction with new values."""
 	return await _client.update_transaction(req)
+
+
+@mcp.tool(tags={'transactions', 'manage', 'bulk'})
+async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> List[Transaction]:
+	"""Update multiple transactions at once."""
+	return await _client.bulk_update_transactions(req)
 
 
 @mcp.tool(tags={'budgets'})

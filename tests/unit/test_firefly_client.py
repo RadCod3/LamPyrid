@@ -5,6 +5,7 @@ import httpx
 from lampyrid.clients.firefly import FireflyClient
 from lampyrid.models.firefly_models import AccountArray, AccountTypeFilter
 from lampyrid.models.lampyrid_models import (
+	BulkUpdateTransactionsRequest,
 	CreateBulkTransactionsRequest,
 	CreateWithdrawalRequest,
 	CreateDepositRequest,
@@ -800,3 +801,78 @@ class TestFireflyClient:
 				# Verify endpoint was called correctly
 				assert mock_client.put.call_args[0][0] == '/api/v1/transactions/123'
 				mock_response.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_bulk_update_transactions(self, sample_transaction_single):
+		"""Test bulk updating multiple transactions"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			# Mock multiple successful responses
+			mock_response1 = MagicMock()
+			mock_response1.json.return_value = sample_transaction_single.model_dump()
+			mock_response1.is_success = True
+			mock_response2 = MagicMock()
+			mock_response2.json.return_value = sample_transaction_single.model_dump()
+			mock_response2.is_success = True
+			mock_client.put.side_effect = [mock_response1, mock_response2]
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = BulkUpdateTransactionsRequest(
+					updates=[
+						UpdateTransactionRequest(transaction_id='123', amount=150.0),
+						UpdateTransactionRequest(
+							transaction_id='456', description='Updated description'
+						),
+					]
+				)
+
+				result = await client.bulk_update_transactions(request)
+
+				assert len(result) == 2
+				assert all(isinstance(trx, Transaction) for trx in result)
+				assert result[0].amount == 100.0  # From sample_transaction_single
+				assert result[1].amount == 100.0  # From sample_transaction_single
+
+				# Verify both transactions were updated
+				assert mock_client.put.call_count == 2
+				mock_response1.raise_for_status.assert_called_once()
+				mock_response2.raise_for_status.assert_called_once()
+
+	@pytest.mark.asyncio
+	async def test_bulk_update_transactions_with_error(self, sample_transaction_single):
+		"""Test bulk update transactions with one failure"""
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			# First update succeeds, second fails
+			mock_response1 = MagicMock()
+			mock_response1.json.return_value = sample_transaction_single.model_dump()
+			mock_response1.is_success = True
+			mock_client.put.side_effect = [
+				mock_response1,
+				httpx.HTTPStatusError('Update failed', request=None, response=None),
+			]
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = BulkUpdateTransactionsRequest(
+					updates=[
+						UpdateTransactionRequest(transaction_id='123', amount=150.0),
+						UpdateTransactionRequest(
+							transaction_id='456', description='Updated description'
+						),
+					]
+				)
+
+				with pytest.raises(Exception, match='Failed to update transaction 456'):
+					await client.bulk_update_transactions(request)
