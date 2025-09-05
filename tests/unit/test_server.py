@@ -20,7 +20,7 @@ from lampyrid.models.lampyrid_models import (
 	TransactionListResponse,
 	Transaction,
 	TransactionType,
-	UpdateTransactionBudgetRequest,
+	UpdateTransactionRequest,
 )
 from lampyrid.models.firefly_models import AccountTypeFilter, AccountArray, TransactionArray
 
@@ -273,37 +273,6 @@ class TestMCPTools:
 			mock_client.list_budgets.assert_called_once_with(request)
 
 	@pytest.mark.asyncio
-	async def test_update_transaction_budget(self):
-		"""Test update_transaction_budget tool"""
-		from datetime import datetime
-
-		mock_transaction = Transaction(
-			amount=50.0,
-			description='Test transaction',
-			type=TransactionType.withdrawal,
-			date=datetime.now(),
-			source_id='1',
-			destination_id='2',
-			budget_id='789',
-			budget_name='Groceries',
-		)
-
-		with patch('lampyrid.server._client') as mock_client:
-			mock_client.update_transaction_budget = AsyncMock(return_value=mock_transaction)
-
-			request = UpdateTransactionBudgetRequest(
-				transaction_id='456',
-				budget_id='789',
-				budget_name='Groceries',
-			)
-			result = await server_module.update_transaction_budget.fn(request)
-
-			assert isinstance(result, Transaction)
-			assert result.budget_id == '789'
-			assert result.budget_name == 'Groceries'
-			mock_client.update_transaction_budget.assert_called_once_with(request)
-
-	@pytest.mark.asyncio
 	async def test_create_bulk_transactions(self):
 		"""Test create_bulk_transactions tool"""
 		from datetime import datetime
@@ -355,3 +324,34 @@ class TestMCPTools:
 			assert result[2].amount == 100.0
 
 			mock_client.create_bulk_transactions.assert_called_once_with(request)
+
+	@pytest.mark.asyncio
+	async def test_update_transaction(self):
+		"""Test update_transaction tool"""
+		from datetime import datetime
+
+		# Create a mock updated transaction
+		updated_transaction = Transaction(
+			id='123',
+			amount=75.0,
+			description='Updated grocery shopping',
+			type=TransactionType.withdrawal,
+			date=datetime.now(),
+			source_id='1',
+			destination_id='2',
+		)
+
+		with patch('lampyrid.server._client') as mock_client:
+			mock_client.update_transaction = AsyncMock(return_value=updated_transaction)
+
+			request = UpdateTransactionRequest(
+				transaction_id='123', amount=75.0, description='Updated grocery shopping'
+			)
+			result = await server_module.update_transaction.fn(request)
+
+			assert isinstance(result, Transaction)
+			assert result.id == '123'
+			assert result.amount == 75.0
+			assert result.description == 'Updated grocery shopping'
+
+			mock_client.update_transaction.assert_called_once_with(request)

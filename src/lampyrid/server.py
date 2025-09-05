@@ -27,7 +27,7 @@ from .models.lampyrid_models import (
 	SearchTransactionsRequest,
 	Transaction,
 	TransactionListResponse,
-	UpdateTransactionBudgetRequest,
+	UpdateTransactionRequest,
 )
 
 mcp = FastMCP('lampyrid')
@@ -124,6 +124,12 @@ async def delete_transaction(req: DeleteTransactionRequest) -> bool:
 	return await _client.delete_transaction(req)
 
 
+@mcp.tool(tags={'transactions', 'manage'})
+async def update_transaction(req: UpdateTransactionRequest) -> Transaction:
+	"""Update an existing transaction with new values."""
+	return await _client.update_transaction(req)
+
+
 @mcp.tool(tags={'budgets'})
 async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 	"""List Firefly-III budgets."""
@@ -134,12 +140,6 @@ async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 	]
 
 	return budgets
-
-
-@mcp.tool(tags={'transactions', 'budgets', 'manage'})
-async def update_transaction_budget(req: UpdateTransactionBudgetRequest) -> Transaction:
-	"""Update a transaction's budget allocation."""
-	return await _client.update_transaction_budget(req)
 
 
 @mcp.tool(tags={'budgets'})

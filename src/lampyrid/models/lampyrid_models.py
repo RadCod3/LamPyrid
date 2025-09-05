@@ -270,20 +270,6 @@ class ListBudgetsRequest(BaseModel):
 	active: Optional[bool] = Field(None, description='Filter budgets by active status')
 
 
-class UpdateTransactionBudgetRequest(BaseModel):
-	"""Request for updating a transaction's budget allocation."""
-
-	transaction_id: str = Field(..., description='ID of the transaction to update')
-	budget_id: Optional[str] = Field(
-		None,
-		description='ID of the budget to allocate the transaction to. Set to None to remove budget allocation.',
-	)
-	budget_name: Optional[str] = Field(
-		None,
-		description='Name of the budget to allocate the transaction to. If the budget name is unknown, the ID will be used or the value will be ignored.',
-	)
-
-
 class GetBudgetRequest(BaseModel):
 	"""Request for getting a single budget by ID."""
 
@@ -365,3 +351,18 @@ class CreateBulkTransactionsRequest(BaseModel):
 		min_length=1,
 		max_length=100,
 	)
+
+
+class UpdateTransactionRequest(BaseModel):
+	"""Update an existing transaction."""
+
+	transaction_id: str = Field(..., description='ID of the transaction to update')
+	amount: Optional[float] = Field(None, description='New amount for the transaction')
+	description: Optional[str] = Field(None, description='New description for the transaction')
+	date: Optional[datetime] = Field(None, description='New date for the transaction')
+	source_id: Optional[str] = Field(None, description='New source account ID')
+	destination_id: Optional[str] = Field(None, description='New destination account ID')
+	budget_id: Optional[str] = Field(
+		None, description='New budget ID (set to None to clear budget)'
+	)
+	category_name: Optional[str] = Field(None, description='New category name')

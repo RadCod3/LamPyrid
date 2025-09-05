@@ -22,7 +22,7 @@ from lampyrid.models.lampyrid_models import (
 	SearchTransactionsRequest,
 	Transaction,
 	TransactionType,
-	UpdateTransactionBudgetRequest,
+	UpdateTransactionRequest,
 )
 
 
@@ -682,42 +682,6 @@ class TestFireflyClient:
 				assert result.percentage_spent is None
 
 	@pytest.mark.asyncio
-	async def test_update_transaction_budget(self, sample_transaction_single):
-		"""Test updating a transaction's budget allocation"""
-		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
-			mock_client = AsyncMock()
-			mock_client_class.return_value = mock_client
-
-			mock_response = MagicMock()
-			mock_response.json.return_value = sample_transaction_single.model_dump()
-			mock_client.put.return_value = mock_response
-
-			with patch('lampyrid.clients.firefly.settings') as mock_settings:
-				mock_settings.firefly_base_url = 'https://firefly.example.com'
-				mock_settings.firefly_token = 'test-token'
-
-				client = FireflyClient()
-				request = UpdateTransactionBudgetRequest(
-					transaction_id='456',
-					budget_id='789',
-					budget_name='Groceries',
-				)
-
-				result = await client.update_transaction_budget(request)
-
-				assert result.amount == 100.0
-				mock_client.put.assert_called_once_with(
-					'/api/v1/transactions/456',
-					json={
-						'apply_rules': False,
-						'fire_webhooks': True,
-						'group_title': None,
-						'transactions': [{'budget_id': '789', 'budget_name': 'Groceries'}],
-					},
-				)
-				mock_response.raise_for_status.assert_called_once()
-
-	@pytest.mark.asyncio
 	async def test_create_bulk_transactions(self, sample_transaction_single):
 		"""Test creating multiple transactions in bulk"""
 		from datetime import datetime
@@ -786,3 +750,53 @@ class TestFireflyClient:
 				assert first_trx['destination_name'] == 'Supermarket'
 
 				mock_response.raise_for_status.assert_called()
+
+	@pytest.mark.asyncio
+	async def test_update_transaction(self, sample_transaction_single):
+		"""Test updating an existing transaction"""
+
+		with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_client_class:
+			mock_client = AsyncMock()
+			mock_client_class.return_value = mock_client
+
+			# Mock response for transaction update
+			mock_response = MagicMock()
+			mock_response.json.return_value = sample_transaction_single.model_dump()
+			mock_client.put.return_value = mock_response
+
+			with patch('lampyrid.clients.firefly.settings') as mock_settings:
+				mock_settings.firefly_base_url = 'https://firefly.example.com'
+				mock_settings.firefly_token = 'test-token'
+
+				client = FireflyClient()
+				request = UpdateTransactionRequest(
+					transaction_id='123',
+					amount=75.0,
+					description='Updated description',
+					source_id='2',
+					budget_id='456',
+				)
+				result = await client.update_transaction(request)
+
+				# Should return updated transaction
+				assert isinstance(result, Transaction)
+				assert result.amount == 100.0  # From sample_transaction_single
+				assert result.description == 'Test transaction'  # From sample_transaction_single
+
+				# Verify the correct API call was made
+				call_json = mock_client.put.call_args[1]['json']
+				assert call_json['apply_rules'] is False
+				assert call_json['fire_webhooks'] is True
+				assert call_json['group_title'] is None
+				assert len(call_json['transactions']) == 1
+
+				# Verify the transaction fields that were set
+				transaction_data = call_json['transactions'][0]
+				assert transaction_data['amount'] == '75.0'
+				assert transaction_data['description'] == 'Updated description'
+				assert transaction_data['source_id'] == '2'
+				assert transaction_data['budget_id'] == '456'
+
+				# Verify endpoint was called correctly
+				assert mock_client.put.call_args[0][0] == '/api/v1/transactions/123'
+				mock_response.raise_for_status.assert_called_once()
