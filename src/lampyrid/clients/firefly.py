@@ -200,12 +200,6 @@ class FireflyClient:
 			f'/api/v1/transactions/{req.transaction_id}',
 			json=trx_update.model_dump(mode='json', exclude_unset=True),
 		)
-		if not r.is_success:
-			# Log the error response for debugging
-			error_detail = r.text
-			raise httpx.HTTPStatusError(
-				f'Update transaction failed: {error_detail}', request=r.request, response=r
-			)
 		r.raise_for_status()
 		transaction_single = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(transaction_single)
