@@ -14,7 +14,6 @@ from lampyrid.models.lampyrid_models import (
 	GetTransactionsRequest,
 	SearchTransactionsRequest,
 	TransactionListResponse,
-	UpdateTransactionBudgetRequest,
 	utc_now,
 )
 from lampyrid.models.firefly_models import AccountTypeFilter, TransactionTypeFilter
@@ -306,28 +305,6 @@ class TestBudgetRequests:
 		"""Test ListBudgetsRequest with default values"""
 		request = ListBudgetsRequest()
 		assert request.active is None
-
-	def test_update_transaction_budget_request(self):
-		"""Test UpdateTransactionBudgetRequest"""
-		request = UpdateTransactionBudgetRequest(
-			transaction_id='456',
-			budget_id='789',
-			budget_name='Groceries',
-		)
-		assert request.transaction_id == '456'
-		assert request.budget_id == '789'
-		assert request.budget_name == 'Groceries'
-
-	def test_update_transaction_budget_request_clear(self):
-		"""Test UpdateTransactionBudgetRequest to clear budget"""
-		request = UpdateTransactionBudgetRequest(
-			transaction_id='456',
-			budget_id=None,
-			budget_name=None,
-		)
-		assert request.transaction_id == '456'
-		assert request.budget_id is None
-		assert request.budget_name is None
 
 
 class TestTransactionWithBudget:

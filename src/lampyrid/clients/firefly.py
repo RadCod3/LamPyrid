@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import httpx
 
@@ -25,6 +25,8 @@ from ..models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	BulkUpdateTransactionsRequest,
+	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
@@ -40,7 +42,7 @@ from ..models.lampyrid_models import (
 	SearchAccountRequest,
 	SearchTransactionsRequest,
 	Transaction,
-	UpdateTransactionBudgetRequest,
+	UpdateTransactionRequest,
 )
 
 
@@ -145,6 +147,81 @@ class FireflyClient:
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
 
+	async def create_bulk_transactions(
+		self, req: CreateBulkTransactionsRequest
+	) -> List[Transaction]:
+		"""Create multiple transactions using individual API calls."""
+		created_transactions: List[Transaction] = []
+
+		for transaction in req.transactions:
+			trx_split = transaction.to_transaction_split_store()
+			trx_store = TransactionStore(
+				transactions=[trx_split],
+				apply_rules=False,
+				fire_webhooks=True,
+				error_if_duplicate_hash=False,
+			)
+			r = await self._client.post(
+				'/api/v1/transactions', json=trx_store.model_dump(mode='json')
+			)
+			r.raise_for_status()
+			res = TransactionSingle.model_validate(r.json())
+			created_transactions.append(Transaction.from_transaction_single(res))
+
+		return created_transactions
+
+	async def update_transaction(self, req: UpdateTransactionRequest) -> Transaction:
+		"""Update an existing transaction with new values."""
+		# Build the update payload with only provided fields using explicit parameters
+		update_kwargs = {}
+
+		if req.amount is not None:
+			update_kwargs['amount'] = str(req.amount)
+		if req.description is not None:
+			update_kwargs['description'] = req.description
+		if req.date is not None:
+			update_kwargs['date'] = req.date
+		if req.source_id is not None:
+			update_kwargs['source_id'] = req.source_id
+		if req.destination_id is not None:
+			update_kwargs['destination_id'] = req.destination_id
+		if req.budget_id is not None:
+			update_kwargs['budget_id'] = req.budget_id
+		if req.category_name is not None:
+			update_kwargs['category_name'] = req.category_name
+
+		trx_split_update = TransactionSplitUpdate(**update_kwargs)  # type: ignore
+
+		trx_update = TransactionUpdate(
+			apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
+		)
+
+		r = await self._client.put(
+			f'/api/v1/transactions/{req.transaction_id}',
+			json=trx_update.model_dump(mode='json', exclude_unset=True),
+		)
+		r.raise_for_status()
+		transaction_single = TransactionSingle.model_validate(r.json())
+		return Transaction.from_transaction_single(transaction_single)
+
+	async def bulk_update_transactions(
+		self, req: BulkUpdateTransactionsRequest
+	) -> List[Transaction]:
+		"""Update multiple transactions using individual API calls."""
+		updated_transactions: List[Transaction] = []
+
+		for update_req in req.updates:
+			try:
+				updated_transaction = await self.update_transaction(update_req)
+				updated_transactions.append(updated_transaction)
+			except Exception as e:
+				# Re-raise with transaction ID context
+				raise Exception(
+					f'Failed to update transaction {update_req.transaction_id}: {e}'
+				) from e
+
+		return updated_transactions
+
 	async def get_transactions(self, req: GetTransactionsRequest) -> TransactionArray:
 		"""Get transactions with optional time range and type filtering."""
 		params: Dict[str, Any] = {
@@ -188,26 +265,6 @@ class FireflyClient:
 		r = await self._client.get('/api/v1/budgets', params=params)
 		r.raise_for_status()
 		return BudgetArray.model_validate(r.json())
-
-	async def update_transaction_budget(self, req: UpdateTransactionBudgetRequest) -> Transaction:
-		"""Update a transaction's budget allocation."""
-		# Create the transaction update payload
-		trx_split_update = TransactionSplitUpdate(
-			budget_id=req.budget_id,
-			budget_name=req.budget_name,
-		)
-
-		trx_update = TransactionUpdate(
-			apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
-		)
-
-		r = await self._client.put(
-			f'/api/v1/transactions/{req.transaction_id}',
-			json=trx_update.model_dump(mode='json', exclude_unset=True),
-		)
-		r.raise_for_status()
-		transaction_single = TransactionSingle.model_validate(r.json())
-		return Transaction.from_transaction_single(transaction_single)
 
 	async def get_budget(self, req: GetBudgetRequest) -> Budget:
 		"""Get a single budget by ID."""

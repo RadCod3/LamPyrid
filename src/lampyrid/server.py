@@ -9,6 +9,8 @@ from .models.lampyrid_models import (
 	Budget,
 	BudgetSpending,
 	BudgetSummary,
+	BulkUpdateTransactionsRequest,
+	CreateBulkTransactionsRequest,
 	CreateDepositRequest,
 	CreateTransferRequest,
 	CreateWithdrawalRequest,
@@ -26,7 +28,7 @@ from .models.lampyrid_models import (
 	SearchTransactionsRequest,
 	Transaction,
 	TransactionListResponse,
-	UpdateTransactionBudgetRequest,
+	UpdateTransactionRequest,
 )
 
 mcp = FastMCP('lampyrid')
@@ -84,6 +86,13 @@ async def create_transfer(req: CreateTransferRequest) -> Transaction:
 	return transaction
 
 
+@mcp.tool(tags={'transactions', 'create', 'bulk'})
+async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> List[Transaction]:
+	"""Create multiple transactions at once (can be mixed types: withdrawals, deposits, transfers)."""
+	transactions = await _client.create_bulk_transactions(req)
+	return transactions
+
+
 @mcp.tool(tags={'transactions', 'query'})
 async def get_transaction(req: GetTransactionRequest) -> Transaction:
 	"""Get a single transaction by ID."""
@@ -116,6 +125,18 @@ async def delete_transaction(req: DeleteTransactionRequest) -> bool:
 	return await _client.delete_transaction(req)
 
 
+@mcp.tool(tags={'transactions', 'manage'})
+async def update_transaction(req: UpdateTransactionRequest) -> Transaction:
+	"""Update an existing transaction with new values."""
+	return await _client.update_transaction(req)
+
+
+@mcp.tool(tags={'transactions', 'manage', 'bulk'})
+async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> List[Transaction]:
+	"""Update multiple transactions at once."""
+	return await _client.bulk_update_transactions(req)
+
+
 @mcp.tool(tags={'budgets'})
 async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 	"""List Firefly-III budgets."""
@@ -126,12 +147,6 @@ async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 	]
 
 	return budgets
-
-
-@mcp.tool(tags={'transactions', 'budgets', 'manage'})
-async def update_transaction_budget(req: UpdateTransactionBudgetRequest) -> Transaction:
-	"""Update a transaction's budget allocation."""
-	return await _client.update_transaction_budget(req)
 
 
 @mcp.tool(tags={'budgets'})

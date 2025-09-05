@@ -137,6 +137,10 @@ class Transaction(BaseModel):
 			description=self.description,
 			source_id=self.source_id,
 			destination_id=self.destination_id,
+			source_name=self.source_name,
+			destination_name=self.destination_name,
+			budget_id=self.budget_id,
+			budget_name=self.budget_name,
 		)
 
 
@@ -266,20 +270,6 @@ class ListBudgetsRequest(BaseModel):
 	active: Optional[bool] = Field(None, description='Filter budgets by active status')
 
 
-class UpdateTransactionBudgetRequest(BaseModel):
-	"""Request for updating a transaction's budget allocation."""
-
-	transaction_id: str = Field(..., description='ID of the transaction to update')
-	budget_id: Optional[str] = Field(
-		None,
-		description='ID of the budget to allocate the transaction to. Set to None to remove budget allocation.',
-	)
-	budget_name: Optional[str] = Field(
-		None,
-		description='Name of the budget to allocate the transaction to. If the budget name is unknown, the ID will be used or the value will be ignored.',
-	)
-
-
 class GetBudgetRequest(BaseModel):
 	"""Request for getting a single budget by ID."""
 
@@ -349,4 +339,41 @@ class GetAvailableBudgetRequest(BaseModel):
 	)
 	end_date: Optional[date] = Field(
 		None, description='End date for budget period (YYYY-MM-DD), defaults to current month'
+	)
+
+
+class CreateBulkTransactionsRequest(BaseModel):
+	"""Create multiple transactions in one operation."""
+
+	transactions: List[Transaction] = Field(
+		...,
+		description='List of transactions to create (can be mixed types: withdrawals, deposits, transfers)',
+		min_length=1,
+		max_length=100,
+	)
+
+
+class UpdateTransactionRequest(BaseModel):
+	"""Update an existing transaction."""
+
+	transaction_id: str = Field(..., description='ID of the transaction to update')
+	amount: Optional[float] = Field(None, description='New amount for the transaction')
+	description: Optional[str] = Field(None, description='New description for the transaction')
+	date: Optional[datetime] = Field(None, description='New date for the transaction')
+	source_id: Optional[str] = Field(None, description='New source account ID')
+	destination_id: Optional[str] = Field(None, description='New destination account ID')
+	budget_id: Optional[str] = Field(
+		None, description='New budget ID (set to None to clear budget)'
+	)
+	category_name: Optional[str] = Field(None, description='New category name')
+
+
+class BulkUpdateTransactionsRequest(BaseModel):
+	"""Update multiple transactions in one operation."""
+
+	updates: List[UpdateTransactionRequest] = Field(
+		...,
+		description='List of transaction updates to apply',
+		min_length=1,
+		max_length=50,
 	)
