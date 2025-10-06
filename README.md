@@ -48,80 +48,54 @@ uv run lampyrid
 
 LamPyrid uses environment variables for configuration:
 
+### Required Configuration
+
 - `FIREFLY_BASE_URL`: URL of your Firefly III instance
 - `FIREFLY_TOKEN`: Personal access token for API authentication
 
+### Optional: Google OAuth Authentication
+
+For remote server deployments requiring authentication, you can enable Google OAuth:
+
+- `GOOGLE_CLIENT_ID`: Google OAuth 2.0 client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth 2.0 client secret
+- `SERVER_BASE_URL`: Your server's public URL (e.g., `http://localhost:8000`)
+
+**Note**: Authentication is optional and only needed for remote server deployments. All three OAuth variables must be provided together to enable authentication.
+
 Configuration can be provided via a `.env` file in the project root or as environment variables.
 
-## Docker Deployment
+### Setting Up Google OAuth
 
-LamPyrid supports containerized deployment using Docker with optimized uv integration.
+If you need authentication for remote server deployment:
 
-### Quick Start with Docker
-
-1. **Using Docker Compose (Recommended)**:
-```bash
-# Clone and configure
-git clone <repository-url>
-cd LamPyrid
-
-# Create .env file with your Firefly III credentials
-echo "FIREFLY_BASE_URL=https://your-firefly-instance.com" >> .env
-echo "FIREFLY_TOKEN=your-api-token" >> .env
-
-# Start the service
-docker-compose up -d
-```
-
-2. **Using Docker directly**:
-```bash
-docker run -d \
-  --name lampyrid \
-  -p 3000:3000 \
-  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
-  -e FIREFLY_TOKEN=your-api-token \
-  ghcr.io/radcod3/lampyrid:latest
-```
-
-3. **Using pre-built images from GHCR**:
-```bash
-docker pull ghcr.io/radcod3/lampyrid:latest
-```
-
-### Docker Configuration
-
-**Environment Variables:**
-- `MCP_TRANSPORT`: Set to `http` for containerized deployment (default in Docker)
-- `MCP_HOST`: Bind address (default: `0.0.0.0`)
-- `MCP_PORT`: Server port (default: `3000`)
-- `FIREFLY_BASE_URL`: Your Firefly III instance URL
-- `FIREFLY_TOKEN`: Firefly III API token
-
-**Development Mode:**
-```bash
-# Start with development profile for live reloading
-docker-compose --profile dev up lampyrid-dev
-```
-
-### Health Checks
-
-The Docker container includes health checks to ensure the service is running properly:
-```bash
-# Check container health
-docker ps
-# or
-docker-compose ps
-```
-
-### Building from Source
-
-```bash
-# Build the image locally
-docker build -t lampyrid .
-
-# Build with cache optimization
-docker build --cache-from ghcr.io/radcod3/lampyrid:latest -t lampyrid .
-```
+1. **Go to Google Cloud Console**: Visit [console.cloud.google.com](https://console.cloud.google.com)
+2. **Create or select a project**: Choose an existing project or create a new one
+3. **Enable APIs**:
+   - Navigate to "APIs & Services" → "Library"
+   - Search for and enable "Google+ API"
+4. **Configure OAuth Consent Screen**:
+   - Go to "APIs & Services" → "OAuth consent screen"
+   - Choose "External" user type (unless you have Google Workspace)
+   - Fill in required fields: app name, user support email, developer contact
+   - Add scopes: `openid`, `email`, `profile`
+   - Save and continue
+5. **Create OAuth 2.0 Credentials**:
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "OAuth client ID"
+   - Application type: "Web application"
+   - Name: "LamPyrid MCP Server"
+   - Add authorized redirect URI: `{SERVER_BASE_URL}/auth/callback`
+     - For local development: `http://localhost:8000/auth/callback`
+     - For production: `https://your-domain.com/auth/callback`
+   - Click "Create"
+   - Copy the Client ID and Client Secret
+6. **Configure Environment**: Add to your `.env` file:
+   ```bash
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   SERVER_BASE_URL=http://localhost:8000
+   ```
 
 ## Claude Desktop Integration
 
