@@ -108,8 +108,7 @@ To use LamPyrid with Claude Desktop, add the following configuration to your Cla
 
 ### Claude Desktop Settings
 
-Add the following to your Claude Desktop MCP configuration:
-
+**Option 1: Local Installation (stdio mode)**
 ```json
 {
   "mcpServers": {
@@ -121,6 +120,36 @@ Add the following to your Claude Desktop MCP configuration:
         "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
         "FIREFLY_TOKEN": "your-personal-access-token"
       }
+    }
+  }
+}
+```
+
+**Option 2: Docker Container (HTTP mode)**
+```json
+{
+  "mcpServers": {
+    "lampyrid": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "MCP_TRANSPORT=stdio",
+        "-e", "FIREFLY_BASE_URL=https://your-firefly-instance.com",
+        "-e", "FIREFLY_TOKEN=your-personal-access-token",
+        "ghcr.io/radcod3/lampyrid:latest"
+      ]
+    }
+  }
+}
+```
+
+**Option 3: HTTP Connection to Running Container**
+If you have LamPyrid running in HTTP mode (e.g., via docker-compose), you can connect directly:
+```json
+{
+  "mcpServers": {
+    "lampyrid": {
+      "url": "http://localhost:3000"
     }
   }
 }
