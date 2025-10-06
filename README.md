@@ -48,10 +48,54 @@ uv run lampyrid
 
 LamPyrid uses environment variables for configuration:
 
+### Required Configuration
+
 - `FIREFLY_BASE_URL`: URL of your Firefly III instance
 - `FIREFLY_TOKEN`: Personal access token for API authentication
 
+### Optional: Google OAuth Authentication
+
+For remote server deployments requiring authentication, you can enable Google OAuth:
+
+- `GOOGLE_CLIENT_ID`: Google OAuth 2.0 client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth 2.0 client secret
+- `SERVER_BASE_URL`: Your server's public URL (e.g., `http://localhost:8000`)
+
+**Note**: Authentication is optional and only needed for remote server deployments. All three OAuth variables must be provided together to enable authentication.
+
 Configuration can be provided via a `.env` file in the project root or as environment variables.
+
+### Setting Up Google OAuth
+
+If you need authentication for remote server deployment:
+
+1. **Go to Google Cloud Console**: Visit [console.cloud.google.com](https://console.cloud.google.com)
+2. **Create or select a project**: Choose an existing project or create a new one
+3. **Enable APIs**:
+   - Navigate to "APIs & Services" → "Library"
+   - Search for and enable "Google+ API"
+4. **Configure OAuth Consent Screen**:
+   - Go to "APIs & Services" → "OAuth consent screen"
+   - Choose "External" user type (unless you have Google Workspace)
+   - Fill in required fields: app name, user support email, developer contact
+   - Add scopes: `openid`, `email`, `profile`
+   - Save and continue
+5. **Create OAuth 2.0 Credentials**:
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "OAuth client ID"
+   - Application type: "Web application"
+   - Name: "LamPyrid MCP Server"
+   - Add authorized redirect URI: `{SERVER_BASE_URL}/auth/callback`
+     - For local development: `http://localhost:8000/auth/callback`
+     - For production: `https://your-domain.com/auth/callback`
+   - Click "Create"
+   - Copy the Client ID and Client Secret
+6. **Configure Environment**: Add to your `.env` file:
+   ```bash
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   SERVER_BASE_URL=http://localhost:8000
+   ```
 
 ## Claude Desktop Integration
 

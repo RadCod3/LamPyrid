@@ -11,8 +11,14 @@ class Settings(BaseSettings):
 		extra='ignore',
 	)
 
+	# Firefly III Configuration
 	firefly_base_url: Optional[HttpUrl] = Field(default=None)
 	firefly_token: Optional[str] = Field(default=None)
+
+	# Google OAuth Configuration (Optional - for remote server authentication)
+	google_client_id: Optional[str] = Field(default=None)
+	google_client_secret: Optional[str] = Field(default=None)
+	server_base_url: Optional[HttpUrl] = Field(default=None)
 
 
 # Initialize settings
