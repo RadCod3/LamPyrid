@@ -1,8 +1,9 @@
 from typing import List, Optional
 
 from fastmcp import FastMCP
+from fastmcp.server.auth.auth import AuthProvider
+from fastmcp.server.auth.providers.google import GoogleProvider
 
-from .auth.google import GoogleProvider
 from .clients.firefly import FireflyClient
 from .config import settings
 from .models.lampyrid_models import (
@@ -34,7 +35,7 @@ from .models.lampyrid_models import (
 )
 
 
-def _create_auth_provider() -> Optional[GoogleProvider]:
+def _create_auth_provider() -> Optional[AuthProvider]:
 	"""
 	Create Google authentication provider if credentials are configured.
 
@@ -46,6 +47,10 @@ def _create_auth_provider() -> Optional[GoogleProvider]:
 			client_id=settings.google_client_id,
 			client_secret=settings.google_client_secret,
 			base_url=str(settings.server_base_url),
+			required_scopes=[
+				'openid',
+				'https://www.googleapis.com/auth/userinfo.email',
+			],
 		)
 	return None
 
