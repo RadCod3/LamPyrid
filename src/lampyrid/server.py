@@ -1,8 +1,10 @@
+from logging import config
 from typing import List, Optional
 
 from fastmcp import FastMCP
 from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
+from fastmcp.utilities.logging import configure_logging
 
 from .clients.firefly import FireflyClient
 from .config import settings
@@ -59,6 +61,8 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 auth_provider = _create_auth_provider()
 mcp = FastMCP('lampyrid', auth=auth_provider)
 _client = FireflyClient()
+
+configure_logging(level='DEBUG')
 
 
 @mcp.tool(tags={'accounts'})
