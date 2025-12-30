@@ -91,12 +91,15 @@ jobs:
       id: scan-tag
       if: github.event_name != 'pull_request'
       run: |
+        # Lowercase the image name (Docker registries require lowercase)
+        IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+
         # Use the version tag if this is a tag push, otherwise use latest
         if [[ "${{ github.ref }}" == refs/tags/* ]]; then
           TAG="${GITHUB_REF#refs/tags/}"
-          SCAN_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG#v}"
+          SCAN_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:${TAG#v}"
         else
-          SCAN_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          SCAN_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:latest"
         fi
         echo "tag=$SCAN_TAG" >> $GITHUB_OUTPUT
         echo "Scanning image: $SCAN_TAG"
