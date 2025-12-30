@@ -17,10 +17,10 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 	Returns:
 		GoogleProvider if all required credentials are present, None otherwise
 	"""
-	if settings.google_client_id and settings.google_client_secret and settings.server_base_url:
+	if settings.is_auth_enabled:
 		return GoogleProvider(
-			client_id=settings.google_client_id,
-			client_secret=settings.google_client_secret,
+			client_id=settings.google_client_id,  # ty:ignore[invalid-argument-type]
+			client_secret=settings.google_client_secret,  # ty:ignore[invalid-argument-type]
 			base_url=str(settings.server_base_url),
 			required_scopes=[
 				'openid',
