@@ -5,19 +5,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      # MCP Server Configuration
-      - MCP_TRANSPORT=http
-      - MCP_HOST=0.0.0.0
-      - MCP_PORT=3000
-      
-      # Firefly III Configuration (set these values)
-      - FIREFLY_BASE_URL=${FIREFLY_BASE_URL:-https://your-firefly-instance.com}
-      - FIREFLY_TOKEN=${FIREFLY_TOKEN:-your-api-token-here}
-    
-    # Mount .env file for easier configuration
-    volumes:
-      - ./.env:/app/.env:ro
-    
-    # Restart policy
+    env_file:
+      - .env
     restart: unless-stopped
