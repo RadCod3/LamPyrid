@@ -73,6 +73,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -86,11 +87,25 @@ jobs:
         build-args: |
           BUILDKIT_INLINE_CACHE=1
 
+    - name: Determine scan tag
+      id: scan-tag
+      if: github.event_name != 'pull_request'
+      run: |
+        # Use the version tag if this is a tag push, otherwise use latest
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          TAG="${GITHUB_REF#refs/tags/}"
+          SCAN_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG#v}"
+        else
+          SCAN_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        fi
+        echo "tag=$SCAN_TAG" >> $GITHUB_OUTPUT
+        echo "Scanning image: $SCAN_TAG"
+
     - name: Run security scan on image
       if: github.event_name != 'pull_request'
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: ${{ steps.meta.outputs.tags }}
+        image-ref: ${{ steps.scan-tag.outputs.tag }}
         format: 'sarif'
         output: 'trivy-results.sarif'
 
