@@ -1,0 +1,98 @@
+"""
+Transaction Management MCP Tools.
+
+This module provides MCP tools for managing Firefly III transactions including
+creating, retrieving, searching, updating, and deleting transactions.
+"""
+
+from typing import List
+
+from fastmcp import FastMCP
+
+from ..clients.firefly import FireflyClient
+from ..models.lampyrid_models import (
+	BulkUpdateTransactionsRequest,
+	CreateBulkTransactionsRequest,
+	CreateDepositRequest,
+	CreateTransferRequest,
+	CreateWithdrawalRequest,
+	DeleteTransactionRequest,
+	GetTransactionRequest,
+	GetTransactionsRequest,
+	SearchTransactionsRequest,
+	Transaction,
+	TransactionListResponse,
+	UpdateTransactionRequest,
+)
+
+
+def register_tools(mcp: FastMCP, client: FireflyClient) -> None:
+	"""
+	Register transaction management tools with the FastMCP server.
+
+	Args:
+		mcp: The FastMCP server instance
+		client: The FireflyClient instance for API interactions
+	"""
+
+	@mcp.tool(tags={'transactions', 'create'})
+	async def create_withdrawal(req: CreateWithdrawalRequest) -> Transaction:  # pyright: ignore[reportUnusedFunction]
+		"""Record expenses and spending. Money leaves your asset accounts to pay for goods, services, or cash withdrawals. Can be assigned to budgets for expense tracking."""
+		transaction = await client.create_withdrawal(req)
+		return transaction
+
+	@mcp.tool(tags={'transactions', 'create'})
+	async def create_deposit(req: CreateDepositRequest) -> Transaction:  # pyright: ignore[reportUnusedFunction]
+		"""Record income and money received. Represents salary, refunds, gifts, or any money coming into your asset accounts from external sources."""
+		transaction = await client.create_deposit(req)
+		return transaction
+
+	@mcp.tool(tags={'transactions', 'create'})
+	async def create_transfer(req: CreateTransferRequest) -> Transaction:  # pyright: ignore[reportUnusedFunction]
+		"""Move money between your own accounts. Use for transferring to savings, paying credit cards from checking, or consolidating funds."""
+		transaction = await client.create_transfer(req)
+		return transaction
+
+	@mcp.tool(tags={'transactions', 'create', 'bulk'})
+	async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> List[Transaction]:  # pyright: ignore[reportUnusedFunction]
+		"""Efficiently create multiple transactions in one operation. Ideal for importing transaction batches, recording monthly bills, or processing CSV data."""
+		transactions = await client.create_bulk_transactions(req)
+		return transactions
+
+	@mcp.tool(tags={'transactions', 'query'})
+	async def get_transaction(req: GetTransactionRequest) -> Transaction:  # pyright: ignore[reportUnusedFunction]
+		"""Retrieve complete transaction details. Use this to verify transaction information before updates or to examine specific transactions."""
+		return await client.get_transaction(req)
+
+	@mcp.tool(tags={'transactions', 'query'})
+	async def get_transactions(req: GetTransactionsRequest) -> TransactionListResponse:  # pyright: ignore[reportUnusedFunction]
+		"""Retrieve transaction history with flexible filtering and pagination. Essential for financial analysis, spending pattern review, and account activity monitoring."""
+		transaction_array = await client.get_transactions(req)
+
+		return TransactionListResponse.from_transaction_array(
+			transaction_array, current_page=req.page or 1, per_page=req.limit or 50
+		)
+
+	@mcp.tool(tags={'transactions', 'query'})
+	async def search_transactions(req: SearchTransactionsRequest) -> TransactionListResponse:  # pyright: ignore[reportUnusedFunction]
+		"""Find transactions by searching text content. Perfect for locating specific purchases, payments, or merchants by description."""
+		transaction_array = await client.search_transactions(req)
+
+		return TransactionListResponse.from_transaction_array(
+			transaction_array, current_page=req.page or 1, per_page=req.limit or 50
+		)
+
+	@mcp.tool(tags={'transactions', 'manage'})
+	async def delete_transaction(req: DeleteTransactionRequest) -> bool:  # pyright: ignore[reportUnusedFunction]
+		"""Permanently remove a transaction. Use to correct mistakes, remove duplicates, or delete test data. This action cannot be undone."""
+		return await client.delete_transaction(req)
+
+	@mcp.tool(tags={'transactions', 'manage'})
+	async def update_transaction(req: UpdateTransactionRequest) -> Transaction:  # pyright: ignore[reportUnusedFunction]
+		"""Modify transaction details such as amounts, descriptions, dates, accounts, or budget assignments. Useful for correcting imported data or updating incomplete information."""
+		return await client.update_transaction(req)
+
+	@mcp.tool(tags={'transactions', 'manage', 'bulk'})
+	async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> List[Transaction]:  # pyright: ignore[reportUnusedFunction]
+		"""Efficiently update multiple transactions in one operation. Ideal for batch account changes, budget reassignments, or correcting imported data."""
+		return await client.bulk_update_transactions(req)
