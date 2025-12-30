@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - docker-support  # Include current branch for testing
     tags:
       - 'v*'
   pull_request:
@@ -22,10 +21,32 @@ jobs:
       contents: read
       packages: write
       security-events: write
+    outputs:
+      image-tags: ${{ steps.meta.outputs.tags }}
+      image-version: ${{ steps.meta.outputs.version }}
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Validate version tag
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # Extract version from tag (e.g., v0.1.0 -> 0.1.0)
+        TAG_VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Tag version: $TAG_VERSION"
+
+        # Extract version from pyproject.toml
+        PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+        echo "pyproject.toml version: $PYPROJECT_VERSION"
+
+        # Compare versions
+        if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
+          echo "::error::Version mismatch! Tag version ($TAG_VERSION) doesn't match pyproject.toml version ($PYPROJECT_VERSION)"
+          exit 1
+        fi
+
+        echo "::notice::Version validation passed: $TAG_VERSION"
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3

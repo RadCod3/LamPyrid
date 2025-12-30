@@ -1,0 +1,254 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create release for (e.g., v0.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      previous-tag: ${{ steps.get-previous-tag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
+
+      - name: Get version from tag
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
+          # Validate tag format
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid tag format: $TAG (expected format: v0.1.0)"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "::notice::Release version: $VERSION"
+
+      - name: Validate version matches pyproject.toml
+        run: |
+          PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+          TAG_VERSION="${{ steps.get-version.outputs.version }}"
+
+          if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
+            echo "::error::Version mismatch! Tag ($TAG_VERSION) doesn't match pyproject.toml ($PYPROJECT_VERSION)"
+            exit 1
+          fi
+
+          echo "::notice::Version validation passed: $TAG_VERSION"
+
+      - name: Get previous tag
+        id: get-previous-tag
+        run: |
+          CURRENT_TAG="${{ steps.get-version.outputs.tag }}"
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -A1 "^${CURRENT_TAG}$" | tail -n1 || echo "")
+
+          if [ -z "$PREVIOUS_TAG" ] || [ "$PREVIOUS_TAG" == "$CURRENT_TAG" ]; then
+            echo "::notice::No previous tag found, this is the first release"
+            echo "tag=" >> $GITHUB_OUTPUT
+          else
+            echo "::notice::Previous tag: $PREVIOUS_TAG"
+            echo "tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          fi
+
+  wait-for-docker:
+    name: Wait for Docker Build
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Wait for Docker workflow
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success
+
+      - name: Verify Docker workflow succeeded
+        run: |
+          echo "::notice::Docker build workflow completed successfully"
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate, wait-for-docker]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          CURRENT_TAG="v${VERSION}"
+          PREVIOUS_TAG="${{ needs.validate.outputs.previous-tag }}"
+
+          echo "Generating changelog for $CURRENT_TAG"
+
+          # Generate changelog content
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "## What's Changed" > changelog.md
+            echo "" >> changelog.md
+            echo "Initial release of LamPyrid - A comprehensive MCP server for Firefly III personal finance management." >> changelog.md
+            echo "" >> changelog.md
+            echo "### Features" >> changelog.md
+            git log --pretty=format:"- %s (%h)" >> changelog.md
+          else
+            echo "## What's Changed" > changelog.md
+            echo "" >> changelog.md
+
+            # Get commits between tags
+            COMMITS=$(git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"%s|||%h" --reverse)
+
+            # Categorize commits
+            echo "### Added" > features.md
+            echo "### Fixed" > fixes.md
+            echo "### Changed" > changes.md
+            echo "### Other" > other.md
+
+            HAS_FEATURES=false
+            HAS_FIXES=false
+            HAS_CHANGES=false
+            HAS_OTHER=false
+
+            while IFS='|||' read -r message hash; do
+              if [[ $message == feat:* ]] || [[ $message == *"Add"* ]] || [[ $message == *"Implement"* ]]; then
+                echo "- ${message} (${hash})" >> features.md
+                HAS_FEATURES=true
+              elif [[ $message == fix:* ]] || [[ $message == *"Fix"* ]]; then
+                echo "- ${message} (${hash})" >> fixes.md
+                HAS_FIXES=true
+              elif [[ $message == *"Update"* ]] || [[ $message == *"Change"* ]] || [[ $message == *"Refactor"* ]]; then
+                echo "- ${message} (${hash})" >> changes.md
+                HAS_CHANGES=true
+              else
+                echo "- ${message} (${hash})" >> other.md
+                HAS_OTHER=true
+              fi
+            done <<< "$COMMITS"
+
+            # Append categories that have content
+            if [ "$HAS_FEATURES" = true ]; then
+              cat features.md >> changelog.md
+              echo "" >> changelog.md
+            fi
+            if [ "$HAS_FIXES" = true ]; then
+              cat fixes.md >> changelog.md
+              echo "" >> changelog.md
+            fi
+            if [ "$HAS_CHANGES" = true ]; then
+              cat changes.md >> changelog.md
+              echo "" >> changelog.md
+            fi
+            if [ "$HAS_OTHER" = true ]; then
+              cat other.md >> changelog.md
+              echo "" >> changelog.md
+            fi
+
+            # Cleanup temp files
+            rm -f features.md fixes.md changes.md other.md
+          fi
+
+          # Add Docker information
+          echo "## Docker Images" >> changelog.md
+          echo "" >> changelog.md
+          echo "Multi-platform Docker images are available on GitHub Container Registry:" >> changelog.md
+          echo "" >> changelog.md
+          echo "\`\`\`bash" >> changelog.md
+          echo "# Pull specific version" >> changelog.md
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/$(echo ${{ github.repository }} | cut -d'/' -f2):${VERSION}" >> changelog.md
+          echo "" >> changelog.md
+          echo "# Pull latest" >> changelog.md
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/$(echo ${{ github.repository }} | cut -d'/' -f2):latest" >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          echo "" >> changelog.md
+          echo "**Supported Platforms:** linux/amd64, linux/arm64" >> changelog.md
+          echo "" >> changelog.md
+
+          # Add installation instructions
+          echo "## Installation" >> changelog.md
+          echo "" >> changelog.md
+          echo "### Using Docker (Recommended)" >> changelog.md
+          echo "" >> changelog.md
+          echo "\`\`\`bash" >> changelog.md
+          echo "docker run -p 3000:3000 \\" >> changelog.md
+          echo "  -e FIREFLY_BASE_URL=your-firefly-url \\" >> changelog.md
+          echo "  -e FIREFLY_TOKEN=your-token \\" >> changelog.md
+          echo "  ghcr.io/${{ github.repository_owner }}/$(echo ${{ github.repository }} | cut -d'/' -f2):${VERSION}" >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          echo "" >> changelog.md
+          echo "### Using Docker Compose" >> changelog.md
+          echo "" >> changelog.md
+          echo "See the [docker-compose.yml](https://github.com/${{ github.repository }}/blob/main/docker-compose.yml) in the repository." >> changelog.md
+          echo "" >> changelog.md
+          echo "### From Source" >> changelog.md
+          echo "" >> changelog.md
+          echo "\`\`\`bash" >> changelog.md
+          echo "git clone https://github.com/${{ github.repository }}.git" >> changelog.md
+          echo "cd $(echo ${{ github.repository }} | cut -d'/' -f2)" >> changelog.md
+          echo "git checkout v${VERSION}" >> changelog.md
+          echo "uv sync" >> changelog.md
+          echo "uv run lampyrid" >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          echo "" >> changelog.md
+
+          # Add documentation link
+          echo "## Documentation" >> changelog.md
+          echo "" >> changelog.md
+          echo "See the [README](https://github.com/${{ github.repository }}/blob/v${VERSION}/README.md) for detailed configuration and usage instructions." >> changelog.md
+
+          # Output changelog for use in release
+          echo "changelog-file=changelog.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.validate.outputs.version }}
+          name: Release v${{ needs.validate.outputs.version }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          echo "## Release v${VERSION} Created Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL:** https://github.com/${{ github.repository }}/releases/tag/v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Image:** \`ghcr.io/${{ github.repository_owner }}/$(echo ${{ github.repository }} | cut -d'/' -f2):${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Quick Start" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/$(echo ${{ github.repository }} | cut -d'/' -f2):${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
