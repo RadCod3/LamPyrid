@@ -255,6 +255,9 @@ class FireflyClient:
 		if req.end_date:
 			params['end'] = req.end_date.strftime('%Y-%m-%d')
 
+		if req.transaction_type:
+			params['type'] = req.transaction_type.value
+
 		if req.account_id is None:
 			raise ValueError('account_id must be provided for account transactions retrieval.')
 
