@@ -253,6 +253,10 @@ class CreateTransferRequest(BaseModel):
 
 
 class GetTransactionsRequest(BaseModel):
+	account_id: Optional[str] = Field(
+		None,
+		description='Filter transactions by specific account ID (asset, expense, or revenue)',
+	)
 	start_date: Optional[date] = Field(
 		None,
 		description='Start date for filtering transactions (YYYY-MM-DD format). If not specified, returns recent transactions.',
