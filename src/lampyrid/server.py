@@ -4,6 +4,8 @@ from fastmcp import FastMCP
 from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
+from fastmcp.utilities.types import Image
+from mcp.types import Icon
 
 from .clients.firefly import FireflyClient
 from .config import settings
@@ -32,7 +34,11 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 
 # Initialize FastMCP with optional authentication
 auth_provider = _create_auth_provider()
-mcp = FastMCP('lampyrid', auth=auth_provider)
+
+# Load favicon icon
+favicon_icon = Icon(src=Image(path='assets/favicon.png').to_data_uri())
+
+mcp = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
 _client = FireflyClient()
 
 # Configure logging
