@@ -10,6 +10,7 @@ from mcp.types import Icon
 from .clients.firefly import FireflyClient
 from .config import settings
 from .tools import register_all_tools
+from .utils import register_custom_routes
 
 
 def _create_auth_provider() -> Optional[AuthProvider]:
@@ -46,3 +47,6 @@ configure_logging(level='DEBUG')
 
 # Register all MCP tools
 register_all_tools(mcp, _client)
+
+# Register custom HTTP routes
+register_custom_routes(mcp)
