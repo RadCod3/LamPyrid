@@ -1,8 +1,6 @@
 services:
   lampyrid:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/radcod3/lampyrid:latest
     ports:
       - "3000:3000"
     env_file:
