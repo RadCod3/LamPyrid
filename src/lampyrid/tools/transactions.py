@@ -67,7 +67,10 @@ def register_tools(mcp: FastMCP, client: FireflyClient) -> None:
 	@mcp.tool(tags={'transactions', 'query'})
 	async def get_transactions(req: GetTransactionsRequest) -> TransactionListResponse:
 		"""Retrieve transaction history with flexible filtering and pagination. Essential for financial analysis, spending pattern review, and account activity monitoring."""
-		transaction_array = await client.get_transactions(req)
+		if req.account_id is not None:
+			transaction_array = await client.get_account_transactions(req)
+		else:
+			transaction_array = await client.get_transactions(req)
 
 		return TransactionListResponse.from_transaction_array(
 			transaction_array, current_page=req.page or 1, per_page=req.limit or 50

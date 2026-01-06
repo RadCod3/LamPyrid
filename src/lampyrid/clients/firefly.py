@@ -242,6 +242,29 @@ class FireflyClient:
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
 
+	async def get_account_transactions(self, req: GetTransactionsRequest) -> TransactionArray:
+		"""Get transactions for a specific account with optional time range filtering."""
+		params: Dict[str, Any] = {
+			'page': req.page,
+			'limit': req.limit,
+		}
+
+		if req.start_date:
+			params['start'] = req.start_date.strftime('%Y-%m-%d')
+
+		if req.end_date:
+			params['end'] = req.end_date.strftime('%Y-%m-%d')
+
+		if req.transaction_type:
+			params['type'] = req.transaction_type.value
+
+		if req.account_id is None:
+			raise ValueError('account_id must be provided for account transactions retrieval.')
+
+		r = await self._client.get(f'/api/v1/accounts/{req.account_id}/transactions', params=params)
+		r.raise_for_status()
+		return TransactionArray.model_validate(r.json())
+
 	async def get_transaction(self, req: GetTransactionRequest) -> Transaction:
 		"""Get a single transaction by ID."""
 		r = await self._client.get(f'/api/v1/transactions/{req.id}')

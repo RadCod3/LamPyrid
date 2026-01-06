@@ -253,6 +253,12 @@ class CreateTransferRequest(BaseModel):
 
 
 class GetTransactionsRequest(BaseModel):
+	account_id: Optional[str] = Field(
+		None,
+		description='Optional account ID to filter results. When provided, only transactions involving this '
+		'specific account (as source or destination) are returned. When omitted or None, '
+		'transactions for all accounts are returned (subject to other filters).',
+	)
 	start_date: Optional[date] = Field(
 		None,
 		description='Start date for filtering transactions (YYYY-MM-DD format). If not specified, returns recent transactions.',
