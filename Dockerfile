@@ -18,8 +18,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     UV_LINK_MODE=copy uv sync --frozen --no-install-project || \
     UV_LINK_MODE=copy uv sync --no-install-project
 
-# Copy application source code and README (required by pyproject.toml)
+# Copy application source code, assets, and README (required by pyproject.toml)
 COPY src/ ./src/
+COPY assets/ ./assets/
 COPY README.md ./
 
 # Install the project with optimizations

@@ -10,7 +10,7 @@ from mcp.types import Icon
 from .clients.firefly import FireflyClient
 from .config import settings
 from .tools import register_all_tools
-from .utils import register_custom_routes
+from .utils import get_assets_path, register_custom_routes
 
 
 def _create_auth_provider() -> Optional[AuthProvider]:
@@ -37,7 +37,7 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 auth_provider = _create_auth_provider()
 
 # Load favicon icon
-favicon_icon = Icon(src=Image(path='assets/favicon.png').to_data_uri())
+favicon_icon = Icon(src=Image(path=str(get_assets_path('favicon.png'))).to_data_uri())
 
 mcp = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
 _client = FireflyClient()

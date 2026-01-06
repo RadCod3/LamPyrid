@@ -12,10 +12,17 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 
 
+def get_project_root() -> Path:
+	return Path(__file__).parent.parent.parent
+
+
+def get_assets_path(filename: str) -> Path:
+	return get_project_root() / 'assets' / filename
+
+
 async def serve_favicon(request: Request):
 	"""Serve favicon.ico file at the root level."""
-
-	favicon_path = Path(__file__).parent.parent.parent / 'assets' / 'favicon.ico'
+	favicon_path = get_assets_path('favicon.ico')
 	if favicon_path.exists():
 		return FileResponse(favicon_path, media_type='image/x-icon')
 	return JSONResponse({'error': 'Not found'}, status_code=404)
