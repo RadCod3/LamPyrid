@@ -23,16 +23,19 @@ from ..models.lampyrid_models import (
 )
 
 
-def register_tools(mcp: FastMCP, client: FireflyClient) -> None:
+def create_budgets_server(client: FireflyClient) -> FastMCP:
 	"""
-	Register budget management tools with the FastMCP server.
+	Create a standalone FastMCP server for budget management tools.
 
 	Args:
-		mcp: The FastMCP server instance
 		client: The FireflyClient instance for API interactions
-	"""
 
-	@mcp.tool(tags={'budgets'})
+	Returns:
+		FastMCP server instance with budget management tools registered
+	"""
+	budgets_mcp = FastMCP('budgets')
+
+	@budgets_mcp.tool(tags={'budgets'})
 	async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
 		"""Retrieve your budgets for expense tracking and financial planning. Filter by active status to see current or all budgets."""
 		budget_array = await client.list_budgets(req)
@@ -43,22 +46,24 @@ def register_tools(mcp: FastMCP, client: FireflyClient) -> None:
 
 		return budgets
 
-	@mcp.tool(tags={'budgets'})
+	@budgets_mcp.tool(tags={'budgets'})
 	async def get_budget(req: GetBudgetRequest) -> Budget:
 		"""Retrieve detailed budget information including name, status, and notes. Use this to verify budget details before assigning transactions."""
 		return await client.get_budget(req)
 
-	@mcp.tool(tags={'budgets', 'analysis'})
+	@budgets_mcp.tool(tags={'budgets', 'analysis'})
 	async def get_budget_spending(req: GetBudgetSpendingRequest) -> BudgetSpending:
 		"""Analyze spending against a budget including amount spent, remaining budget, and percentage used. Essential for budget monitoring and overspending alerts."""
 		return await client.get_budget_spending(req)
 
-	@mcp.tool(tags={'budgets', 'analysis'})
+	@budgets_mcp.tool(tags={'budgets', 'analysis'})
 	async def get_budget_summary(req: GetBudgetSummaryRequest) -> BudgetSummary:
 		"""Comprehensive overview of all budget performance with totals and spending analysis. Perfect for monthly reviews and financial dashboards."""
 		return await client.get_budget_summary(req)
 
-	@mcp.tool(tags={'budgets', 'analysis'})
+	@budgets_mcp.tool(tags={'budgets', 'analysis'})
 	async def get_available_budget(req: GetAvailableBudgetRequest) -> AvailableBudget:
 		"""Check unallocated budget available for new budgets or unexpected expenses. Shows money set aside but not assigned to specific budgets."""
 		return await client.get_available_budget(req)
+
+	return budgets_mcp

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 from fastmcp import FastMCP
@@ -9,11 +10,11 @@ from mcp.types import Icon
 
 from .clients.firefly import FireflyClient
 from .config import settings
-from .tools import register_all_tools
+from .tools import compose_all_servers
 from .utils import get_assets_path, register_custom_routes
 
 
-def _create_auth_provider() -> Optional[AuthProvider]:
+def _create_auth_provider() :
 	"""
 	Create Google authentication provider if credentials are configured.
 
@@ -33,20 +34,38 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 	return None
 
 
-# Initialize FastMCP with optional authentication
-auth_provider = _create_auth_provider()
+def _initialize_server() -> FastMCP:
+	"""
+	Initialize and configure the FastMCP server with all domain servers.
 
-# Load favicon icon
-favicon_icon = Icon(src=Image(path=str(get_assets_path('favicon.png'))).to_data_uri())
+	This function:
+	1. Creates the main FastMCP server with authentication and icons
+	2. Composes domain-specific servers (accounts, transactions, budgets) using static composition
+	3. Registers custom HTTP routes
 
-mcp = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
-_client = FireflyClient()
+	Returns:
+		Fully configured FastMCP server instance
+	"""
+	# Initialize FastMCP with optional authentication
+	auth_provider = _create_auth_provider()
 
-# Configure logging
-configure_logging(level='DEBUG')
+	# Load favicon icon
+	favicon_icon = Icon(src=Image(path=str(get_assets_path('favicon.png'))).to_data_uri())
 
-# Register all MCP tools
-register_all_tools(mcp, _client)
+	server = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
+	client = FireflyClient()
 
-# Register custom HTTP routes
-register_custom_routes(mcp)
+	# Configure logging
+	configure_logging(level='DEBUG')
+
+	# Compose all domain servers using static composition (import_server)
+	asyncio.run(compose_all_servers(server, client))
+
+	# Register custom HTTP routes
+	register_custom_routes(server)
+
+	return server
+
+
+# Create the main MCP server instance
+mcp = _initialize_server()
