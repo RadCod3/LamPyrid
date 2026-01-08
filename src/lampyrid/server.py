@@ -1,8 +1,6 @@
 import asyncio
-from typing import Optional
 
 from fastmcp import FastMCP
-from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
 from fastmcp.utilities.types import Image
