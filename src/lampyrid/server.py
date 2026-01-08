@@ -1,6 +1,8 @@
 import asyncio
+from typing import Optional
 
 from fastmcp import FastMCP
+from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
 from fastmcp.utilities.types import Image
@@ -12,7 +14,7 @@ from .tools import compose_all_servers
 from .utils import get_assets_path, register_custom_routes
 
 
-def _create_auth_provider() :
+def _create_auth_provider() -> Optional[AuthProvider]:
 	"""
 	Create Google authentication provider if credentials are configured.
 
