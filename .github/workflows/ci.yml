@@ -56,9 +56,34 @@ jobs:
       - name: Test package installation
         run: uv pip install dist/*.whl
 
-      - name: Verify lampyrid command exists
+      - name: Test application startup
         run: |
-          uv run lampyrid --help || echo "Note: lampyrid --help may fail if it requires env vars"
+          # Start the server in background with dummy env vars
+          export FIREFLY_BASE_URL="https://demo.firefly-iii.org"
+          export FIREFLY_TOKEN="dummy_token_for_ci_testing"
+
+          # Run server in background and capture output
+          timeout 30s uv run lampyrid > startup.log 2>&1 &
+          PID=$!
+
+          # Wait for startup (max 20 seconds)
+          echo "Waiting for server to start..."
+          for i in {1..20}; do
+            if grep -q "Application startup complete" startup.log; then
+              echo "✓ Server started successfully!"
+              cat startup.log
+              kill $PID 2>/dev/null || true
+              exit 0
+            fi
+            sleep 1
+          done
+
+          # If we get here, startup failed
+          echo "✗ Server failed to start within timeout"
+          echo "=== Server output ==="
+          cat startup.log
+          kill $PID 2>/dev/null || true
+          exit 1
 
   docker-build-test:
     name: Docker Build Test
@@ -79,6 +104,32 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Test Docker image
+      - name: Test Docker container startup
         run: |
-          docker run --rm lampyrid:test --help || echo "Note: Container may require environment variables"
+          # Start container in background with dummy env vars
+          docker run -d --name lampyrid-test \
+            -e FIREFLY_BASE_URL="https://demo.firefly-iii.org" \
+            -e FIREFLY_TOKEN="dummy_token_for_ci_testing" \
+            lampyrid:test > /dev/null 2>&1
+
+          # Wait for startup (max 20 seconds)
+          echo "Waiting for container to start..."
+          for i in {1..20}; do
+            if docker logs lampyrid-test 2>&1 | grep -q "Application startup complete"; then
+              echo "✓ Container started successfully!"
+              echo "=== Container logs ==="
+              docker logs lampyrid-test 2>&1
+              docker stop lampyrid-test >/dev/null 2>&1
+              docker rm lampyrid-test >/dev/null 2>&1
+              exit 0
+            fi
+            sleep 1
+          done
+
+          # If we get here, startup failed
+          echo "✗ Container failed to start within timeout"
+          echo "=== Container logs ==="
+          docker logs lampyrid-test 2>&1
+          docker stop lampyrid-test >/dev/null 2>&1
+          docker rm lampyrid-test >/dev/null 2>&1
+          exit 1
