@@ -68,9 +68,9 @@ jobs:
           timeout 30s uv run lampyrid > startup.log 2>&1 &
           PID=$!
 
-          # Wait for startup (max 20 seconds)
+          # Wait for startup (max 30 seconds to match timeout)
           echo "Waiting for server to start..."
-          for i in {1..20}; do
+          for i in {1..30}; do
             if grep -q "Application startup complete" startup.log; then
               echo "✓ Server started successfully!"
               cat startup.log
@@ -110,6 +110,14 @@ jobs:
 
       - name: Test Docker container startup
         run: |
+          set -euo pipefail
+
+          # Setup cleanup trap
+          cleanup() {
+            docker rm -f lampyrid-test >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
           # Start container in background with dummy env vars
           echo "Starting container..."
           docker run -d --name lampyrid-test \
@@ -125,10 +133,17 @@ jobs:
               echo "✓ Container started successfully!"
               echo "=== Container logs ==="
               docker logs lampyrid-test 2>&1
-              docker stop lampyrid-test >/dev/null 2>&1
-              docker rm lampyrid-test >/dev/null 2>&1
               exit 0
             fi
+
+            # Early exit if container died
+            if ! docker ps -q --filter "name=lampyrid-test" | grep -q .; then
+              echo "✗ Container exited unexpectedly"
+              echo "=== Container logs ==="
+              docker logs lampyrid-test 2>&1
+              exit 1
+            fi
+
             sleep 1
           done
 
@@ -136,6 +151,4 @@ jobs:
           echo "✗ Container failed to start within timeout"
           echo "=== Container logs ==="
           docker logs lampyrid-test 2>&1
-          docker stop lampyrid-test >/dev/null 2>&1
-          docker rm lampyrid-test >/dev/null 2>&1
           exit 1
