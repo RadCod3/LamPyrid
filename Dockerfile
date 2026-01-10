@@ -1,4 +1,4 @@
-# Use Python 3.14 slim image for smaller footprint
+# Use Python 3.14 Alpine image with uv pre-installed for smaller footprint
 FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
 # Set working directory
