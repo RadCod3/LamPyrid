@@ -1,5 +1,5 @@
-# Use Python 3.13 slim image for smaller footprint
-FROM python:3.13-slim
+# Use Python 3.14 slim image for smaller footprint
+FROM python:3.14-slim
 
 # Install uv from official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
