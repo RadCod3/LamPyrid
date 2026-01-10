@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server providing comprehensive tools for interact
 
 ### Prerequisites
 
-- Python 3.13+
+- Python 3.14+
 - [uv](https://github.com/astral-sh/uv) package manager
 - Access to a Firefly III instance with API token
 

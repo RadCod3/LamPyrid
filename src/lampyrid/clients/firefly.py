@@ -190,7 +190,7 @@ class FireflyClient:
 		if req.category_name is not None:
 			update_kwargs['category_name'] = req.category_name
 
-		trx_split_update = TransactionSplitUpdate(**update_kwargs)  # type: ignore
+		trx_split_update = TransactionSplitUpdate(**update_kwargs)
 
 		trx_update = TransactionUpdate(
 			apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]

@@ -1,8 +1,5 @@
-# Use Python 3.13 slim image for smaller footprint
-FROM python:3.13-slim
-
-# Install uv from official image
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Use Python 3.14 Alpine image with uv pre-installed for smaller footprint
+FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
 # Set working directory
 WORKDIR /app
@@ -28,8 +25,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     UV_LINK_MODE=copy uv sync --frozen --compile-bytecode || \
     UV_LINK_MODE=copy uv sync --compile-bytecode
 
-# Create a non-root user for security
-RUN groupadd -r lampyrid && useradd -r -g lampyrid lampyrid
+# Create a non-root user for security (Alpine uses addgroup/adduser)
+RUN addgroup -S lampyrid && adduser -S -G lampyrid -h /home/lampyrid lampyrid
 
 # Create cache directory for uv and set permissions
 RUN mkdir -p /home/lampyrid/.cache/uv && chown -R lampyrid:lampyrid /home/lampyrid
