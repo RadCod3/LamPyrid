@@ -62,6 +62,7 @@ jobs:
           # Start the server in background with dummy env vars
           export FIREFLY_BASE_URL="https://demo.firefly-iii.org"
           export FIREFLY_TOKEN="dummy_token_for_ci_testing"
+          export MCP_TRANSPORT="http"
 
           # Run server in background and capture output
           timeout 30s uv run lampyrid > startup.log 2>&1 &
@@ -109,10 +110,12 @@ jobs:
       - name: Test Docker container startup
         run: |
           # Start container in background with dummy env vars
+          echo "Starting container..."
           docker run -d --name lampyrid-test \
             -e FIREFLY_BASE_URL="https://demo.firefly-iii.org" \
             -e FIREFLY_TOKEN="dummy_token_for_ci_testing" \
-            lampyrid:test > /dev/null 2>&1
+            -e MCP_TRANSPORT="http" \
+            lampyrid:test
 
           # Wait for startup (max 20 seconds)
           echo "Waiting for container to start..."
