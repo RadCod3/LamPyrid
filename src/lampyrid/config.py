@@ -1,6 +1,6 @@
 from pydantic import HttpUrl, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional, Self
+from typing import Optional, Self, Literal
 
 
 class Settings(BaseSettings):
@@ -20,6 +20,12 @@ class Settings(BaseSettings):
 	firefly_token: str = Field(
 		min_length=1,
 		description='Personal access token for Firefly III API authentication',
+	)
+
+	# Logging Configuration (Optional)
+	logging_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = Field(
+		default='INFO',
+		description='Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL',
 	)
 
 	# MCP Server Configuration (Optional - for transport settings)

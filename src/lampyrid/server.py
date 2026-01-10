@@ -56,7 +56,7 @@ def _initialize_server() -> FastMCP:
 	client = FireflyClient()
 
 	# Configure logging
-	configure_logging(level='DEBUG')
+	configure_logging(level=settings.logging_level)
 
 	# Compose all domain servers using static composition (import_server)
 	asyncio.run(compose_all_servers(server, client))
