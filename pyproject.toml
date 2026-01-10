@@ -15,8 +15,8 @@ lampyrid = "lampyrid.__main__:main"
 
 [dependency-groups]
 dev = [
-  "datamodel-code-generator>=0.32.0",
-  "ruff>=0.12.9",
+  "datamodel-code-generator>=0.52.0",
+  "ruff>=0.14.11",
 ]
 
 [build-system]
