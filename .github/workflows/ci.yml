@@ -59,14 +59,25 @@ jobs:
 
       - name: Test application startup
         run: |
+          set -euo pipefail
+
           # Start the server in background with dummy env vars
           export FIREFLY_BASE_URL="https://demo.firefly-iii.org"
           export FIREFLY_TOKEN="dummy_token_for_ci_testing"
           export MCP_TRANSPORT="http"
+          # Avoid log buffering when redirecting to a file
+          export PYTHONUNBUFFERED="1"
 
           # Run server in background and capture output
           timeout 30s uv run lampyrid > startup.log 2>&1 &
           PID=$!
+
+          cleanup() {
+            kill "$PID" 2>/dev/null || true
+            # Also terminate any child process spawned by timeout
+            pkill -TERM -P "$PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
 
           # Wait for startup (max 30 seconds to match timeout)
           echo "Waiting for server to start..."
@@ -74,9 +85,17 @@ jobs:
             if grep -q "Application startup complete" startup.log; then
               echo "✓ Server started successfully!"
               cat startup.log
-              kill $PID 2>/dev/null || true
               exit 0
             fi
+
+            # Abort early if process already exited
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "✗ Server process exited before completing startup"
+              echo "=== Server output ==="
+              cat startup.log || true
+              exit 1
+            fi
+
             sleep 1
           done
 
@@ -84,7 +103,6 @@ jobs:
           echo "✗ Server failed to start within timeout"
           echo "=== Server output ==="
           cat startup.log
-          kill $PID 2>/dev/null || true
           exit 1
 
   docker-build-test:
