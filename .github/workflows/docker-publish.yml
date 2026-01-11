@@ -61,13 +61,16 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        flavor: |
+          latest=false
         tags: |
           type=ref,event=branch
           type=ref,event=pr
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=edge,enable={{is_default_branch}}
+          type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
 
     - name: Build and push Docker image
       id: build
@@ -91,12 +94,12 @@ jobs:
         # Lowercase the image name (Docker registries require lowercase)
         IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
 
-        # Use the version tag if this is a tag push, otherwise use latest
+        # Use the version tag if this is a tag push, otherwise use edge
         if [[ "${{ github.ref }}" == refs/tags/* ]]; then
           TAG="${GITHUB_REF#refs/tags/}"
           SCAN_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:${TAG#v}"
         else
-          SCAN_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:latest"
+          SCAN_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:edge"
         fi
         echo "tag=$SCAN_TAG" >> $GITHUB_OUTPUT
         echo "Scanning image: $SCAN_TAG"
