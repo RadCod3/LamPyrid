@@ -1,29 +1,63 @@
 # LamPyrid
 
-A Model Context Protocol (MCP) server providing comprehensive tools for interacting with Firefly III personal finance software. LamPyrid enables automated personal finance workflows and analysis through 17+ MCP tools with support for account management, transaction operations, and budget management.
+A Model Context Protocol (MCP) server providing comprehensive tools for interacting with Firefly III personal finance software. LamPyrid enables automated personal finance workflows and analysis through 18 MCP tools with support for account management, transaction operations, and budget management.
 
 ## Features
 
 - **Comprehensive Account Management**: List, search, and retrieve account information across all Firefly III account types
 - **Transaction Operations**: Full CRUD operations for transactions with support for withdrawals, deposits, and transfers
+- **Bulk Operations**: Efficient bulk transaction creation and updates for high-volume workflows
 - **Budget Management**: Complete budget analysis with spending tracking, allocation, and summary reporting
+- **Docker Support**: Production-ready Docker images with multi-platform support (amd64/arm64)
 - **Type Safety**: Full type hints and Pydantic validation throughout the codebase
 - **Async Operations**: Non-blocking HTTP operations for optimal performance
 - **Robust Error Handling**: Comprehensive error handling across all API interactions
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Docker (Recommended)
+
+The fastest way to get started is using the published Docker image:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/radcod3/lampyrid:latest
+
+# Run with stdio mode (for Claude Desktop)
+docker run --rm -i \
+  -e MCP_TRANSPORT=stdio \
+  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
+  -e FIREFLY_TOKEN=your-api-token \
+  ghcr.io/radcod3/lampyrid:latest
+
+# Or use docker-compose
+cat > docker-compose.yml <<EOF
+services:
+  lampyrid:
+    image: ghcr.io/radcod3/lampyrid:latest
+    ports:
+      - "3000:3000"
+    environment:
+      FIREFLY_BASE_URL: https://your-firefly-instance.com
+      FIREFLY_TOKEN: your-api-token
+    restart: unless-stopped
+EOF
+docker-compose up -d
+```
+
+### Option 2: Local Installation
+
+#### Prerequisites
 
 - Python 3.14+
 - [uv](https://github.com/astral-sh/uv) package manager
 - Access to a Firefly III instance with API token
 
-### Installation
+#### Installation Steps
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/RadCod3/LamPyrid.git
 cd LamPyrid
 ```
 
@@ -53,7 +87,14 @@ LamPyrid uses environment variables for configuration:
 - `FIREFLY_BASE_URL`: URL of your Firefly III instance
 - `FIREFLY_TOKEN`: Personal access token for API authentication
 
-### Optional: Google OAuth Authentication
+### Server Configuration (Optional)
+
+- `MCP_TRANSPORT`: Transport protocol (stdio/http/sse, default: stdio)
+- `MCP_HOST`: Host binding for HTTP/SSE transports (default: 0.0.0.0)
+- `MCP_PORT`: Port binding for HTTP/SSE transports (default: 3000)
+- `LOGGING_LEVEL`: Logging verbosity (DEBUG/INFO/WARNING/ERROR/CRITICAL, default: INFO)
+
+### Google OAuth Authentication (Optional)
 
 For remote server deployments requiring authentication, you can enable Google OAuth:
 
@@ -169,22 +210,24 @@ After configuration, restart Claude Desktop. LamPyrid tools will be available fo
 
 ## Available MCP Tools
 
-### Account Management
+### Account Management (3 tools)
 - `list_accounts` - List accounts by type (asset, expense, revenue, etc.)
 - `search_accounts` - Search accounts by name with optional type filtering
 - `get_account` - Get detailed information for a single account
 
-### Transaction Management
+### Transaction Management (10 tools)
 - `get_transactions` - Retrieve transactions with time range and type filtering
 - `search_transactions` - Search transactions by description or text fields
 - `get_transaction` - Get detailed information for a single transaction
 - `create_withdrawal` - Create withdrawal transactions with budget allocation
 - `create_deposit` - Create deposit transactions
 - `create_transfer` - Create transfer transactions between accounts
+- `create_bulk_transactions` - Create multiple transactions efficiently in a single operation
+- `update_transaction` - Update existing transaction details (amount, description, accounts, budget, etc.)
+- `bulk_update_transactions` - Update multiple transactions efficiently in a single operation
 - `delete_transaction` - Delete transactions by ID
-- `update_transaction_budget` - Update or clear budget allocation for transactions
 
-### Budget Management
+### Budget Management (5 tools)
 - `list_budgets` - List all budgets with optional filtering
 - `get_budget` - Get detailed budget information
 - `get_budget_spending` - Analyze spending for specific budgets and periods
@@ -198,8 +241,8 @@ All tools include comprehensive error handling and return structured data optimi
 ### Setup Development Environment
 
 ```bash
-# Install with test dependencies
-uv sync --group test
+# Install dependencies
+uv sync
 
 # Format code
 uv run ruff format
@@ -207,80 +250,186 @@ uv run ruff format
 # Lint code
 uv run ruff check --fix
 
-# Run tests
-uv run pytest
+# Build Docker image locally
+docker build -t lampyrid:dev .
 
-# Run tests with coverage
-uv run pytest --cov=lampyrid --cov-report=term-missing
+# Run local development server
+uv run lampyrid
 ```
 
 ### Project Structure
 
 ```
 LamPyrid/
-+-- src/lampyrid/           # Main package
-|   +-- server.py          # FastMCP server with MCP tools
-|   +-- config.py          # Environment configuration
-|   +-- clients/
-|   |   \-- firefly.py     # Firefly III HTTP client
-|   \-- models/
-|       +-- firefly_models.py    # Auto-generated API models
-|       \-- lampyrid_models.py   # Simplified MCP models
-+-- tests/                 # Test suite
-|   +-- unit/             # Unit tests
-|   +-- integration/      # Integration tests
-|   \-- conftest.py       # Test fixtures
-\-- pyproject.toml        # Project configuration
+├── src/lampyrid/
+│   ├── __init__.py           # Package initialization
+│   ├── __main__.py           # Main entry point for MCP server
+│   ├── server.py             # FastMCP server initialization and tool composition
+│   ├── config.py             # Environment configuration
+│   ├── utils.py              # Custom HTTP routes (favicon, etc.)
+│   ├── clients/
+│   │   └── firefly.py        # HTTP client for Firefly III API
+│   ├── models/
+│   │   ├── firefly_models.py # Auto-generated Firefly III API models
+│   │   └── lampyrid_models.py# Simplified MCP interface models
+│   └── tools/
+│       ├── __init__.py       # Tool server composition coordinator
+│       ├── accounts.py       # Account management tools (3 tools)
+│       ├── transactions.py   # Transaction management tools (10 tools)
+│       └── budgets.py        # Budget management tools (5 tools)
+├── .github/workflows/        # CI/CD workflows
+├── assets/                   # Project assets
+├── Dockerfile                # Docker image definition
+├── docker-compose.yml        # Docker Compose configuration
+├── pyproject.toml            # Project configuration and dependencies
+└── README.md                 # Project documentation
 ```
-
-### Testing
-
-The project includes comprehensive test coverage:
-
-```bash
-# Run all tests
-uv run pytest
-
-# Run specific test categories
-uv run pytest tests/unit
-uv run pytest tests/integration
-
-# Run with coverage
-uv run pytest --cov=lampyrid
-
-# Run specific tests
-uv run pytest -k "test_account"
-```
-
-Test categories:
-- Unit tests (`@pytest.mark.unit`): Fast, isolated component tests
-- Integration tests (`@pytest.mark.integration`): End-to-end workflow tests with mocked APIs
 
 ## Architecture
 
-LamPyrid follows a clean layered architecture:
+LamPyrid follows a clean layered architecture with modular tool organization:
 
-- **Server Layer**: FastMCP server exposing MCP tools with comprehensive tagging
-- **Client Layer**: HTTP client for Firefly III API with full CRUD support
-- **Models Layer**: Type-safe data models with Pydantic validation
-- **Configuration**: Environment-based settings management
+- **Server Layer** (`server.py`): FastMCP server initialization, authentication setup, and tool registration orchestration
+- **Tools Layer** (`tools/`): Modular MCP tool definitions organized by domain
+  - `accounts.py`: Account management tools (3 tools)
+  - `transactions.py`: Transaction management tools (10 tools)
+  - `budgets.py`: Budget management tools (5 tools)
+- **Client Layer** (`clients/firefly.py`): HTTP client for Firefly III API with full CRUD support
+- **Models Layer**:
+  - `firefly_models.py`: Auto-generated Pydantic models from Firefly III OpenAPI spec
+  - `lampyrid_models.py`: Simplified models for MCP tool interfaces
+- **Configuration** (`config.py`): Environment-based settings using pydantic-settings
+
+### Tool Registration Pattern
+Tools are registered using FastMCP's native static composition pattern:
+- Each tool module exports a `create_*_server(client)` function that returns a standalone FastMCP instance
+- The `tools/__init__.py` module provides `compose_all_servers()` to coordinate composition
+- The `server.py` uses `mcp.import_server()` to compose all domain servers into the main server
+- This leverages FastMCP's built-in server composition while keeping modular organization
 
 The architecture enables easy extension and modification while maintaining type safety and comprehensive error handling throughout.
 
+## Docker Deployment
+
+LamPyrid provides production-ready Docker images published to GitHub Container Registry.
+
+### Available Images
+
+- **Latest**: `ghcr.io/radcod3/lampyrid:latest` (main branch)
+- **Versioned**: `ghcr.io/radcod3/lampyrid:0.2.0`, `ghcr.io/radcod3/lampyrid:0.2`, `ghcr.io/radcod3/lampyrid:0`
+- **Platforms**: linux/amd64, linux/arm64
+
+### Running with Docker
+
+```bash
+# Run in stdio mode (for Claude Desktop integration)
+docker run --rm -i \
+  -e MCP_TRANSPORT=stdio \
+  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
+  -e FIREFLY_TOKEN=your-api-token \
+  ghcr.io/radcod3/lampyrid:latest
+
+# Run in HTTP mode
+docker run -d \
+  -p 3000:3000 \
+  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
+  -e FIREFLY_TOKEN=your-api-token \
+  --name lampyrid \
+  ghcr.io/radcod3/lampyrid:latest
+```
+
+### Using Docker Compose
+
+```yaml
+services:
+  lampyrid:
+    image: ghcr.io/radcod3/lampyrid:latest
+    ports:
+      - "3000:3000"
+    environment:
+      FIREFLY_BASE_URL: https://your-firefly-instance.com
+      FIREFLY_TOKEN: your-api-token
+      # Optional: Configure transport and logging
+      MCP_TRANSPORT: http
+      LOGGING_LEVEL: INFO
+    restart: unless-stopped
+```
+
+### Building Custom Images
+
+```bash
+# Build locally
+docker build -t lampyrid:custom .
+
+# Build for specific platform
+docker buildx build --platform linux/amd64 -t lampyrid:custom .
+```
+
+## CI/CD and Releases
+
+LamPyrid uses GitHub Actions for continuous integration and deployment:
+
+### Automated Workflows
+
+- **CI Workflow**: Runs on all pull requests
+  - Code linting and formatting validation
+  - Package build verification
+  - Docker image build test
+
+- **Docker Publish Workflow**: Runs on main branch and version tags
+  - Multi-platform image builds (amd64/arm64)
+  - Security scanning with Trivy
+  - Publishes to ghcr.io with appropriate tags
+
+- **Release Workflow**: Runs on version tags (e.g., `v0.2.0`)
+  - Generates changelog from git commits
+  - Creates GitHub release with installation instructions
+  - Links to published Docker images
+
+### Creating a Release
+
+To create a new release:
+
+1. Merge all features to main via pull requests
+2. Create a release branch and update version in `pyproject.toml`
+3. Merge the version bump PR
+4. Create and push a version tag (e.g., `v0.2.0`)
+5. GitHub Actions automatically builds and publishes the release
+
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with appropriate tests
-4. Run the test suite and ensure all tests pass
-5. Submit a pull request
+Contributions are welcome! Please follow this workflow:
 
-Please ensure all code follows the project's style guidelines:
-- Use tabs for indentation
-- Single quotes for strings
-- 100 character line limit
-- Type hints for all functions
-- Comprehensive test coverage
+1. **Fork the repository**
+2. **Create a feature branch** from `main`:
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+3. **Make your changes** following the code style guidelines below
+4. **Test locally**:
+   ```bash
+   uv run ruff format
+   uv run ruff check --fix
+   uv run lampyrid  # Verify the server starts
+   ```
+5. **Commit your changes** with clear, descriptive messages
+6. **Push to your fork** and create a pull request
+
+### Code Style Guidelines
+
+- **Indentation**: Use tabs for indentation
+- **Quotes**: Single quotes for strings
+- **Line Length**: 100 character line limit
+- **Type Safety**: Type hints required for all functions and methods
+- **Async Operations**: Use async/await pattern for HTTP operations
+- **Documentation**: Include docstrings for all MCP tools and complex functions
+
+### CI/CD Process
+
+The main branch is protected with the following requirements:
+- All pull requests must pass CI checks (linting, formatting, Docker build)
+- GitHub Actions automatically run on all PRs
+- Docker images are published on version tags and main branch pushes
 
 ## License
 
