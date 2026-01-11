@@ -385,7 +385,14 @@ class SearchTransactionsRequest(BaseModel):
 			self.account_contains,
 			self.account_id,
 		]
-		if not any(field is not None for field in search_fields):
+		# Consider a field provided if: (a) it's not None and not a string, or
+		# (b) it's a string and not empty/whitespace-only
+		has_criteria = any(
+			(field is not None and not isinstance(field, str))
+			or (isinstance(field, str) and field.strip() != '')
+			for field in search_fields
+		)
+		if not has_criteria:
 			raise ValueError('At least one search criterion must be provided')
 		return self
 
