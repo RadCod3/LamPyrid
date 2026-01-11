@@ -88,6 +88,27 @@ class FireflyClient:
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
+	@staticmethod
+	def _sanitize_value(value: str) -> str:
+		"""Escape and optionally quote a search value for Firefly III query syntax.
+
+		Escapes backslashes and double quotes, then wraps the value in double quotes
+		if it contains whitespace or quote characters.
+
+		Args:
+			value: The raw search value
+
+		Returns:
+			Escaped and optionally quoted value safe for Firefly III queries
+		"""
+		# Escape backslashes first, then escape double quotes
+		escaped = value.replace('\\', '\\\\').replace('"', '\\"')
+
+		# Quote if contains whitespace or quote characters
+		if ' ' in value or '"' in value or "'" in value:
+			return f'"{escaped}"'
+		return escaped
+
 	async def search_transactions(self, req: SearchTransactionsRequest) -> TransactionArray:
 		"""Search transactions using structured filters or raw query string."""
 		# Build query string from structured fields
@@ -117,36 +138,19 @@ class FireflyClient:
 
 		# Content filters
 		if req.description_contains:
-			# Quote if contains spaces
-			desc = req.description_contains
-			if ' ' in desc:
-				query_parts.append(f'description_contains:"{desc}"')
-			else:
-				query_parts.append(f'description_contains:{desc}')
+			query_parts.append(
+				f'description_contains:{self._sanitize_value(req.description_contains)}'
+			)
 
 		# Metadata filters
 		if req.category:
-			# Quote if contains spaces
-			cat = req.category
-			if ' ' in cat:
-				query_parts.append(f'category_is:"{cat}"')
-			else:
-				query_parts.append(f'category_is:{cat}')
+			query_parts.append(f'category_is:{self._sanitize_value(req.category)}')
 		if req.budget:
-			# Quote if contains spaces
-			bud = req.budget
-			if ' ' in bud:
-				query_parts.append(f'budget_is:"{bud}"')
-			else:
-				query_parts.append(f'budget_is:{bud}')
+			query_parts.append(f'budget_is:{self._sanitize_value(req.budget)}')
 
 		# Account filters
 		if req.account_contains:
-			acc = req.account_contains
-			if ' ' in acc:
-				query_parts.append(f'account_contains:"{acc}"')
-			else:
-				query_parts.append(f'account_contains:{acc}')
+			query_parts.append(f'account_contains:{self._sanitize_value(req.account_contains)}')
 		if req.account_id is not None:
 			query_parts.append(f'account_id:{req.account_id}')
 
