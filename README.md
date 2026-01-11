@@ -315,7 +315,8 @@ LamPyrid provides production-ready Docker images published to GitHub Container R
 
 ### Available Images
 
-- **Latest**: `ghcr.io/radcod3/lampyrid:latest` (main branch)
+- **Latest Stable**: `ghcr.io/radcod3/lampyrid:latest` (latest release - recommended for production)
+- **Development**: `ghcr.io/radcod3/lampyrid:edge` (main branch - latest features, may be unstable)
 - **Versioned**: `ghcr.io/radcod3/lampyrid:0.2.0`, `ghcr.io/radcod3/lampyrid:0.2`, `ghcr.io/radcod3/lampyrid:0`
 - **Platforms**: linux/amd64, linux/arm64
 
