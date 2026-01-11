@@ -88,10 +88,77 @@ class FireflyClient:
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
+	@staticmethod
+	def _sanitize_value(value: str) -> str:
+		"""Escape and optionally quote a search value for Firefly III query syntax.
+
+		Escapes backslashes and double quotes, then wraps the value in double quotes
+		if it contains whitespace or quote characters.
+
+		Args:
+			value: The raw search value
+
+		Returns:
+			Escaped and optionally quoted value safe for Firefly III queries
+		"""
+		# Escape backslashes first, then escape double quotes
+		escaped = value.replace('\\', '\\\\').replace('"', '\\"')
+
+		# Quote if contains whitespace or quote characters
+		if ' ' in value or '"' in value or "'" in value:
+			return f'"{escaped}"'
+		return escaped
+
 	async def search_transactions(self, req: SearchTransactionsRequest) -> TransactionArray:
-		"""Search transactions by description or other text fields."""
+		"""Search transactions using structured filters or raw query string."""
+		# Build query string from structured fields
+		query_parts = []
+
+		# Add raw query if provided
+		if req.query:
+			query_parts.append(req.query)
+
+		# Transaction type and amount filters
+		if req.type:
+			query_parts.append(f'type:{req.type}')
+		if req.amount_equals is not None:
+			query_parts.append(f'amount:{req.amount_equals}')
+		if req.amount_more is not None:
+			query_parts.append(f'more:{req.amount_more}')
+		if req.amount_less is not None:
+			query_parts.append(f'less:{req.amount_less}')
+
+		# Date filters
+		if req.date_on:
+			query_parts.append(f'date_on:{req.date_on}')
+		if req.date_after:
+			query_parts.append(f'date_after:{req.date_after}')
+		if req.date_before:
+			query_parts.append(f'date_before:{req.date_before}')
+
+		# Content filters
+		if req.description_contains:
+			query_parts.append(
+				f'description_contains:{self._sanitize_value(req.description_contains)}'
+			)
+
+		# Metadata filters
+		if req.category:
+			query_parts.append(f'category_is:{self._sanitize_value(req.category)}')
+		if req.budget:
+			query_parts.append(f'budget_is:{self._sanitize_value(req.budget)}')
+
+		# Account filters
+		if req.account_contains:
+			query_parts.append(f'account_contains:{self._sanitize_value(req.account_contains)}')
+		if req.account_id is not None:
+			query_parts.append(f'account_id:{req.account_id}')
+
+		# Combine all query parts with spaces (AND logic)
+		final_query = ' '.join(query_parts)
+
 		params: Dict[str, Any] = {
-			'query': req.query,
+			'query': final_query,
 			'page': req.page,
 			'limit': req.limit,
 		}

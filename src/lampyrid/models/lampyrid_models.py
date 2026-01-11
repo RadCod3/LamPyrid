@@ -1,8 +1,8 @@
 from datetime import date, datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .firefly_models import (
 	AccountRead,
@@ -282,18 +282,119 @@ class GetTransactionsRequest(BaseModel):
 
 
 class SearchTransactionsRequest(BaseModel):
-	query: str = Field(
-		...,
-		description='Text to search for in transaction descriptions, account names, and other transaction fields',
+	query: str | None = Field(
+		None,
+		description='Free-text search or raw Firefly III query string. Can be combined with structured filters below.',
 	)
-	page: Optional[int] = Field(
+
+	# Transaction type and amount filters
+	type: Literal['withdrawal', 'deposit', 'transfer'] | None = Field(
+		None,
+		description='Transaction type to filter by',
+		examples=['withdrawal', 'deposit', 'transfer'],
+	)
+	amount_equals: float | None = Field(
+		None,
+		description='Exact amount to match',
+		examples=[123.45],
+	)
+	amount_more: float | None = Field(
+		None,
+		description='Minimum amount (inclusive)',
+		examples=[100.00],
+	)
+	amount_less: float | None = Field(
+		None,
+		description='Maximum amount (inclusive)',
+		examples=[50.00],
+	)
+
+	# Date filters
+	date_on: date | None = Field(
+		None,
+		description='Exact date match in YYYY-MM-DD format',
+		examples=['2024-01-15'],
+	)
+	date_after: date | None = Field(
+		None,
+		description='From date (inclusive) in YYYY-MM-DD format',
+		examples=['2024-01-01'],
+	)
+	date_before: date | None = Field(
+		None,
+		description='Until date (inclusive) in YYYY-MM-DD format',
+		examples=['2024-12-31'],
+	)
+
+	# Content filters
+	description_contains: str | None = Field(
+		None,
+		description='Text to search for in transaction descriptions',
+		examples=['groceries', 'coffee'],
+	)
+
+	# Metadata filters
+	category: str | None = Field(
+		None,
+		description='Category name to filter by (exact match)',
+		examples=['Food', 'Transportation'],
+	)
+	budget: str | None = Field(
+		None,
+		description='Budget name to filter by (exact match)',
+		examples=['Groceries', 'Dining Out'],
+	)
+
+	# Account filters
+	account_contains: str | None = Field(
+		None,
+		description='Text to search for in any account name (source or destination)',
+		examples=['checking', 'savings'],
+	)
+	account_id: str | None = Field(
+		None,
+		description='Account ID to filter by (matches source or destination account)',
+		examples=['123'],
+	)
+
+	# Pagination
+	page: int | None = Field(
 		1,
 		description='Page number to retrieve (1-based). Use for browsing large result sets.',
 		ge=1,
 	)
-	limit: Optional[int] = Field(
+	limit: int | None = Field(
 		50, description='Maximum number of transactions to return per page (1-500)', ge=1, le=500
 	)
+
+	@model_validator(mode='after')
+	def validate_search_criteria(self):
+		"""Ensure at least one search criterion is provided."""
+		search_fields = [
+			self.query,
+			self.type,
+			self.amount_equals,
+			self.amount_more,
+			self.amount_less,
+			self.date_on,
+			self.date_after,
+			self.date_before,
+			self.description_contains,
+			self.category,
+			self.budget,
+			self.account_contains,
+			self.account_id,
+		]
+		# Consider a field provided if: (a) it's not None and not a string, or
+		# (b) it's a string and not empty/whitespace-only
+		has_criteria = any(
+			(field is not None and not isinstance(field, str))
+			or (isinstance(field, str) and field.strip() != '')
+			for field in search_fields
+		)
+		if not has_criteria:
+			raise ValueError('At least one search criterion must be provided')
+		return self
 
 
 class DeleteTransactionRequest(BaseModel):

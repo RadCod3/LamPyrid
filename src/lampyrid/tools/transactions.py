@@ -81,7 +81,7 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
 
 	@transactions_mcp.tool(tags={'transactions', 'query'})
 	async def search_transactions(req: SearchTransactionsRequest) -> TransactionListResponse:
-		"""Find transactions by searching text content. Perfect for locating specific purchases, payments, or merchants by description."""
+		"""Search transactions with powerful filtering options. Supports free-text search, type filtering (withdrawal/deposit/transfer), amount ranges, date ranges, categories, budgets, and account matching. All filters combine with AND logic for precise results."""
 		transaction_array = await client.search_transactions(req)
 
 		return TransactionListResponse.from_transaction_array(
