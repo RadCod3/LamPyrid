@@ -30,3 +30,8 @@ line-length = 100
 quote-style = "single"
 indent-style = "tab"
 docstring-code-format = true
+
+[tool.datamodel-codegen]
+input = "firefly-iii-6.4.14-v1.yaml"
+output = "src/lampyrid/models/firefly_models.py"
+output-model-type = "pydantic_v2.BaseModel"
