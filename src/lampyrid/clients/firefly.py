@@ -387,7 +387,6 @@ class FireflyClient:
 
 		r = await self._client.get('/api/v1/available-budgets', params=params)
 		r.raise_for_status()
-		print(r.json())
 		available_array = AvailableBudgetArray.model_validate(r.json())
 
 		# Parse the available budget data
