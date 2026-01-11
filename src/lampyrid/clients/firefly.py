@@ -280,14 +280,12 @@ class FireflyClient:
 
 	async def list_budgets(self, req: ListBudgetsRequest) -> BudgetArray:
 		"""List all budgets."""
-		params: Dict[str, Any] = {}
-
-		if req.active is not None:
-			params['active'] = req.active
-
-		r = await self._client.get('/api/v1/budgets', params=params)
+		r = await self._client.get('/api/v1/budgets')
 		r.raise_for_status()
-		return BudgetArray.model_validate(r.json())
+		budget_array = BudgetArray.model_validate(r.json())
+		if req.active is not None:
+			budget_array.data = [x for x in budget_array.data if x.attributes.active == req.active]
+		return budget_array
 
 	async def get_budget(self, req: GetBudgetRequest) -> Budget:
 		"""Get a single budget by ID."""
@@ -320,13 +318,16 @@ class FireflyClient:
 
 		# Calculate spending from limits data
 		spent = 0.0
-		budgeted = None
+		budgeted = 0.0
 
 		for limit in limits_array.data:
-			spent += abs(float(limit.attributes.spent)) if limit.attributes.spent else 0.0
-			if budgeted is None:
-				budgeted = float(limit.attributes.amount)
-			else:
+			if limit.attributes.spent:
+				for spent_entry in limit.attributes.spent:
+					if spent_entry.sum:
+						spent += abs(float(spent_entry.sum))
+
+			# amount is still a string field
+			if limit.attributes.amount:
 				budgeted += float(limit.attributes.amount)
 
 		remaining = (budgeted - spent) if budgeted is not None else None
@@ -386,6 +387,7 @@ class FireflyClient:
 
 		r = await self._client.get('/api/v1/available-budgets', params=params)
 		r.raise_for_status()
+		print(r.json())
 		available_array = AvailableBudgetArray.model_validate(r.json())
 
 		# Parse the available budget data
