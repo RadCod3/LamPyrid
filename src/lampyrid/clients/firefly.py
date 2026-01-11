@@ -89,9 +89,72 @@ class FireflyClient:
 		return AccountArray.model_validate(r.json())
 
 	async def search_transactions(self, req: SearchTransactionsRequest) -> TransactionArray:
-		"""Search transactions by description or other text fields."""
+		"""Search transactions using structured filters or raw query string."""
+		# Build query string from structured fields
+		query_parts = []
+
+		# Add raw query if provided
+		if req.query:
+			query_parts.append(req.query)
+
+		# Transaction type and amount filters
+		if req.type:
+			query_parts.append(f'type:{req.type}')
+		if req.amount_equals is not None:
+			query_parts.append(f'amount:{req.amount_equals}')
+		if req.amount_more is not None:
+			query_parts.append(f'more:{req.amount_more}')
+		if req.amount_less is not None:
+			query_parts.append(f'less:{req.amount_less}')
+
+		# Date filters
+		if req.date_on:
+			query_parts.append(f'date_on:{req.date_on}')
+		if req.date_after:
+			query_parts.append(f'date_after:{req.date_after}')
+		if req.date_before:
+			query_parts.append(f'date_before:{req.date_before}')
+
+		# Content filters
+		if req.description_contains:
+			# Quote if contains spaces
+			desc = req.description_contains
+			if ' ' in desc:
+				query_parts.append(f'description_contains:"{desc}"')
+			else:
+				query_parts.append(f'description_contains:{desc}')
+
+		# Metadata filters
+		if req.category:
+			# Quote if contains spaces
+			cat = req.category
+			if ' ' in cat:
+				query_parts.append(f'category_is:"{cat}"')
+			else:
+				query_parts.append(f'category_is:{cat}')
+		if req.budget:
+			# Quote if contains spaces
+			bud = req.budget
+			if ' ' in bud:
+				query_parts.append(f'budget_is:"{bud}"')
+			else:
+				query_parts.append(f'budget_is:{bud}')
+
+		# Account filters
+		if req.account_contains:
+			acc = req.account_contains
+			if ' ' in acc:
+				query_parts.append(f'account_contains:"{acc}"')
+			else:
+				query_parts.append(f'account_contains:{acc}')
+		if req.account_id is not None:
+			query_parts.append(f'account_id:{req.account_id}')
+
+		# Combine all query parts with spaces (AND logic)
+		final_query = ' '.join(query_parts)
+
 		params: Dict[str, Any] = {
-			'query': req.query,
+			'query': final_query,
 			'page': req.page,
 			'limit': req.limit,
 		}
