@@ -351,10 +351,10 @@ class SearchTransactionsRequest(BaseModel):
 		description='Text to search for in any account name (source or destination)',
 		examples=['checking', 'savings'],
 	)
-	account_id: int | None = Field(
+	account_id: str | None = Field(
 		None,
 		description='Account ID to filter by (matches source or destination account)',
-		examples=[123],
+		examples=['123'],
 	)
 
 	# Pagination
