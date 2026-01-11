@@ -259,7 +259,7 @@ uv run lampyrid
 
 ### Project Structure
 
-```
+```text
 LamPyrid/
 ├── src/lampyrid/
 │   ├── __init__.py           # Package initialization
