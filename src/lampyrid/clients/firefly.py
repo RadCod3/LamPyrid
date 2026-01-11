@@ -318,7 +318,7 @@ class FireflyClient:
 
 		# Calculate spending from limits data
 		spent = 0.0
-		budgeted = 0.0
+		budgeted = None
 
 		for limit in limits_array.data:
 			if limit.attributes.spent:
@@ -328,6 +328,8 @@ class FireflyClient:
 
 			# amount is still a string field
 			if limit.attributes.amount:
+				if budgeted is None:
+					budgeted = 0.0
 				budgeted += float(limit.attributes.amount)
 
 		remaining = (budgeted - spent) if budgeted is not None else None
