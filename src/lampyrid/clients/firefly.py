@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List
 
 import httpx
@@ -45,6 +46,8 @@ from ..models.lampyrid_models import (
 	UpdateTransactionRequest,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class FireflyClient:
 	def __init__(self) -> None:
@@ -59,16 +62,43 @@ class FireflyClient:
 			timeout=30.0,
 		)
 
+	def _serialize_model(self, model: Any, exclude_unset: bool = False) -> Dict[str, Any]:
+		"""Serialize a Pydantic model to dict, excluding None values by default.
+
+		Firefly III API rejects None values for many fields, so we exclude them.
+		Use exclude_unset=True for update operations to only send changed fields.
+		"""
+		return model.model_dump(mode='json', exclude_none=True, exclude_unset=exclude_unset)
+
+	def _handle_api_error(
+		self, response: httpx.Response, payload: Dict[str, Any] | None = None
+	) -> None:
+		"""Log detailed error information for API errors.
+
+		Args:
+			response: The HTTP response object
+			payload: The request payload that was sent (optional, for POST/PUT requests)
+		"""
+		if response.status_code >= 400:
+			logger.error(
+				f'Firefly III API error ({response.status_code}): {response.text}',
+			)
+			if payload:
+				logger.error(f'Request payload: {payload}')
+			logger.error(f'Request URL: {response.request.url}')
+
 	async def list_accounts(
 		self, page: int = 1, type: AccountTypeFilter = AccountTypeFilter.all
 	) -> AccountArray:
 		r = await self._client.get('/api/v1/accounts', params={'page': page, 'type': type.value})
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
 	async def get_account(self, req: GetAccountRequest) -> Account:
 		"""Get a single account by ID."""
 		r = await self._client.get(f'/api/v1/accounts/{req.id}')
+		self._handle_api_error(r)
 		r.raise_for_status()
 		account_single = AccountSingle.model_validate(r.json())
 		return Account.from_account_read(account_single.data)
@@ -84,7 +114,7 @@ class FireflyClient:
 				'page': 1,
 			},
 		)
-
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
 
@@ -164,6 +194,7 @@ class FireflyClient:
 		}
 
 		r = await self._client.get('/api/v1/search/transactions', params=params)
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
 
@@ -179,7 +210,9 @@ class FireflyClient:
 			budget_name=withdrawal.budget_name,
 		)
 		trx_store = TransactionStore(transactions=[trx])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
+		payload = self._serialize_model(trx_store)
+		r = await self._client.post('/api/v1/transactions', json=payload)
+		self._handle_api_error(r, payload)
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
@@ -194,7 +227,9 @@ class FireflyClient:
 			destination_id=deposit.destination_id,
 		)
 		trx_store = TransactionStore(transactions=[trx])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
+		payload = self._serialize_model(trx_store)
+		r = await self._client.post('/api/v1/transactions', json=payload)
+		self._handle_api_error(r, payload)
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
@@ -209,7 +244,9 @@ class FireflyClient:
 			destination_id=transfer.destination_id,
 		)
 		trx_store = TransactionStore(transactions=[trx])
-		r = await self._client.post('/api/v1/transactions', json=trx_store.model_dump(mode='json'))
+		payload = self._serialize_model(trx_store)
+		r = await self._client.post('/api/v1/transactions', json=payload)
+		self._handle_api_error(r, payload)
 		r.raise_for_status()
 		res = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(res)
@@ -228,9 +265,9 @@ class FireflyClient:
 				fire_webhooks=True,
 				error_if_duplicate_hash=False,
 			)
-			r = await self._client.post(
-				'/api/v1/transactions', json=trx_store.model_dump(mode='json')
-			)
+			payload = self._serialize_model(trx_store)
+			r = await self._client.post('/api/v1/transactions', json=payload)
+			self._handle_api_error(r, payload)
 			r.raise_for_status()
 			res = TransactionSingle.model_validate(r.json())
 			created_transactions.append(Transaction.from_transaction_single(res))
@@ -263,10 +300,9 @@ class FireflyClient:
 			apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
 		)
 
-		r = await self._client.put(
-			f'/api/v1/transactions/{req.transaction_id}',
-			json=trx_update.model_dump(mode='json', exclude_unset=True),
-		)
+		payload = self._serialize_model(trx_update, exclude_unset=True)
+		r = await self._client.put(f'/api/v1/transactions/{req.transaction_id}', json=payload)
+		self._handle_api_error(r, payload)
 		r.raise_for_status()
 		transaction_single = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(transaction_single)
@@ -306,6 +342,7 @@ class FireflyClient:
 			params['type'] = req.transaction_type.value
 
 		r = await self._client.get('/api/v1/transactions', params=params)
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
 
@@ -329,12 +366,14 @@ class FireflyClient:
 			raise ValueError('account_id must be provided for account transactions retrieval.')
 
 		r = await self._client.get(f'/api/v1/accounts/{req.account_id}/transactions', params=params)
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return TransactionArray.model_validate(r.json())
 
 	async def get_transaction(self, req: GetTransactionRequest) -> Transaction:
 		"""Get a single transaction by ID."""
 		r = await self._client.get(f'/api/v1/transactions/{req.id}')
+		self._handle_api_error(r)
 		r.raise_for_status()
 		transaction_single = TransactionSingle.model_validate(r.json())
 		return Transaction.from_transaction_single(transaction_single)
@@ -342,12 +381,14 @@ class FireflyClient:
 	async def delete_transaction(self, req: DeleteTransactionRequest) -> bool:
 		"""Delete a transaction by ID."""
 		r = await self._client.delete(f'/api/v1/transactions/{req.id}')
+		self._handle_api_error(r)
 		r.raise_for_status()
 		return r.status_code == 204
 
 	async def list_budgets(self, req: ListBudgetsRequest) -> BudgetArray:
 		"""List all budgets."""
 		r = await self._client.get('/api/v1/budgets')
+		self._handle_api_error(r)
 		r.raise_for_status()
 		budget_array = BudgetArray.model_validate(r.json())
 		if req.active is not None:
@@ -357,6 +398,7 @@ class FireflyClient:
 	async def get_budget(self, req: GetBudgetRequest) -> Budget:
 		"""Get a single budget by ID."""
 		r = await self._client.get(f'/api/v1/budgets/{req.id}')
+		self._handle_api_error(r)
 		r.raise_for_status()
 		budget_single = BudgetSingle.model_validate(r.json())
 		return Budget.from_budget_read(budget_single.data)
@@ -372,6 +414,7 @@ class FireflyClient:
 
 		# Get budget info first
 		budget_r = await self._client.get(f'/api/v1/budgets/{req.budget_id}')
+		self._handle_api_error(budget_r)
 		budget_r.raise_for_status()
 		budget_single = BudgetSingle.model_validate(budget_r.json())
 		budget_name = budget_single.data.attributes.name
@@ -380,6 +423,7 @@ class FireflyClient:
 		spending_r = await self._client.get(
 			f'/api/v1/budgets/{req.budget_id}/limits', params=params
 		)
+		self._handle_api_error(spending_r)
 		spending_r.raise_for_status()
 		limits_array = BudgetLimitArray.model_validate(spending_r.json())
 
@@ -415,6 +459,7 @@ class FireflyClient:
 		"""Get summary of all budgets with spending information."""
 		# Get all budgets
 		budgets_r = await self._client.get('/api/v1/budgets')
+		self._handle_api_error(budgets_r)
 		budgets_r.raise_for_status()
 		budgets_array = BudgetArray.model_validate(budgets_r.json())
 
@@ -455,6 +500,7 @@ class FireflyClient:
 			params['end'] = req.end_date.strftime('%Y-%m-%d')
 
 		r = await self._client.get('/api/v1/available-budgets', params=params)
+		self._handle_api_error(r)
 		r.raise_for_status()
 		available_array = AvailableBudgetArray.model_validate(r.json())
 

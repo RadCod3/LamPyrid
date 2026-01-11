@@ -167,7 +167,9 @@ class ListAccountRequest(BaseModel):
 
 class SearchAccountRequest(BaseModel):
 	query: str = Field(
-		..., description='Text to search for in account names (supports partial matching)'
+		...,
+		description='Text to search for in account names (supports partial matching)',
+		min_length=1,
 	)
 	type: AccountTypeFilter = Field(
 		AccountTypeFilter.all,
