@@ -7,25 +7,23 @@ FROM ghcr.io/astral-sh/uv:python3.14-alpine AS builder
 WORKDIR /app
 
 # Copy dependency files first for better layer caching
-COPY pyproject.toml ./
-# Copy uv.lock if it exists (optional for now)
-COPY uv.loc[k] ./
+COPY pyproject.toml uv.lock ./
+
+# Set environment variables for UV optimizations
+ENV UV_LINK_MODE=copy
+ENV UV_COMPILE_BYTECODE=1
 
 # Install dependencies with cache mount optimization
-# Use UV_LINK_MODE=copy for compatibility with cache mounts
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --no-dev --no-install-project || \
-    UV_LINK_MODE=copy uv sync --no-dev --no-install-project
+    uv sync --locked --no-dev --no-editable --no-install-project
 
-# Copy application source code, assets, and README (required by pyproject.toml)
+# Copy application source code and README (required by pyproject.toml)
 COPY src/ ./src/
-COPY assets/ ./assets/
 COPY README.md ./
 
 # Install the project with optimizations
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --no-dev --compile-bytecode || \
-    UV_LINK_MODE=copy uv sync --no-dev --compile-bytecode
+    uv sync --locked --no-dev --no-editable
 
 # ============================================================================
 # Runtime Stage: Minimal production image
@@ -35,12 +33,8 @@ FROM python:3.14-alpine AS runtime
 # Set working directory
 WORKDIR /app
 
-# Copy the virtual environment from builder
+# Copy only the virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
-
-# Copy application source code and assets
-COPY --from=builder /app/src /app/src
-COPY --from=builder /app/assets /app/assets
 
 # Create a non-root user for security (Alpine uses addgroup/adduser)
 RUN addgroup -S lampyrid && adduser -S -G lampyrid -h /home/lampyrid lampyrid
