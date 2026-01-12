@@ -32,6 +32,9 @@ COPY README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
+# Create data directory for OAuth token storage
+RUN mkdir -p /app/data/oauth
+
 # ============================================================================
 # Runtime Stage: Minimal distroless image
 # ============================================================================
@@ -45,6 +48,9 @@ WORKDIR /app
 
 # Copy only the virtual environment from builder
 COPY --from=builder --chown=nonroot:nonroot /app/.venv /app/.venv
+
+# Copy data directory structure from builder (for OAuth token storage)
+COPY --from=builder --chown=nonroot:nonroot /app/data /app/data
 
 # Set up the virtual environment in PATH
 ENV PATH="/app/.venv/bin:$PATH"
