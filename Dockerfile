@@ -1,35 +1,50 @@
-# Use Python 3.14 Alpine image with uv pre-installed for smaller footprint
-FROM ghcr.io/astral-sh/uv:python3.14-alpine
+# ============================================================================
+# Builder Stage: Install dependencies and build the project
+# ============================================================================
+FROM ghcr.io/astral-sh/uv:bookworm-slim AS builder
+
+# Set environment variables for UV optimizations
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+
+# Configure Python directory for consistency and use managed Python only
+ENV UV_PYTHON_INSTALL_DIR=/python
+ENV UV_PYTHON_PREFERENCE=only-managed
+
+# Install Python before the project for better caching
+RUN uv python install 3.14
 
 # Set working directory
 WORKDIR /app
 
 # Copy dependency files first for better layer caching
-COPY pyproject.toml ./
-# Copy uv.lock if it exists (optional for now)
-COPY uv.loc[k] ./
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies with cache mount optimization
-# Use UV_LINK_MODE=copy for compatibility with cache mounts
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --no-install-project || \
-    UV_LINK_MODE=copy uv sync --no-install-project
+    uv sync --locked --no-dev --no-editable --no-install-project
 
-# Copy application source code, assets, and README (required by pyproject.toml)
+# Copy application source code and README (required by pyproject.toml)
 COPY src/ ./src/
-COPY assets/ ./assets/
 COPY README.md ./
 
 # Install the project with optimizations
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --compile-bytecode || \
-    UV_LINK_MODE=copy uv sync --compile-bytecode
+    uv sync --locked --no-dev --no-editable
 
-# Create a non-root user for security (Alpine uses addgroup/adduser)
-RUN addgroup -S lampyrid && adduser -S -G lampyrid -h /home/lampyrid lampyrid
+# ============================================================================
+# Runtime Stage: Minimal distroless image
+# ============================================================================
+FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
 
-# Create cache directory for uv and set permissions
-RUN mkdir -p /home/lampyrid/.cache/uv && chown -R lampyrid:lampyrid /home/lampyrid
+# Copy the Python installation from builder
+COPY --from=builder --chown=nonroot:nonroot /python /python
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the virtual environment from builder
+COPY --from=builder --chown=nonroot:nonroot /app/.venv /app/.venv
 
 # Set up the virtual environment in PATH
 ENV PATH="/app/.venv/bin:$PATH"
@@ -39,18 +54,13 @@ ENV MCP_TRANSPORT=http
 ENV MCP_HOST=0.0.0.0
 ENV MCP_PORT=3000
 
-# Change ownership of the app directory
-RUN chown -R lampyrid:lampyrid /app
-
-# Switch to non-root user
-USER lampyrid
-
 # Expose the MCP server port
 EXPOSE 3000
 
 # Health check to verify the server can start
+# Note: Distroless has no shell, so use exec form
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD uv run python -c "import lampyrid; print('Server can import successfully')" || exit 1
+    CMD ["python", "-c", "import lampyrid; print('Server can import successfully')"]
 
 # Default command to run the MCP server in HTTP mode
-CMD ["uv", "run", "lampyrid"]
+CMD ["lampyrid"]
