@@ -5,6 +5,7 @@ This module provides custom HTTP route handlers that are served at the root leve
 alongside the MCP protocol endpoints.
 """
 
+from importlib.resources import files
 from pathlib import Path
 
 from fastmcp import FastMCP
@@ -12,12 +13,10 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 
 
-def get_project_root() -> Path:
-	return Path(__file__).parent.parent.parent
-
-
 def get_assets_path(filename: str) -> Path:
-	return get_project_root() / 'assets' / filename
+	"""Get path to an asset file bundled with the package."""
+	asset_resource = files('lampyrid').joinpath('assets', filename)
+	return Path(str(asset_resource))
 
 
 async def serve_favicon(request: Request):
