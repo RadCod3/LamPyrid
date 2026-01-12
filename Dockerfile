@@ -12,8 +12,8 @@ COPY uv.loc[k] ./
 # Install dependencies with cache mount optimization
 # Use UV_LINK_MODE=copy for compatibility with cache mounts
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --no-install-project || \
-    UV_LINK_MODE=copy uv sync --no-install-project
+    UV_LINK_MODE=copy uv sync --frozen --no-dev --no-install-project || \
+    UV_LINK_MODE=copy uv sync --no-dev --no-install-project
 
 # Copy application source code, assets, and README (required by pyproject.toml)
 COPY src/ ./src/
@@ -22,8 +22,8 @@ COPY README.md ./
 
 # Install the project with optimizations
 RUN --mount=type=cache,target=/root/.cache/uv \
-    UV_LINK_MODE=copy uv sync --frozen --compile-bytecode || \
-    UV_LINK_MODE=copy uv sync --compile-bytecode
+    UV_LINK_MODE=copy uv sync --frozen --no-dev --compile-bytecode || \
+    UV_LINK_MODE=copy uv sync --no-dev --compile-bytecode
 
 # Create a non-root user for security (Alpine uses addgroup/adduser)
 RUN addgroup -S lampyrid && adduser -S -G lampyrid -h /home/lampyrid lampyrid
@@ -50,7 +50,7 @@ EXPOSE 3000
 
 # Health check to verify the server can start
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD uv run python -c "import lampyrid; print('Server can import successfully')" || exit 1
+    CMD python -c "import lampyrid; print('Server can import successfully')" || exit 1
 
 # Default command to run the MCP server in HTTP mode
-CMD ["uv", "run", "lampyrid"]
+CMD ["lampyrid"]
