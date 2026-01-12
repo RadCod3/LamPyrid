@@ -48,7 +48,7 @@ EOF
 docker-compose up -d
 ```
 
-**Note on Volume Permissions**: If you encounter permission errors when the container tries to write to the OAuth storage directory, you may need to set the correct ownership:
+**Note on Volume Permissions**: If you encounter permission errors like `sqlite3.OperationalError: unable to open database file` when the container tries to write to the OAuth storage directory, you may need to set the correct ownership:
 
 ```bash
 sudo chown -R 65532:65532 ./data/oauth
@@ -397,7 +397,7 @@ services:
 
 When using Docker with OAuth token persistence, you may encounter permission issues where the container cannot write to the mounted volume at `./data/oauth`.
 
-**The Issue**: The container runs as the `nonroot` user (UID 65532) for security. When Docker creates the volume mount from the host, it may have root:root ownership, preventing the nonroot user from writing to the directory.
+**The Issue**: The container runs as the `nonroot` user (UID 65532) for security. When Docker creates the volume mount from the host (typically when the host directory doesn't exist before the container starts), it may have root:root ownership, preventing the nonroot user from writing to the directory.
 
 **Symptoms**: If you see errors like `sqlite3.OperationalError: unable to open database file` or other permission-related errors in the container logs, this is likely the cause.
 
