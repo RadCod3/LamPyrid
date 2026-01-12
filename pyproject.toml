@@ -1,5 +1,6 @@
 [project]
 dependencies = [
+  "cryptography>=46.0.0",
   "fastmcp>=2.14",
   "pydantic>=2.11.7",
   "pydantic-settings>=2.10.1",

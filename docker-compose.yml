@@ -5,4 +5,10 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    # Uncomment to override environment variables
+    # environment:
+    #   OAUTH_STORAGE_PATH: /app/data/oauth
+    volumes:
+      # Persist OAuth tokens across container restarts
+      - ./data/oauth:/app/data/oauth
     restart: unless-stopped

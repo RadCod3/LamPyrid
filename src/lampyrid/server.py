@@ -1,11 +1,14 @@
 import asyncio
 from typing import Optional
 
+from cryptography.fernet import Fernet
 from fastmcp import FastMCP
 from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
 from fastmcp.utilities.types import Image
+from key_value.aio.stores.disk import DiskStore
+from key_value.aio.wrappers.encryption import FernetEncryptionWrapper
 from mcp.types import Icon
 
 from .clients.firefly import FireflyClient
@@ -18,10 +21,26 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 	"""
 	Create Google authentication provider if credentials are configured.
 
+	If token persistence is enabled, initializes encrypted disk storage for OAuth tokens.
+	Otherwise, tokens are stored in memory and lost on server restart.
+
 	Returns:
 		GoogleProvider if all required credentials are present, None otherwise
 	"""
 	if settings.is_auth_enabled:
+		# Initialize persistent token storage if encryption keys are configured
+		client_storage = None
+		if settings.is_token_persistence_enabled:
+			# Create storage directory if it doesn't exist
+			settings.oauth_storage_path.mkdir(parents=True, exist_ok=True)
+
+			# Initialize disk storage with Fernet encryption
+			disk_store = DiskStore(directory=settings.oauth_storage_path)
+			client_storage = FernetEncryptionWrapper(
+				key_value=disk_store,
+				fernet=Fernet(settings.oauth_storage_encryption_key),  # ty:ignore[invalid-argument-type]
+			)
+
 		return GoogleProvider(
 			client_id=settings.google_client_id,  # ty:ignore[invalid-argument-type]
 			client_secret=settings.google_client_secret,  # ty:ignore[invalid-argument-type]
@@ -30,6 +49,8 @@ def _create_auth_provider() -> Optional[AuthProvider]:
 				'openid',
 				'https://www.googleapis.com/auth/userinfo.email',
 			],
+			jwt_signing_key=settings.jwt_signing_key,  # ty:ignore[invalid-argument-type]
+			client_storage=client_storage,
 		)
 	return None
 

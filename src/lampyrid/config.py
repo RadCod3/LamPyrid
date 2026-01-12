@@ -1,6 +1,8 @@
-from pydantic import HttpUrl, Field, model_validator
+from pathlib import Path
+from typing import Literal, Optional, Self
+
+from pydantic import Field, HttpUrl, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional, Self, Literal
 
 
 class Settings(BaseSettings):
@@ -56,6 +58,20 @@ class Settings(BaseSettings):
 		description="This server's base URL (e.g., http://localhost:8000 for development)",
 	)
 
+	# OAuth Token Storage Configuration (Optional - for persistent authentication)
+	jwt_signing_key: Optional[str] = Field(
+		default=None,
+		description='JWT signing key for OAuth tokens. Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"',
+	)
+	oauth_storage_encryption_key: Optional[str] = Field(
+		default=None,
+		description='Fernet encryption key for OAuth token storage. Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"',
+	)
+	oauth_storage_path: Path = Field(
+		default=Path.home() / '.local' / 'share' / 'lampyrid' / 'oauth',
+		description='Path for persistent OAuth token storage (default: ~/.local/share/lampyrid/oauth)',
+	)
+
 	@model_validator(mode='after')
 	def validate_google_oauth_settings(self) -> Self:
 		"""Ensure Google OAuth settings are all provided together or all absent."""
@@ -77,6 +93,11 @@ class Settings(BaseSettings):
 		"""Check if Google OAuth authentication is enabled."""
 		return all([self.google_client_id, self.google_client_secret, self.server_base_url])
 
+	@property
+	def is_token_persistence_enabled(self) -> bool:
+		"""Check if OAuth token persistence is enabled."""
+		return all([self.jwt_signing_key, self.oauth_storage_encryption_key])
+
 
 def _init_settings() -> Settings:
 	"""Initialize settings with user-friendly error handling."""
@@ -84,6 +105,7 @@ def _init_settings() -> Settings:
 		return Settings.model_validate({})
 	except Exception as e:
 		import sys
+
 		from pydantic_core import ValidationError
 
 		if isinstance(e, ValidationError):

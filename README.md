@@ -40,6 +40,9 @@ services:
     environment:
       FIREFLY_BASE_URL: https://your-firefly-instance.com
       FIREFLY_TOKEN: your-api-token
+    volumes:
+      # Persist OAuth tokens if authentication is enabled
+      - ./data/oauth:/app/data/oauth
     restart: unless-stopped
 EOF
 docker-compose up -d
@@ -103,6 +106,25 @@ For remote server deployments requiring authentication, you can enable Google OA
 - `SERVER_BASE_URL`: Your server's public URL (e.g., `http://localhost:8000`)
 
 **Note**: Authentication is optional and only needed for remote server deployments. All three OAuth variables must be provided together to enable authentication.
+
+### OAuth Token Persistence (Optional)
+
+By default, OAuth tokens are stored in memory and lost on server restarts. To enable persistent authentication across restarts, configure encrypted token storage:
+
+- `JWT_SIGNING_KEY`: JWT signing key for OAuth tokens
+- `OAUTH_STORAGE_ENCRYPTION_KEY`: Fernet encryption key for token storage
+- `OAUTH_STORAGE_PATH`: Storage path (default: `~/.local/share/lampyrid/oauth` for local, `/app/data/oauth` for Docker)
+
+**Generate encryption keys:**
+```bash
+# Generate JWT signing key
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Generate Fernet encryption key
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+**IMPORTANT**: Keep these keys secure and consistent across deployments. Changing keys will invalidate existing tokens and require users to re-authenticate.
 
 Configuration can be provided via a `.env` file in the project root or as environment variables.
 
@@ -353,6 +375,13 @@ services:
       # Optional: Configure transport and logging
       MCP_TRANSPORT: http
       LOGGING_LEVEL: INFO
+      # Optional: Enable OAuth token persistence
+      # JWT_SIGNING_KEY: your-jwt-signing-key
+      # OAUTH_STORAGE_ENCRYPTION_KEY: your-fernet-encryption-key
+      # OAUTH_STORAGE_PATH: /app/data/oauth
+    volumes:
+      # Persist OAuth tokens across container restarts (if OAuth is enabled)
+      - ./data/oauth:/app/data/oauth
     restart: unless-stopped
 ```
 
