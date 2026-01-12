@@ -1,5 +1,7 @@
-# Use Python 3.14 Alpine image with uv pre-installed for smaller footprint
-FROM ghcr.io/astral-sh/uv:python3.14-alpine
+# ============================================================================
+# Builder Stage: Install dependencies and build the project
+# ============================================================================
+FROM ghcr.io/astral-sh/uv:python3.14-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -25,11 +27,23 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     UV_LINK_MODE=copy uv sync --frozen --no-dev --compile-bytecode || \
     UV_LINK_MODE=copy uv sync --no-dev --compile-bytecode
 
+# ============================================================================
+# Runtime Stage: Minimal production image
+# ============================================================================
+FROM python:3.14-alpine AS runtime
+
+# Set working directory
+WORKDIR /app
+
+# Copy the virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy application source code and assets
+COPY --from=builder /app/src /app/src
+COPY --from=builder /app/assets /app/assets
+
 # Create a non-root user for security (Alpine uses addgroup/adduser)
 RUN addgroup -S lampyrid && adduser -S -G lampyrid -h /home/lampyrid lampyrid
-
-# Create cache directory for uv and set permissions
-RUN mkdir -p /home/lampyrid/.cache/uv && chown -R lampyrid:lampyrid /home/lampyrid
 
 # Set up the virtual environment in PATH
 ENV PATH="/app/.venv/bin:$PATH"
