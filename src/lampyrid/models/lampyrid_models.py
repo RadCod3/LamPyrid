@@ -7,6 +7,7 @@ from .firefly_models import (
 	AccountRead,
 	AccountTypeFilter,
 	BudgetRead,
+	ShortAccountTypeProperty,
 	TransactionArray,
 	TransactionRead,
 	TransactionSingle,
@@ -24,6 +25,9 @@ def utc_now():
 class Account(BaseModel):
 	id: str = Field(..., description='Unique identifier for the account', examples=['2'])
 	name: str = Field(..., description='Display name of the account', examples=['Cash'])
+	type: ShortAccountTypeProperty = Field(
+		..., description='Type of the account', examples=['asset']
+	)
 	currency_code: Optional[str] = Field(
 		None, description='Currency code (ISO 4217) for the account', examples=['GBP']
 	)
@@ -37,6 +41,7 @@ class Account(BaseModel):
 		return cls(
 			id=account_read.id,
 			name=account_read.attributes.name,
+			type=account_read.attributes.type,
 			currency_code=account_read.attributes.currency_code,
 			current_balance=(
 				float(account_read.attributes.current_balance)
