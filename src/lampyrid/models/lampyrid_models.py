@@ -1,6 +1,5 @@
 from datetime import date, datetime, timezone
-from enum import Enum
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -8,6 +7,7 @@ from .firefly_models import (
 	AccountRead,
 	AccountTypeFilter,
 	BudgetRead,
+	ShortAccountTypeProperty,
 	TransactionArray,
 	TransactionRead,
 	TransactionSingle,
@@ -25,6 +25,9 @@ def utc_now():
 class Account(BaseModel):
 	id: str = Field(..., description='Unique identifier for the account', examples=['2'])
 	name: str = Field(..., description='Display name of the account', examples=['Cash'])
+	type: ShortAccountTypeProperty = Field(
+		..., description='Type of the account', examples=['asset']
+	)
 	currency_code: Optional[str] = Field(
 		None, description='Currency code (ISO 4217) for the account', examples=['GBP']
 	)
@@ -38,6 +41,7 @@ class Account(BaseModel):
 		return cls(
 			id=account_read.id,
 			name=account_read.attributes.name,
+			type=account_read.attributes.type,
 			currency_code=account_read.attributes.currency_code,
 			current_balance=(
 				float(account_read.attributes.current_balance)
@@ -76,17 +80,11 @@ class Budget(BaseModel):
 		)
 
 
-class TransactionType(Enum):
-	withdrawal = 'withdrawal'
-	deposit = 'deposit'
-	transfer = 'transfer'
-
-
 class Transaction(BaseModel):
 	id: Optional[str] = Field(None, description='Transaction ID')
 	amount: float = Field(..., description='Amount of the transaction')
 	description: str = Field(..., description='Description of the transaction')
-	type: TransactionType = Field(..., description='Type of the transaction')
+	type: TransactionTypeProperty = Field(..., description='Type of the transaction')
 	date: datetime = Field(
 		default_factory=datetime.now, description='Date and time of the transaction'
 	)
@@ -111,7 +109,7 @@ class Transaction(BaseModel):
 			id=trx.data.id,
 			amount=float(inner_trx.amount),
 			description=inner_trx.description,
-			type=TransactionType[inner_trx.type.value],
+			type=inner_trx.type,
 			date=inner_trx.date,
 			source_id=inner_trx.source_id,
 			destination_id=inner_trx.destination_id,
@@ -131,9 +129,7 @@ class Transaction(BaseModel):
 			description=first_trx.description,
 			amount=float(first_trx.amount),
 			date=first_trx.date,
-			type=TransactionType[first_trx.type.value]
-			if first_trx.type
-			else TransactionType.withdrawal,
+			type=first_trx.type,
 			source_id=first_trx.source_id,
 			destination_id=first_trx.destination_id,
 			source_name=first_trx.source_name,
@@ -145,7 +141,7 @@ class Transaction(BaseModel):
 
 	def to_transaction_split_store(self) -> TransactionSplitStore:
 		return TransactionSplitStore(
-			type=TransactionTypeProperty(self.type.value),
+			type=self.type,
 			date=self.date,
 			amount=str(self.amount),
 			description=self.description,
@@ -544,6 +540,20 @@ class CreateBulkTransactionsRequest(BaseModel):
 		min_length=1,
 		max_length=100,
 	)
+
+	@model_validator(mode='after')
+	def validate_transactions(self):
+		"""Ensure transactions are only of allowed types."""
+		for trx in self.transactions:
+			if trx.type not in {
+				TransactionTypeProperty.withdrawal,
+				TransactionTypeProperty.deposit,
+				TransactionTypeProperty.transfer,
+			}:
+				raise ValueError(
+					f'Invalid transaction type: {trx.type}. Only withdrawal, deposit, and transfer are allowed.'
+				)
+		return self
 
 
 class UpdateTransactionRequest(BaseModel):
