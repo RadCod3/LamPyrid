@@ -207,6 +207,7 @@ jobs:
           files: ./coverage.xml
           flags: integration
           name: integration-tests
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Stop Firefly III
         if: always()
