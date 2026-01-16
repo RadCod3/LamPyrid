@@ -4,10 +4,31 @@ set -euo pipefail
 echo "=== Automated Firefly III v6 Test Setup ==="
 echo ""
 
+# --- Step 0: Detect Container Engine ---
+if command -v docker >/dev/null 2>&1; then
+    CONTAINER_ENGINE="docker"
+elif command -v podman >/dev/null 2>&1; then
+    CONTAINER_ENGINE="podman"
+else
+    echo "✗ Error: Neither docker nor podman found in PATH."
+    exit 1
+fi
+
+# Determine if we use 'docker compose' or 'podman-compose'
+# Most modern systems use the 'compose' plugin for both
+if $CONTAINER_ENGINE compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE="$CONTAINER_ENGINE compose"
+else
+    # Fallback for older podman/docker setups
+    DOCKER_COMPOSE="${CONTAINER_ENGINE}-compose"
+fi
+
+echo "→ Using container engine: $CONTAINER_ENGINE ($DOCKER_COMPOSE)"
+
 # Step 1: Reset and start Firefly III
 echo "Step 1: Starting Firefly III (with clean database)..."
-docker-compose -f docker-compose.test.yml down -v --remove-orphans > /dev/null 2>&1 || true
-docker-compose -f docker-compose.test.yml up -d
+$DOCKER_COMPOSE -f docker-compose.test.yml down -v --remove-orphans > /dev/null 2>&1 || true
+$DOCKER_COMPOSE -f docker-compose.test.yml up -d
 
 # Step 2: Wait for Firefly to be healthy
 echo "Step 2: Waiting for Firefly III to initialize..."
@@ -18,7 +39,7 @@ HEALTH_URL="http://localhost:8080/health"
 until $(curl --output /dev/null --silent --head --fail "$HEALTH_URL"); do
     if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
       echo -e "\n✗ Firefly III failed to start."
-      docker-compose -f docker-compose.test.yml logs firefly-app | tail -n 20
+      $DOCKER_COMPOSE -f docker-compose.test.yml logs firefly-app | tail -n 20
       exit 1
     fi
     echo -n "."
@@ -27,35 +48,53 @@ until $(curl --output /dev/null --silent --head --fail "$HEALTH_URL"); do
 done
 
 echo -e "\n✓ Health check passed. Finalizing database migrations..."
-docker-compose -f docker-compose.test.yml exec -T firefly-app php artisan migrate --force > /dev/null 2>&1
+$DOCKER_COMPOSE -f docker-compose.test.yml exec -T firefly-app php artisan migrate --force > /dev/null 2>&1
 
 # Step 3: Create User, User Group, and Link via Foreign Key
 echo ""
 echo "Step 3: Provisioning user and administration group..."
 
-docker-compose -f docker-compose.test.yml exec -T firefly-app php -r "
+$DOCKER_COMPOSE -f docker-compose.test.yml exec -T firefly-app php -r "
     require 'vendor/autoload.php';
     \$app = require_once 'bootstrap/app.php';
     \$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-    
+
     try {
         \Illuminate\Support\Facades\DB::beginTransaction();
 
-        // 1. Create or Find the User Group (Administration)
-        // Firefly III v6 uses 'title' for the group name.
-        \$group = \FireflyIII\Models\UserGroup::firstOrNew(['title' => 'Test Administration']);
-        \$group->save();
+        // Get or create default group (#1) - Firefly III uses this for API requests
+        \$group = \FireflyIII\Models\UserGroup::findOrNew(1);
+        if (!\$group->exists) {
+            \$group->id = 1;
+            \$group->title = 'Default User Group';
+            \$group->save();
+        }
 
-        // 2. Create the User (Namespace: \FireflyIII based on your provided file)
+        // Create or update user, link to group #1
         \$user = \FireflyIII\User::firstOrNew(['email' => 'test@lampyrid.local']);
         \$user->password = \Illuminate\Support\Facades\Hash::make('secret_password_123');
-        
-        // 3. Set the Administration ID directly (mapped to 'user_group_id' in your source)
-        \$user->user_group_id = \$group->id;
+        \$user->user_group_id = 1; // Must use group #1 for API access
+        \$user->email = 'test@lampyrid.local';
         \$user->save();
 
+        // Create group membership entry - this is required for API authorization
+        \$existing = \Illuminate\Support\Facades\DB::table('group_memberships')
+            ->where('user_id', \$user->id)
+            ->where('user_group_id', \$group->id)
+            ->first();
+
+        if (!\$existing) {
+            \Illuminate\Support\Facades\DB::table('group_memberships')->insert([
+                'user_id' => \$user->id,
+                'user_group_id' => \$group->id,
+                'user_role_id' => 21, // owner role ID
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         \Illuminate\Support\Facades\DB::commit();
-        echo '✓ User test@lampyrid.local created and linked to Group #' . \$group->id . PHP_EOL;
+        echo '✓ User test@lampyrid.local created and linked to default Group #1' . PHP_EOL;
     } catch (\Exception \$e) {
         \Illuminate\Support\Facades\DB::rollBack();
         fwrite(STDERR, '✗ Provisioning Error: ' . \$e->getMessage() . PHP_EOL);
@@ -66,13 +105,13 @@ docker-compose -f docker-compose.test.yml exec -T firefly-app php -r "
 # Step 4: Create personal access client
 echo ""
 echo "Step 4: Creating OAuth personal access client..."
-docker-compose -f docker-compose.test.yml exec -T firefly-app \
+$DOCKER_COMPOSE -f docker-compose.test.yml exec -T firefly-app \
     php artisan passport:client --personal --no-interaction --name="Test Client" > /dev/null 2>&1
 
 # Step 5: Generate access token
 echo ""
 echo "Step 5: Generating API access token..."
-TOKEN=$(docker-compose -f docker-compose.test.yml exec -T firefly-app php -r "
+TOKEN=$($DOCKER_COMPOSE -f docker-compose.test.yml exec -T firefly-app php -r "
     require 'vendor/autoload.php';
     \$app = require_once 'bootstrap/app.php';
     \$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
@@ -98,12 +137,9 @@ LOGGING_LEVEL=DEBUG
 EOF
 echo "✓ Configuration saved to tests/.env.test"
 
-# Step 7: Test data will be created programmatically by tests
+# Step 7 & 8: Verify
 echo ""
 echo "Step 7: Test setup complete!"
-echo "  → Tests will create accounts and budgets programmatically"
-
-# Step 8: Verify
 echo ""
 echo "Step 8: Verifying setup..."
 if [ -f "tests/verify_setup.py" ]; then

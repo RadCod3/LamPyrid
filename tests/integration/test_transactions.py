@@ -1,6 +1,6 @@
 """Integration tests for transaction management tools."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import pytest
@@ -8,7 +8,7 @@ from httpx import HTTPStatusError
 
 from lampyrid.clients.firefly import FireflyClient
 from lampyrid.models.firefly_models import TransactionTypeFilter, TransactionTypeProperty
-from lampyrid.models.lampyrid_models import Account, Budget, Transaction
+from lampyrid.models.lampyrid_models import Account, Budget, Transaction, TransactionListResponse
 from tests.fixtures.transactions import (
 	make_create_bulk_transactions_request,
 	make_create_deposit_request,
@@ -232,9 +232,26 @@ async def test_get_transaction(
 @pytest.mark.asyncio
 @pytest.mark.transactions
 @pytest.mark.integration
-async def test_get_transactions_all(firefly_client: FireflyClient):
+async def test_get_transactions_all(
+	firefly_client: FireflyClient,
+	test_asset_account: Account,
+	test_expense_account: str,
+	transaction_cleanup: List[str],
+):
 	"""Test listing all transactions without filters."""
-	from lampyrid.models.lampyrid_models import TransactionListResponse
+
+	# Create a transaction first
+	create_req = make_create_withdrawal_request(
+		amount=5.00,
+		description='Test get all transactions',
+		source_id=test_asset_account.id,
+		destination_name=test_expense_account,
+		date=datetime.now(timezone.utc),
+	)
+	created = await firefly_client.create_withdrawal(create_req)
+	assert created is not None
+	assert created.id is not None
+	transaction_cleanup.append(created.id)
 
 	req = make_get_transactions_request()
 	transaction_array = await firefly_client.get_transactions(req)
@@ -242,7 +259,7 @@ async def test_get_transactions_all(firefly_client: FireflyClient):
 		transaction_array, current_page=req.page or 1, per_page=req.limit or 50
 	)
 
-	# Should have at least some transactions (including test transactions)
+	# Should have at least one transaction (the one we just created)
 	assert len(result.transactions) > 0
 	assert result.total_count is not None and result.total_count > 0
 
