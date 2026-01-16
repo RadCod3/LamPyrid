@@ -43,8 +43,8 @@ else:
 		'are set in environment.'
 	)
 
-from lampyrid.clients.firefly import FireflyClient
-from lampyrid.config import settings
+from lampyrid.clients.firefly import FireflyClient  # noqa: E402
+from lampyrid.config import settings  # noqa: E402
 
 # Global cache for test data created programmatically
 _cached_test_accounts: List[Account] | None = None
