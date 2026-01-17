@@ -302,11 +302,17 @@ LamPyrid/
 │   ├── models/
 │   │   ├── firefly_models.py # Auto-generated Firefly III API models
 │   │   └── lampyrid_models.py# Simplified MCP interface models
+│   ├── services/
+│   │   ├── __init__.py       # Services layer exports
+│   │   ├── accounts.py       # AccountService - account business logic
+│   │   ├── transactions.py   # TransactionService - transaction business logic
+│   │   └── budgets.py        # BudgetService - budget business logic
 │   └── tools/
 │       ├── __init__.py       # Tool server composition coordinator
 │       ├── accounts.py       # Account management tools (3 tools)
 │       ├── transactions.py   # Transaction management tools (10 tools)
 │       └── budgets.py        # Budget management tools (5 tools)
+├── tests/                    # Unit and integration tests
 ├── .github/workflows/        # CI/CD workflows
 ├── assets/                   # Project assets
 ├── Dockerfile                # Docker image definition
@@ -320,10 +326,14 @@ LamPyrid/
 LamPyrid follows a clean layered architecture with modular tool organization:
 
 - **Server Layer** (`server.py`): FastMCP server initialization, authentication setup, and tool registration orchestration
-- **Tools Layer** (`tools/`): Modular MCP tool definitions organized by domain
+- **Tools Layer** (`tools/`): Thin MCP tool wrappers organized by domain that delegate to services
   - `accounts.py`: Account management tools (3 tools)
   - `transactions.py`: Transaction management tools (10 tools)
   - `budgets.py`: Budget management tools (5 tools)
+- **Services Layer** (`services/`): Business logic services that orchestrate operations between tools and the client
+  - `accounts.py`: `AccountService` - account operations and model conversion
+  - `transactions.py`: `TransactionService` - transaction CRUD, bulk operations, search query building
+  - `budgets.py`: `BudgetService` - budget operations, spending calculations, multi-call aggregations
 - **Client Layer** (`clients/firefly.py`): HTTP client for Firefly III API with full CRUD support
 - **Models Layer**:
   - `firefly_models.py`: Auto-generated Pydantic models from Firefly III OpenAPI spec
@@ -333,9 +343,17 @@ LamPyrid follows a clean layered architecture with modular tool organization:
 ### Tool Registration Pattern
 Tools are registered using FastMCP's native static composition pattern:
 - Each tool module exports a `create_*_server(client)` function that returns a standalone FastMCP instance
+- Tool functions are thin wrappers that delegate to corresponding service classes
 - The `tools/__init__.py` module provides `compose_all_servers()` to coordinate composition
 - The `server.py` uses `mcp.import_server()` to compose all domain servers into the main server
 - This leverages FastMCP's built-in server composition while keeping modular organization
+
+### Services Layer Pattern
+The services layer separates business logic from tool definitions:
+- Each service class takes a `FireflyClient` instance via constructor injection
+- Services handle model conversion (Firefly API models to LamPyrid models)
+- Complex operations (bulk transactions, spending calculations) are encapsulated in services
+- This enables easier unit testing with mocked clients
 
 The architecture enables easy extension and modification while maintaining type safety and comprehensive error handling throughout.
 
@@ -475,7 +493,7 @@ Contributions are welcome! Please follow this workflow:
 
 ### Code Style Guidelines
 
-- **Indentation**: Use tabs for indentation
+- **Indentation**: Use spaces for indentation
 - **Quotes**: Single quotes for strings
 - **Line Length**: 100 character line limit
 - **Type Safety**: Type hints required for all functions and methods
@@ -491,7 +509,7 @@ The main branch is protected with the following requirements:
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
