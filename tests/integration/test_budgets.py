@@ -68,7 +68,13 @@ async def test_get_budget_spending(mcp_client: Client, test_budget: Budget):
 
     result = await mcp_client.call_tool(
         'get_budget_spending',
-        {'req': {'budget_id': test_budget.id, 'start': start.isoformat(), 'end': end.isoformat()}},
+        {
+            'req': {
+                'budget_id': test_budget.id,
+                'start_date': start.isoformat(),
+                'end_date': end.isoformat(),
+            }
+        },
     )
     spending = BudgetSpending.model_validate(result.structured_content)
 
