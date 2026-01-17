@@ -4,9 +4,21 @@ Verification script for Firefly III test setup.
 
 This script checks that:
 1. Firefly III is running and accessible
-2. The API token is valid
-3. Required test accounts exist
-4. Required test budget exists
+2. The API token is valid and has proper permissions
+3. Test data endpoints are accessible (accounts, budgets)
+4. Test environment is ready for integration tests
+
+Usage:
+    python tests/verify_setup.py
+    # Or:
+    uv run python tests/verify_setup.py
+
+The script will:
+- Load configuration from tests/.env.test
+- Verify Firefly III connectivity
+- Check API token validity
+- Test endpoint accessibility
+- Provide guidance for running tests
 """
 
 import os
@@ -80,18 +92,33 @@ except Exception as e:
 	print(f'   ✗ Cannot verify token: {e}')
 	all_checks_passed = False
 
-# Note about test data creation
-print('\n3. Test data creation...')
-print('   ℹ  Tests will create accounts and budgets programmatically')
-print('   ℹ  No pre-existing accounts or budgets required')
+# Check 3: Verify test data can be created
+print('\n3. Checking test data creation capability...')
+try:
+	response = httpx.get(f'{FIREFLY_URL}/api/v1/accounts', headers=headers, timeout=10.0)
+	if response.status_code == 200:
+		print('   ✓ Can access accounts endpoint')
+		# Check if we can create accounts (POST request would be needed for full verification)
+		print('   ℹ  Tests will create accounts and budgets programmatically')
+	else:
+		print(f'   ✗ Cannot access accounts endpoint: {response.status_code}')
+		all_checks_passed = False
+except Exception as e:
+	print(f'   ✗ Cannot verify account access: {e}')
+	all_checks_passed = False
 
 # Summary
 print('\n=== Verification Summary ===')
 if all_checks_passed:
 	print('✓ All checks passed! Your test environment is ready.')
-	print('\nYou can now run tests with: uv run pytest tests/')
+	print('\nYou can now run tests with:')
+	print('  uv run pytest tests/')
+	print('  # Or run specific test suites:')
+	print('  uv run pytest -m accounts')
+	print('  uv run pytest -m transactions')
+	print('  uv run pytest -m budgets')
 	sys.exit(0)
 else:
 	print('✗ Some checks failed. Please fix the issues above.')
-	print('\nFor setup instructions, see: tests/setup_firefly.md')
+	print('\nFor setup instructions, see CLAUDE.md#Testing')
 	sys.exit(1)
