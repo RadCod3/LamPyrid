@@ -7,11 +7,13 @@ from ..config import settings
 from ..models.firefly_models import (
 	AccountArray,
 	AccountSingle,
+	AccountStore,
 	AccountTypeFilter,
 	AvailableBudgetArray,
 	BudgetArray,
 	BudgetLimitArray,
 	BudgetSingle,
+	BudgetStore,
 	TransactionArray,
 	TransactionSingle,
 	TransactionSplitStore,
@@ -117,6 +119,13 @@ class FireflyClient:
 		self._handle_api_error(r)
 		r.raise_for_status()
 		return AccountArray.model_validate(r.json())
+
+	async def create_account(self, account_store: AccountStore) -> Account:
+		r = await self._client.post('/api/v1/accounts', json=self._serialize_model(account_store))
+		self._handle_api_error(r)
+		r.raise_for_status()
+		account_single = AccountSingle.model_validate(r.json())
+		return Account.from_account_read(account_single.data)
 
 	@staticmethod
 	def _sanitize_value(value: str) -> str:
@@ -489,6 +498,15 @@ class FireflyClient:
 			total_remaining=total_remaining,
 			available_budget=None,  # Would need additional API call to get available budget
 		)
+
+	async def create_budget(self, budget_store: BudgetStore) -> Budget:
+		"""Create a new budget."""
+		payload = self._serialize_model(budget_store)
+		r = await self._client.post('/api/v1/budgets', json=payload)
+		self._handle_api_error(r, payload)
+		r.raise_for_status()
+		budget_single = BudgetSingle.model_validate(r.json())
+		return Budget.from_budget_read(budget_single.data)
 
 	async def get_available_budget(self, req: GetAvailableBudgetRequest) -> AvailableBudget:
 		"""Get available budget for a period."""

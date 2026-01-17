@@ -1,0 +1,55 @@
+# Docker Compose configuration for running Firefly III test instance
+# This is used for integration testing of LamPyrid
+
+services:
+  # Firefly III application
+  firefly-app:
+    image: fireflyiii/core:latest
+    container_name: firefly_iii_test_app
+    restart: unless-stopped
+    environment:
+      # Application environment
+      - APP_ENV=testing
+      # Database configuration
+      - DB_CONNECTION=sqlite
+
+      # Application configuration
+      - APP_KEY=SomeRandomStringOf32CharsExactly
+      - APP_URL=http://localhost:8080
+      - TRUSTED_PROXIES=**
+
+      # Disable unnecessary features for testing
+      - SEND_REGISTRATION_MAIL=false
+      - SEND_ERROR_MESSAGE=false
+      - SEND_REPORT_JOURNALS=false
+      - ENABLE_EXTERNAL_MAP=false
+      - ENABLE_EXTERNAL_RATES=false
+
+      # Logging
+      - APP_LOG_LEVEL=debug
+      - LOG_CHANNEL=stack
+
+      # Demo mode disabled
+      - IS_DEMO_SITE=false
+
+      # Cache and session
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+
+      # Mail (disabled for testing)
+      - MAIL_MAILER=log
+
+    ports:
+      - "8080:8080"
+    networks:
+      - firefly_test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  firefly_test:
+    driver: bridge
