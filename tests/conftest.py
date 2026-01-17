@@ -8,14 +8,13 @@ This module provides pytest fixtures for:
 - Transaction cleanup utilities
 """
 
-import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
-import httpx
 import pytest
 from dotenv import load_dotenv
+from fastmcp import Client, FastMCP
 
 from lampyrid.models.firefly_models import (
 	AccountRoleProperty,
@@ -43,26 +42,16 @@ else:
 		'are set in environment.'
 	)
 
+
 from lampyrid.clients.firefly import FireflyClient  # noqa: E402
 from lampyrid.config import settings  # noqa: E402
+from lampyrid.tools import compose_all_servers  # noqa: E402
 
 # Global cache for test data created programmatically
 _cached_test_accounts: List[Account] | None = None
 _cached_test_budgets: List[Budget] | None = None
 _created_account_ids: List[str] = []  # Track created accounts for cleanup
 _created_budget_ids: List[str] = []  # Track created budgets for cleanup
-
-
-@pytest.fixture(scope='function')
-async def event_loop():
-	"""Create an event loop for the test session that won't be closed prematurely."""
-	loop = asyncio.new_event_loop()
-	yield loop
-	# Don't close the loop here - let pytest-asyncio handle it
-	try:
-		loop.close()
-	except RuntimeError:
-		pass  # Loop already closed
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -82,18 +71,6 @@ async def _setup_test_data():
 		return  # Skip setup if no config
 
 	client = FireflyClient()
-
-	base = str(settings.firefly_base_url).rstrip('/')
-	client._client = httpx.AsyncClient(
-		base_url=base,
-		headers={
-			'Authorization': f'Bearer {settings.firefly_token}',
-			'Accept': 'application/json',
-			'Content-Type': 'application/json',
-		},
-		timeout=30.0,
-		limits=httpx.Limits(max_connections=1, max_keepalive_connections=0),
-	)
 
 	try:
 		# Create test accounts
@@ -141,6 +118,52 @@ async def _setup_test_data():
 
 			_cached_test_accounts.append(savings)
 
+			# Create expense account for withdrawal tests
+			expense_accounts = await client.list_accounts(page=1, type=AccountTypeFilter.expense)
+			existing_expense = [
+				Account.from_account_read(account_read) for account_read in expense_accounts.data
+			]
+
+			expense = None
+			for account in existing_expense:
+				if 'test expense' in account.name.lower():
+					expense = account
+					break
+
+			if expense is None:
+				expense_store = AccountStore(
+					name='Test Expense',
+					type=ShortAccountTypeProperty.expense,
+					currency_code='EUR',
+				)
+				expense = await client.create_account(expense_store)
+				_created_account_ids.append(expense.id)
+
+			_cached_test_accounts.append(expense)
+
+			# Create revenue account for deposit tests
+			revenue_accounts = await client.list_accounts(page=1, type=AccountTypeFilter.revenue)
+			existing_revenue = [
+				Account.from_account_read(account_read) for account_read in revenue_accounts.data
+			]
+
+			revenue = None
+			for account in existing_revenue:
+				if 'test revenue' in account.name.lower():
+					revenue = account
+					break
+
+			if revenue is None:
+				revenue_store = AccountStore(
+					name='Test Revenue',
+					type=ShortAccountTypeProperty.revenue,
+					currency_code='EUR',
+				)
+				revenue = await client.create_account(revenue_store)
+				_created_account_ids.append(revenue.id)
+
+			_cached_test_accounts.append(revenue)
+
 		# Create test budget
 		if _cached_test_budgets is None:
 			_cached_test_budgets = []
@@ -185,19 +208,6 @@ async def firefly_client():
 
 	client = FireflyClient()
 
-	# Override the httpx client with connection limits to prevent pooling issues
-	base = str(settings.firefly_base_url).rstrip('/')
-	client._client = httpx.AsyncClient(
-		base_url=base,
-		headers={
-			'Authorization': f'Bearer {settings.firefly_token}',
-			'Accept': 'application/json',
-			'Content-Type': 'application/json',
-		},
-		timeout=30.0,
-		limits=httpx.Limits(max_connections=1, max_keepalive_connections=0),
-	)
-
 	yield client
 
 	# Explicitly close the client to clean up connections
@@ -205,6 +215,30 @@ async def firefly_client():
 		await client._client.aclose()
 	except Exception:
 		pass  # Ignore errors during cleanup
+
+
+@pytest.fixture(scope='function')
+async def mcp_client(firefly_client: FireflyClient):
+	"""
+	Create a FastMCP Client for testing tools.
+
+	This fixture uses in-memory transport to test the full MCP stack:
+	MCP Protocol -> Tool Functions -> FireflyClient -> Firefly III API
+
+	The server is created fresh for each test function to ensure isolation.
+	All domain-specific tools (accounts, transactions, budgets) are composed
+	into the server.
+	"""
+
+	# Create a new FastMCP server for testing
+	mcp = FastMCP('lampyrid-test')
+
+	# Compose all domain servers (accounts, transactions, budgets)
+	await compose_all_servers(mcp, firefly_client)
+
+	# Create a FastMCP Client using in-memory transport
+	async with Client(transport=mcp) as client:
+		yield client
 
 
 @pytest.fixture(scope='session')
