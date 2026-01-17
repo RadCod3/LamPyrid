@@ -41,6 +41,19 @@ docstring-code-format = true
 [tool.ruff.lint]
 extend-select = ["I"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+  "integration: marks tests as integration tests",
+  "accounts: account-related tests",
+  "transactions: transaction-related tests",
+  "budgets: budget-related tests",
+]
+
 [tool.datamodel-codegen]
 input = "firefly-iii-6.4.14-v1.yaml"
 output = "src/lampyrid/models/firefly_models.py"
