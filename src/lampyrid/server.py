@@ -1,3 +1,5 @@
+"""MCP server initialization and configuration."""
+
 import asyncio
 from typing import Optional
 
@@ -18,74 +20,74 @@ from .utils import get_assets_path, register_custom_routes
 
 
 def _create_auth_provider() -> Optional[AuthProvider]:
-	"""
-	Create Google authentication provider if credentials are configured.
+    """Create Google authentication provider if credentials are configured.
 
-	If token persistence is enabled, initializes encrypted disk storage for OAuth tokens.
-	Otherwise, tokens are stored in memory and lost on server restart.
+    If token persistence is enabled, initializes encrypted disk storage for OAuth tokens.
+    Otherwise, tokens are stored in memory and lost on server restart.
 
-	Returns:
-		GoogleProvider if all required credentials are present, None otherwise
-	"""
-	if settings.is_auth_enabled:
-		# Initialize persistent token storage if encryption keys are configured
-		client_storage = None
-		if settings.is_token_persistence_enabled:
-			# Create storage directory if it doesn't exist
-			settings.oauth_storage_path.mkdir(parents=True, exist_ok=True)
+    Returns:
+            GoogleProvider if all required credentials are present, None otherwise
 
-			# Initialize disk storage with Fernet encryption
-			disk_store = DiskStore(directory=settings.oauth_storage_path)
-			client_storage = FernetEncryptionWrapper(
-				key_value=disk_store,
-				fernet=Fernet(settings.oauth_storage_encryption_key),  # ty:ignore[invalid-argument-type]
-			)
+    """
+    if settings.is_auth_enabled:
+        # Initialize persistent token storage if encryption keys are configured
+        client_storage = None
+        if settings.is_token_persistence_enabled:
+            # Create storage directory if it doesn't exist
+            settings.oauth_storage_path.mkdir(parents=True, exist_ok=True)
 
-		return GoogleProvider(
-			client_id=settings.google_client_id,  # ty:ignore[invalid-argument-type]
-			client_secret=settings.google_client_secret,  # ty:ignore[invalid-argument-type]
-			base_url=str(settings.server_base_url),
-			required_scopes=[
-				'openid',
-				'https://www.googleapis.com/auth/userinfo.email',
-			],
-			jwt_signing_key=settings.jwt_signing_key,  # ty:ignore[invalid-argument-type]
-			client_storage=client_storage,
-		)
-	return None
+            # Initialize disk storage with Fernet encryption
+            disk_store = DiskStore(directory=settings.oauth_storage_path)
+            client_storage = FernetEncryptionWrapper(
+                key_value=disk_store,
+                fernet=Fernet(settings.oauth_storage_encryption_key),  # ty:ignore[invalid-argument-type]
+            )
+
+        return GoogleProvider(
+            client_id=settings.google_client_id,  # ty:ignore[invalid-argument-type]
+            client_secret=settings.google_client_secret,  # ty:ignore[invalid-argument-type]
+            base_url=str(settings.server_base_url),
+            required_scopes=[
+                'openid',
+                'https://www.googleapis.com/auth/userinfo.email',
+            ],
+            jwt_signing_key=settings.jwt_signing_key,  # ty:ignore[invalid-argument-type]
+            client_storage=client_storage,
+        )
+    return None
 
 
 def _initialize_server() -> FastMCP:
-	"""
-	Initialize and configure the FastMCP server with all domain servers.
+    """Initialize and configure the FastMCP server with all domain servers.
 
-	This function:
-	1. Creates the main FastMCP server with authentication and icons
-	2. Composes domain-specific servers (accounts, transactions, budgets) using static composition
-	3. Registers custom HTTP routes
+    This function:
+    1. Creates the main FastMCP server with authentication and icons
+    2. Composes domain-specific servers (accounts, transactions, budgets) using static composition
+    3. Registers custom HTTP routes
 
-	Returns:
-		Fully configured FastMCP server instance
-	"""
-	# Initialize FastMCP with optional authentication
-	auth_provider = _create_auth_provider()
+    Returns:
+            Fully configured FastMCP server instance
 
-	# Load favicon icon
-	favicon_icon = Icon(src=Image(path=str(get_assets_path('favicon.png'))).to_data_uri())
+    """
+    # Initialize FastMCP with optional authentication
+    auth_provider = _create_auth_provider()
 
-	server = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
-	client = FireflyClient()
+    # Load favicon icon
+    favicon_icon = Icon(src=Image(path=str(get_assets_path('favicon.png'))).to_data_uri())
 
-	# Configure logging
-	configure_logging(level=settings.logging_level)
+    server = FastMCP('lampyrid', auth=auth_provider, icons=[favicon_icon])
+    client = FireflyClient()
 
-	# Compose all domain servers using static composition (import_server)
-	asyncio.run(compose_all_servers(server, client))
+    # Configure logging
+    configure_logging(level=settings.logging_level)
 
-	# Register custom HTTP routes
-	register_custom_routes(server)
+    # Compose all domain servers using static composition (import_server)
+    asyncio.run(compose_all_servers(server, client))
 
-	return server
+    # Register custom HTTP routes
+    register_custom_routes(server)
+
+    return server
 
 
 # Create the main MCP server instance

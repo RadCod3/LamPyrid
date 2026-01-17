@@ -12,4813 +12,4813 @@ from pydantic import AnyUrl, AwareDatetime, BaseModel, EmailStr, Field, RootMode
 
 
 class AutocompleteAccount(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the account found by an auto-complete search.',
-		examples=['Checking Account'],
-	)
-	name_with_balance: str = Field(
-		...,
-		description="Asset accounts and liabilities have a second field with the given date's account balance in the account currency or primary currency.",
-		examples=['Checking Account ($123.45)'],
-	)
-	active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
-	type: str = Field(
-		...,
-		description='Account type of the account found by the auto-complete search.',
-		examples=['Asset account'],
-	)
-	currency_id: str = Field(
-		...,
-		description='ID for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
-		examples=['12'],
-	)
-	currency_name: str = Field(
-		...,
-		description='Currency name for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
-		examples=['Euro'],
-	)
-	currency_code: str = Field(
-		...,
-		description='Currency code for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
-		examples=['EUR'],
-	)
-	currency_symbol: str = Field(
-		...,
-		description='Currency symbol for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
-		examples=['$'],
-	)
-	currency_decimal_places: int = Field(
-		...,
-		description='Number of decimal places for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
-		examples=[2],
-	)
-	account_currency_id: str | None = Field(
-		None,
-		description='ID for the currency used by this account. Even if "convertToPrimary" is on, the account currency ID is displayed here.',
-		examples=['2'],
-	)
-	account_currency_name: str | None = Field(
-		None,
-		description='Name for the currency used by this account. Even if "convertToPrimary" is on, the account currency name is displayed here.',
-		examples=['US Dollar'],
-	)
-	account_currency_code: str | None = Field(
-		None,
-		description='Code for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
-		examples=['USD'],
-	)
-	account_currency_symbol: str | None = Field(
-		None,
-		description='Code for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
-		examples=['$'],
-	)
-	account_currency_decimal_places: int | None = Field(
-		None,
-		description='Number of decimal places for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
-		examples=[2],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the account found by an auto-complete search.',
+        examples=['Checking Account'],
+    )
+    name_with_balance: str = Field(
+        ...,
+        description="Asset accounts and liabilities have a second field with the given date's account balance in the account currency or primary currency.",
+        examples=['Checking Account ($123.45)'],
+    )
+    active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
+    type: str = Field(
+        ...,
+        description='Account type of the account found by the auto-complete search.',
+        examples=['Asset account'],
+    )
+    currency_id: str = Field(
+        ...,
+        description='ID for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
+        examples=['12'],
+    )
+    currency_name: str = Field(
+        ...,
+        description='Currency name for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
+        examples=['Euro'],
+    )
+    currency_code: str = Field(
+        ...,
+        description='Currency code for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
+        examples=['EUR'],
+    )
+    currency_symbol: str = Field(
+        ...,
+        description='Currency symbol for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
+        examples=['$'],
+    )
+    currency_decimal_places: int = Field(
+        ...,
+        description='Number of decimal places for the currency used by this account. If the user prefers amounts converted to their primary currency, this primary currency is used instead.',
+        examples=[2],
+    )
+    account_currency_id: str | None = Field(
+        None,
+        description='ID for the currency used by this account. Even if "convertToPrimary" is on, the account currency ID is displayed here.',
+        examples=['2'],
+    )
+    account_currency_name: str | None = Field(
+        None,
+        description='Name for the currency used by this account. Even if "convertToPrimary" is on, the account currency name is displayed here.',
+        examples=['US Dollar'],
+    )
+    account_currency_code: str | None = Field(
+        None,
+        description='Code for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
+        examples=['USD'],
+    )
+    account_currency_symbol: str | None = Field(
+        None,
+        description='Code for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
+        examples=['$'],
+    )
+    account_currency_decimal_places: int | None = Field(
+        None,
+        description='Number of decimal places for the currency used by this account. Even if "convertToPrimary" is on, the account currency code is displayed here.',
+        examples=[2],
+    )
 
 
 class AutocompleteBill(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the bill found by an auto-complete search.',
-		examples=['Yearly bill'],
-	)
-	active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the bill found by an auto-complete search.',
+        examples=['Yearly bill'],
+    )
+    active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
 
 
 class AutocompleteBudget(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the budget found by an auto-complete search.',
-		examples=['Groceries'],
-	)
-	active: bool | None = Field(None, description='Is the budget active or not?', examples=[True])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the budget found by an auto-complete search.',
+        examples=['Groceries'],
+    )
+    active: bool | None = Field(None, description='Is the budget active or not?', examples=[True])
 
 
 class AutocompleteCategory(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the category found by an auto-complete search.',
-		examples=['Category X'],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the category found by an auto-complete search.',
+        examples=['Category X'],
+    )
 
 
 class AutocompleteCurrency(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(..., description='Currency name.', examples=['Currency name'])
-	code: str = Field(..., description='Currency code.', examples=['EUR'])
-	symbol: str = Field(..., examples=['$'])
-	decimal_places: int = Field(..., examples=[2])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(..., description='Currency name.', examples=['Currency name'])
+    code: str = Field(..., description='Currency code.', examples=['EUR'])
+    symbol: str = Field(..., examples=['$'])
+    decimal_places: int = Field(..., examples=[2])
 
 
 class AutocompleteCurrencyCode(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Currency name with the code between brackets.',
-		examples=['Currency name (XCN)'],
-	)
-	code: str = Field(..., description='Currency code.', examples=['EUR'])
-	symbol: str = Field(..., examples=['$'])
-	decimal_places: int = Field(..., examples=[2])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Currency name with the code between brackets.',
+        examples=['Currency name (XCN)'],
+    )
+    code: str = Field(..., description='Currency code.', examples=['EUR'])
+    symbol: str = Field(..., examples=['$'])
+    decimal_places: int = Field(..., examples=[2])
 
 
 class AutocompleteObjectGroup(BaseModel):
-	id: str = Field(..., examples=['2'])
-	title: str = Field(
-		...,
-		description='Title of the object group found by an auto-complete search.',
-		examples=['Object Group one'],
-	)
-	name: str = Field(
-		...,
-		description='Title of the object group found by an auto-complete search.',
-		examples=['Object Group one'],
-	)
+    id: str = Field(..., examples=['2'])
+    title: str = Field(
+        ...,
+        description='Title of the object group found by an auto-complete search.',
+        examples=['Object Group one'],
+    )
+    name: str = Field(
+        ...,
+        description='Title of the object group found by an auto-complete search.',
+        examples=['Object Group one'],
+    )
 
 
 class AutocompletePiggy(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the piggy bank found by an auto-complete search.',
-		examples=['New couch'],
-	)
-	currency_id: str | None = Field(
-		None,
-		description="Currency ID for this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Currency code for this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_name: str | None = Field(
-		None,
-		description="Currency name for the currency used by this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
-		examples=['Euro'],
-	)
-	currency_decimal_places: int | None = Field(
-		None,
-		description="Number of decimal places for the currency used by this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
-		examples=[2],
-	)
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the piggy bank found by an auto-complete search.',
+        examples=['New couch'],
+    )
+    currency_id: str | None = Field(
+        None,
+        description="Currency ID for this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Currency code for this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_name: str | None = Field(
+        None,
+        description="Currency name for the currency used by this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
+        examples=['Euro'],
+    )
+    currency_decimal_places: int | None = Field(
+        None,
+        description="Number of decimal places for the currency used by this piggy bank. This will always be the currency of the piggy bank, never the user's primary currency.",
+        examples=[2],
+    )
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class AutocompletePiggyBalance(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the piggy bank found by an auto-complete search.',
-		examples=['New couch'],
-	)
-	name_with_balance: str | None = Field(
-		None,
-		description='Name of the piggy bank found by an auto-complete search, including the currently saved amount and the target amount.',
-		examples=['New couch ($234.56 / $600)'],
-	)
-	currency_id: str | None = Field(
-		None,
-		description="Currency ID for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Currency code for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(
-		None,
-		description="Currency symbol for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
-		examples=['$'],
-	)
-	currency_decimal_places: int | None = Field(
-		None,
-		description="Currency decimal places for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
-		examples=[2],
-	)
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the piggy bank found by an auto-complete search.',
+        examples=['New couch'],
+    )
+    name_with_balance: str | None = Field(
+        None,
+        description='Name of the piggy bank found by an auto-complete search, including the currently saved amount and the target amount.',
+        examples=['New couch ($234.56 / $600)'],
+    )
+    currency_id: str | None = Field(
+        None,
+        description="Currency ID for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Currency code for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(
+        None,
+        description="Currency symbol for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
+        examples=['$'],
+    )
+    currency_decimal_places: int | None = Field(
+        None,
+        description="Currency decimal places for the currency used by this piggy bank. This will always be the piggy bank's currency, never the primary currency.",
+        examples=[2],
+    )
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class AutocompleteRecurrence(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the recurrence found by an auto-complete search.',
-		examples=['Yearly bill'],
-	)
-	description: str | None = Field(
-		None,
-		description='Description of the recurrence found by auto-complete.',
-		examples=['Should trigger daily.'],
-	)
-	active: bool | None = Field(
-		None, description='Is the recurring transaction active or not?', examples=[True]
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the recurrence found by an auto-complete search.',
+        examples=['Yearly bill'],
+    )
+    description: str | None = Field(
+        None,
+        description='Description of the recurrence found by auto-complete.',
+        examples=['Should trigger daily.'],
+    )
+    active: bool | None = Field(
+        None, description='Is the recurring transaction active or not?', examples=[True]
+    )
 
 
 class AutocompleteRule(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the rule found by an auto-complete search.',
-		examples=['Rule one'],
-	)
-	description: str | None = Field(
-		None,
-		description='Description of the rule found by auto-complete.',
-		examples=['Useful rule.'],
-	)
-	active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the rule found by an auto-complete search.',
+        examples=['Rule one'],
+    )
+    description: str | None = Field(
+        None,
+        description='Description of the rule found by auto-complete.',
+        examples=['Useful rule.'],
+    )
+    active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
 
 
 class AutocompleteRuleGroup(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the rule group found by an auto-complete search.',
-		examples=['Rule group one'],
-	)
-	description: str | None = Field(
-		None,
-		description='Description of the rule group found by auto-complete.',
-		examples=['Some rule group.'],
-	)
-	active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the rule group found by an auto-complete search.',
+        examples=['Rule group one'],
+    )
+    description: str | None = Field(
+        None,
+        description='Description of the rule group found by auto-complete.',
+        examples=['Some rule group.'],
+    )
+    active: bool | None = Field(None, description='Is the bill active or not?', examples=[True])
 
 
 class AutocompleteTag(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Name of the tag found by an auto-complete search.',
-		examples=['too-expensive-tag-example'],
-	)
-	tag: str = Field(
-		...,
-		description='Name of the tag found by an auto-complete search.',
-		examples=['too-expensive-tag-example'],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Name of the tag found by an auto-complete search.',
+        examples=['too-expensive-tag-example'],
+    )
+    tag: str = Field(
+        ...,
+        description='Name of the tag found by an auto-complete search.',
+        examples=['too-expensive-tag-example'],
+    )
 
 
 class AutocompleteTransaction(BaseModel):
-	id: str = Field(
-		...,
-		description='The ID of a transaction journal (basically a single split).',
-		examples=['2'],
-	)
-	transaction_group_id: str | None = Field(
-		None, description='The ID of the underlying transaction group.', examples=['2']
-	)
-	name: str = Field(..., description='Transaction description', examples=['Transaction'])
-	description: str = Field(..., description='Transaction description', examples=['Transaction'])
+    id: str = Field(
+        ...,
+        description='The ID of a transaction journal (basically a single split).',
+        examples=['2'],
+    )
+    transaction_group_id: str | None = Field(
+        None, description='The ID of the underlying transaction group.', examples=['2']
+    )
+    name: str = Field(..., description='Transaction description', examples=['Transaction'])
+    description: str = Field(..., description='Transaction description', examples=['Transaction'])
 
 
 class AutocompleteTransactionID(BaseModel):
-	id: str = Field(
-		...,
-		description='The ID of a transaction journal (basically a single split).',
-		examples=['2'],
-	)
-	transaction_group_id: str | None = Field(
-		None, description='The ID of the underlying transaction group.', examples=['2']
-	)
-	name: str = Field(
-		...,
-		description='Transaction description with ID in the name.',
-		examples=['#12: Transaction'],
-	)
-	description: str = Field(
-		...,
-		description='Transaction description with ID in the name.',
-		examples=['#12: Transaction'],
-	)
+    id: str = Field(
+        ...,
+        description='The ID of a transaction journal (basically a single split).',
+        examples=['2'],
+    )
+    transaction_group_id: str | None = Field(
+        None, description='The ID of the underlying transaction group.', examples=['2']
+    )
+    name: str = Field(
+        ...,
+        description='Transaction description with ID in the name.',
+        examples=['#12: Transaction'],
+    )
+    description: str = Field(
+        ...,
+        description='Transaction description with ID in the name.',
+        examples=['#12: Transaction'],
+    )
 
 
 class AutocompleteTransactionType(BaseModel):
-	id: str = Field(..., examples=['2'])
-	name: str = Field(
-		...,
-		description='Type of the object found by an auto-complete search.',
-		examples=['Withdrawal'],
-	)
-	type: str = Field(
-		...,
-		description='Name of the object found by an auto-complete search.',
-		examples=['Withdrawal'],
-	)
+    id: str = Field(..., examples=['2'])
+    name: str = Field(
+        ...,
+        description='Type of the object found by an auto-complete search.',
+        examples=['Withdrawal'],
+    )
+    type: str = Field(
+        ...,
+        description='Name of the object found by an auto-complete search.',
+        examples=['Withdrawal'],
+    )
 
 
 class ChartDataPoint(BaseModel):
-	key: str | None = Field(
-		None,
-		description="The key is the label of the value, so for example: '2018-01-01' => 13 or 'Groceries' => -123.",
-		examples=['value'],
-	)
+    key: str | None = Field(
+        None,
+        description="The key is the label of the value, so for example: '2018-01-01' => 13 or 'Groceries' => -123.",
+        examples=['value'],
+    )
 
 
 class Entries(BaseModel):
-	pass
+    pass
 
 
 class PcEntries(BaseModel):
-	pass
+    pass
 
 
 class DataDestroyObject(Enum):
-	not_assets_liabilities = 'not_assets_liabilities'
-	budgets = 'budgets'
-	bills = 'bills'
-	piggy_banks = 'piggy_banks'
-	rules = 'rules'
-	recurring = 'recurring'
-	categories = 'categories'
-	tags = 'tags'
-	object_groups = 'object_groups'
-	accounts = 'accounts'
-	asset_accounts = 'asset_accounts'
-	expense_accounts = 'expense_accounts'
-	revenue_accounts = 'revenue_accounts'
-	liabilities = 'liabilities'
-	transactions = 'transactions'
-	withdrawals = 'withdrawals'
-	deposits = 'deposits'
-	transfers = 'transfers'
+    not_assets_liabilities = 'not_assets_liabilities'
+    budgets = 'budgets'
+    bills = 'bills'
+    piggy_banks = 'piggy_banks'
+    rules = 'rules'
+    recurring = 'recurring'
+    categories = 'categories'
+    tags = 'tags'
+    object_groups = 'object_groups'
+    accounts = 'accounts'
+    asset_accounts = 'asset_accounts'
+    expense_accounts = 'expense_accounts'
+    revenue_accounts = 'revenue_accounts'
+    liabilities = 'liabilities'
+    transactions = 'transactions'
+    withdrawals = 'withdrawals'
+    deposits = 'deposits'
+    transfers = 'transfers'
 
 
 class AccountSearchFieldFilter(Enum):
-	all = 'all'
-	iban = 'iban'
-	name = 'name'
-	number = 'number'
-	id = 'id'
+    all = 'all'
+    iban = 'iban'
+    name = 'name'
+    number = 'number'
+    id = 'id'
 
 
 class ConfigValueFilter(Enum):
-	configuration_is_demo_site = 'configuration.is_demo_site'
-	configuration_permission_update_check = 'configuration.permission_update_check'
-	configuration_last_update_check = 'configuration.last_update_check'
-	configuration_single_user_mode = 'configuration.single_user_mode'
-	firefly_version = 'firefly.version'
-	firefly_default_location = 'firefly.default_location'
-	firefly_account_to_transaction = 'firefly.account_to_transaction'
-	firefly_allowed_opposing_types = 'firefly.allowed_opposing_types'
-	firefly_accountRoles = 'firefly.accountRoles'
-	firefly_valid_liabilities = 'firefly.valid_liabilities'
-	firefly_interest_periods = 'firefly.interest_periods'
-	firefly_enable_external_map = 'firefly.enable_external_map'
-	firefly_expected_source_types = 'firefly.expected_source_types'
-	app_timezone = 'app.timezone'
-	firefly_bill_periods = 'firefly.bill_periods'
-	firefly_credit_card_types = 'firefly.credit_card_types'
-	firefly_languages = 'firefly.languages'
-	firefly_valid_view_ranges = 'firefly.valid_view_ranges'
-	cer_enabled = 'cer.enabled'
-	firefly_preselected_accounts = 'firefly.preselected_accounts'
-	firefly_rule_actions = 'firefly.rule-actions'
-	firefly_context_rule_actions = 'firefly.context-rule-actions'
-	search_operators = 'search.operators'
-	webhook_triggers = 'webhook.triggers'
-	webhook_responses = 'webhook.responses'
-	webhook_deliveries = 'webhook.deliveries'
+    configuration_is_demo_site = 'configuration.is_demo_site'
+    configuration_permission_update_check = 'configuration.permission_update_check'
+    configuration_last_update_check = 'configuration.last_update_check'
+    configuration_single_user_mode = 'configuration.single_user_mode'
+    firefly_version = 'firefly.version'
+    firefly_default_location = 'firefly.default_location'
+    firefly_account_to_transaction = 'firefly.account_to_transaction'
+    firefly_allowed_opposing_types = 'firefly.allowed_opposing_types'
+    firefly_accountRoles = 'firefly.accountRoles'
+    firefly_valid_liabilities = 'firefly.valid_liabilities'
+    firefly_interest_periods = 'firefly.interest_periods'
+    firefly_enable_external_map = 'firefly.enable_external_map'
+    firefly_expected_source_types = 'firefly.expected_source_types'
+    app_timezone = 'app.timezone'
+    firefly_bill_periods = 'firefly.bill_periods'
+    firefly_credit_card_types = 'firefly.credit_card_types'
+    firefly_languages = 'firefly.languages'
+    firefly_valid_view_ranges = 'firefly.valid_view_ranges'
+    cer_enabled = 'cer.enabled'
+    firefly_preselected_accounts = 'firefly.preselected_accounts'
+    firefly_rule_actions = 'firefly.rule-actions'
+    firefly_context_rule_actions = 'firefly.context-rule-actions'
+    search_operators = 'search.operators'
+    webhook_triggers = 'webhook.triggers'
+    webhook_responses = 'webhook.responses'
+    webhook_deliveries = 'webhook.deliveries'
 
 
 class ConfigValueUpdateFilter(Enum):
-	configuration_is_demo_site = 'configuration.is_demo_site'
-	configuration_permission_update_check = 'configuration.permission_update_check'
-	configuration_last_update_check = 'configuration.last_update_check'
-	configuration_single_user_mode = 'configuration.single_user_mode'
+    configuration_is_demo_site = 'configuration.is_demo_site'
+    configuration_permission_update_check = 'configuration.permission_update_check'
+    configuration_last_update_check = 'configuration.last_update_check'
+    configuration_single_user_mode = 'configuration.single_user_mode'
 
 
 class ExportFileFilter(Enum):
-	csv = 'csv'
+    csv = 'csv'
 
 
 class InsightGroupEntry(BaseModel):
-	id: str | None = Field(
-		None,
-		description='This ID is a reference to the original object.',
-		examples=['123'],
-	)
-	name: str | None = Field(
-		None, description='This is the name of the object.', examples=['Land lord']
-	)
-	difference: str | None = Field(
-		None,
-		description='The amount spent or earned between start date and end date, a number defined as a string, for this object and all asset accounts.',
-		examples=['-123.45'],
-	)
-	difference_float: float | None = Field(
-		None,
-		description='The amount spent or earned between start date and end date, a number as a float, for this object and all asset accounts. May have rounding errors.',
-		examples=[-123.45],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the expenses listed for this account.',
-		examples=['5'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the expenses listed for this account.',
-		examples=['EUR'],
-	)
+    id: str | None = Field(
+        None,
+        description='This ID is a reference to the original object.',
+        examples=['123'],
+    )
+    name: str | None = Field(
+        None, description='This is the name of the object.', examples=['Land lord']
+    )
+    difference: str | None = Field(
+        None,
+        description='The amount spent or earned between start date and end date, a number defined as a string, for this object and all asset accounts.',
+        examples=['-123.45'],
+    )
+    difference_float: float | None = Field(
+        None,
+        description='The amount spent or earned between start date and end date, a number as a float, for this object and all asset accounts. May have rounding errors.',
+        examples=[-123.45],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the expenses listed for this account.',
+        examples=['5'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the expenses listed for this account.',
+        examples=['EUR'],
+    )
 
 
 class InsightTotalEntry(BaseModel):
-	difference: str | None = Field(
-		None,
-		description='The amount spent between start date and end date, defined as a string, for this expense account and all asset accounts.',
-		examples=['123.45'],
-	)
-	difference_float: float | None = Field(
-		None,
-		description='The amount spent between start date and end date, defined as a string, for this expense account and all asset accounts. This number is a float (double) and may have rounding errors.',
-		examples=[123.45],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the expenses listed for this expense account.',
-		examples=['5'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the expenses listed for this expense account.',
-		examples=['EUR'],
-	)
+    difference: str | None = Field(
+        None,
+        description='The amount spent between start date and end date, defined as a string, for this expense account and all asset accounts.',
+        examples=['123.45'],
+    )
+    difference_float: float | None = Field(
+        None,
+        description='The amount spent between start date and end date, defined as a string, for this expense account and all asset accounts. This number is a float (double) and may have rounding errors.',
+        examples=[123.45],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the expenses listed for this expense account.',
+        examples=['5'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the expenses listed for this expense account.',
+        examples=['EUR'],
+    )
 
 
 class InsightTransferEntry(BaseModel):
-	id: str | None = Field(
-		None,
-		description='This ID is a reference to the original object.',
-		examples=['123'],
-	)
-	name: str | None = Field(
-		None, description='This is the name of the object.', examples=['Land lord']
-	)
-	difference: str | None = Field(
-		None,
-		description='The total amount transferred between start date and end date, a number defined as a string, for this asset account.',
-		examples=['-123.45'],
-	)
-	difference_float: float | None = Field(
-		None,
-		description='The total amount transferred between start date and end date, a number as a float, for this asset account. May have rounding errors.',
-		examples=[-123.45],
-	)
-	in_: str | None = Field(
-		None,
-		alias='in',
-		description='The total amount transferred TO this account between start date and end date, a number defined as a string, for this asset account.',
-		examples=['123.45'],
-	)
-	in_float: float | None = Field(
-		None,
-		description='The total amount transferred FROM this account between start date and end date, a number as a float, for this asset account. May have rounding errors.',
-		examples=[123.45],
-	)
-	out: str | None = Field(
-		None,
-		description='The total amount transferred FROM this account between start date and end date, a number defined as a string, for this asset account.',
-		examples=['123.45'],
-	)
-	out_float: float | None = Field(
-		None,
-		description='The total amount transferred TO this account between start date and end date, a number as a float, for this asset account. May have rounding errors.',
-		examples=[123.45],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the expenses listed for this account.',
-		examples=['5'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the expenses listed for this account.',
-		examples=['EUR'],
-	)
+    id: str | None = Field(
+        None,
+        description='This ID is a reference to the original object.',
+        examples=['123'],
+    )
+    name: str | None = Field(
+        None, description='This is the name of the object.', examples=['Land lord']
+    )
+    difference: str | None = Field(
+        None,
+        description='The total amount transferred between start date and end date, a number defined as a string, for this asset account.',
+        examples=['-123.45'],
+    )
+    difference_float: float | None = Field(
+        None,
+        description='The total amount transferred between start date and end date, a number as a float, for this asset account. May have rounding errors.',
+        examples=[-123.45],
+    )
+    in_: str | None = Field(
+        None,
+        alias='in',
+        description='The total amount transferred TO this account between start date and end date, a number defined as a string, for this asset account.',
+        examples=['123.45'],
+    )
+    in_float: float | None = Field(
+        None,
+        description='The total amount transferred FROM this account between start date and end date, a number as a float, for this asset account. May have rounding errors.',
+        examples=[123.45],
+    )
+    out: str | None = Field(
+        None,
+        description='The total amount transferred FROM this account between start date and end date, a number defined as a string, for this asset account.',
+        examples=['123.45'],
+    )
+    out_float: float | None = Field(
+        None,
+        description='The total amount transferred TO this account between start date and end date, a number as a float, for this asset account. May have rounding errors.',
+        examples=[123.45],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the expenses listed for this account.',
+        examples=['5'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the expenses listed for this account.',
+        examples=['EUR'],
+    )
 
 
 class ArrayEntryWithCurrencyAndSum(BaseModel):
-	currency_id: str | None = Field(None, examples=['5'])
-	currency_code: str | None = Field(None, examples=['USD'])
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(
-		None, description='Number of decimals supported by the currency', examples=[2]
-	)
-	sum: str | None = Field(
-		None,
-		description='The amount earned, spent or transferred.',
-		examples=['123.45'],
-	)
+    currency_id: str | None = Field(None, examples=['5'])
+    currency_code: str | None = Field(None, examples=['USD'])
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(
+        None, description='Number of decimals supported by the currency', examples=[2]
+    )
+    sum: str | None = Field(
+        None,
+        description='The amount earned, spent or transferred.',
+        examples=['123.45'],
+    )
 
 
 class AttachmentUpdate(BaseModel):
-	filename: str | None = Field(None, examples=['file.pdf'])
-	title: str | None = Field(None, examples=['Some PDF file'])
-	notes: str | None = Field(None, examples=['Some notes'])
+    filename: str | None = Field(None, examples=['file.pdf'])
+    title: str | None = Field(None, examples=['Some PDF file'])
+    notes: str | None = Field(None, examples=['Some notes'])
 
 
 class AvailableBudgetProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	amount: str | None = Field(
-		None,
-		description='The amount of this available budget in the currency of this available budget.',
-		examples=['123.45'],
-	)
-	pc_amount: str | None = Field(
-		None,
-		description='The amount of this available budget in the primary currency (pc) of this administration.',
-		examples=['123.45'],
-	)
-	start: AwareDatetime | None = Field(
-		None,
-		description='Start date of the available budget.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	end: AwareDatetime | None = Field(
-		None,
-		description='End date of the available budget.',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	spent_in_budgets: list[ArrayEntryWithCurrencyAndSum] | None = None
-	pc_spent_in_budgets: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='The amount spent in budgets in the primary currency (pc) of this administration.\n',
-	)
-	spent_outside_budgets: list[ArrayEntryWithCurrencyAndSum] | None = None
-	pc_spent_outside_budgets: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='The amount spent outside of budgets in the primary currency (pc) of this administration.\n',
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    amount: str | None = Field(
+        None,
+        description='The amount of this available budget in the currency of this available budget.',
+        examples=['123.45'],
+    )
+    pc_amount: str | None = Field(
+        None,
+        description='The amount of this available budget in the primary currency (pc) of this administration.',
+        examples=['123.45'],
+    )
+    start: AwareDatetime | None = Field(
+        None,
+        description='Start date of the available budget.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    end: AwareDatetime | None = Field(
+        None,
+        description='End date of the available budget.',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    spent_in_budgets: list[ArrayEntryWithCurrencyAndSum] | None = None
+    pc_spent_in_budgets: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='The amount spent in budgets in the primary currency (pc) of this administration.\n',
+    )
+    spent_outside_budgets: list[ArrayEntryWithCurrencyAndSum] | None = None
+    pc_spent_outside_budgets: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='The amount spent outside of budgets in the primary currency (pc) of this administration.\n',
+    )
 
 
 class AvailableBudgetRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['available_budgets'])
-	id: str = Field(..., examples=['2'])
-	attributes: AvailableBudgetProperties
+    type: str = Field(..., description='Immutable value', examples=['available_budgets'])
+    id: str = Field(..., examples=['2'])
+    attributes: AvailableBudgetProperties
 
 
 class AvailableBudgetSingle(BaseModel):
-	data: AvailableBudgetRead
+    data: AvailableBudgetRead
 
 
 class PaidDate(BaseModel):
-	transaction_group_id: str | None = Field(
-		None,
-		description='Transaction group ID of the transaction linked to this subscription.',
-		examples=['123'],
-	)
-	transaction_journal_id: str | None = Field(
-		None,
-		description='Transaction journal ID of the transaction linked to this subscription.',
-		examples=['123'],
-	)
-	date: AwareDatetime | None = Field(
-		None,
-		description='Date the bill was paid.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	subscription_id: str | None = Field(
-		None, description='ID of this subscription.', examples=['123']
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	amount: str | None = Field(
-		None,
-		description="The amount that was paid for this subscription in the subscription's currency.",
-		examples=['123.45'],
-	)
-	pc_amount: str | None = Field(
-		None,
-		description="The amount that was paid for this subscription in the administration's primary currency.",
-		examples=['123.45'],
-	)
-	foreign_amount: str | None = Field(
-		None,
-		description="The foreign amount that was paid for this subscription in the subscription's currency.",
-		examples=['123.45'],
-	)
-	pc_foreign_amount: str | None = Field(
-		None,
-		description="The foreign amount that was paid for this subscription in the administration's primary currency.",
-		examples=['123.45'],
-	)
+    transaction_group_id: str | None = Field(
+        None,
+        description='Transaction group ID of the transaction linked to this subscription.',
+        examples=['123'],
+    )
+    transaction_journal_id: str | None = Field(
+        None,
+        description='Transaction journal ID of the transaction linked to this subscription.',
+        examples=['123'],
+    )
+    date: AwareDatetime | None = Field(
+        None,
+        description='Date the bill was paid.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    subscription_id: str | None = Field(
+        None, description='ID of this subscription.', examples=['123']
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    amount: str | None = Field(
+        None,
+        description="The amount that was paid for this subscription in the subscription's currency.",
+        examples=['123.45'],
+    )
+    pc_amount: str | None = Field(
+        None,
+        description="The amount that was paid for this subscription in the administration's primary currency.",
+        examples=['123.45'],
+    )
+    foreign_amount: str | None = Field(
+        None,
+        description="The foreign amount that was paid for this subscription in the subscription's currency.",
+        examples=['123.45'],
+    )
+    pc_foreign_amount: str | None = Field(
+        None,
+        description="The foreign amount that was paid for this subscription in the administration's primary currency.",
+        examples=['123.45'],
+    )
 
 
 class BudgetLimitProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	start: AwareDatetime | None = Field(
-		None,
-		description='Start date of the budget limit.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	end: AwareDatetime | None = Field(
-		None,
-		description='End date of the budget limit.',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID of the associated budget.', examples=['23']
-	)
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	amount: str | None = Field(None, examples=['123.45'])
-	pc_amount: str | None = Field(
-		None,
-		description="The amount of this budget limit in the user's primary currency, if the original amount is in a different currency.",
-		examples=['123.45'],
-	)
-	period: str | None = Field(
-		None,
-		description='Period of the budget limit. Only used when auto-generated by auto-budget.',
-		examples=['monthly'],
-	)
-	spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) spent in the currencies in the database for this budget limit.',
-	)
-	pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) spent in the primary currency in the database for this budget limit.',
-	)
-	notes: str | None = Field(
-		None,
-		description='Some notes for this specific budget limit.',
-		examples=['Some example notes'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    start: AwareDatetime | None = Field(
+        None,
+        description='Start date of the budget limit.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    end: AwareDatetime | None = Field(
+        None,
+        description='End date of the budget limit.',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID of the associated budget.', examples=['23']
+    )
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    amount: str | None = Field(None, examples=['123.45'])
+    pc_amount: str | None = Field(
+        None,
+        description="The amount of this budget limit in the user's primary currency, if the original amount is in a different currency.",
+        examples=['123.45'],
+    )
+    period: str | None = Field(
+        None,
+        description='Period of the budget limit. Only used when auto-generated by auto-budget.',
+        examples=['monthly'],
+    )
+    spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) spent in the currencies in the database for this budget limit.',
+    )
+    pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) spent in the primary currency in the database for this budget limit.',
+    )
+    notes: str | None = Field(
+        None,
+        description='Some notes for this specific budget limit.',
+        examples=['Some example notes'],
+    )
 
 
 class BudgetLimitRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['budget_limits'])
-	id: str = Field(..., examples=['2'])
-	attributes: BudgetLimitProperties
+    type: str = Field(..., description='Immutable value', examples=['budget_limits'])
+    id: str = Field(..., examples=['2'])
+    attributes: BudgetLimitProperties
 
 
 class BudgetLimitSingle(BaseModel):
-	data: BudgetLimitRead
+    data: BudgetLimitRead
 
 
 class BudgetLimitStore(BaseModel):
-	currency_id: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's primary currency.",
-		examples=['5'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's primary currency.",
-		examples=['EUR'],
-	)
-	budget_id: str = Field(
-		..., description='The budget ID of the associated budget.', examples=['23']
-	)
-	start: date_aliased = Field(
-		..., description='Start date of the budget limit.', examples=['2025-12-01']
-	)
-	period: str | None = Field(
-		None,
-		description='Period of the budget limit. Only used when auto-generated by auto-budget.',
-		examples=['monthly'],
-	)
-	end: date_aliased = Field(
-		..., description='End date of the budget limit.', examples=['2025-12-31']
-	)
-	amount: str = Field(..., examples=['123.45'])
-	notes: str | None = Field(
-		None,
-		description='Some notes for this specific budget limit.',
-		examples=['Some example notes'],
-	)
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
+    currency_id: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's primary currency.",
+        examples=['5'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's primary currency.",
+        examples=['EUR'],
+    )
+    budget_id: str = Field(
+        ..., description='The budget ID of the associated budget.', examples=['23']
+    )
+    start: date_aliased = Field(
+        ..., description='Start date of the budget limit.', examples=['2025-12-01']
+    )
+    period: str | None = Field(
+        None,
+        description='Period of the budget limit. Only used when auto-generated by auto-budget.',
+        examples=['monthly'],
+    )
+    end: date_aliased = Field(
+        ..., description='End date of the budget limit.', examples=['2025-12-31']
+    )
+    amount: str = Field(..., examples=['123.45'])
+    notes: str | None = Field(
+        None,
+        description='Some notes for this specific budget limit.',
+        examples=['Some example notes'],
+    )
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
 
 
 class BudgetLimitUpdate(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	start: AwareDatetime | None = Field(
-		None,
-		description='Start date of the budget limit.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	end: AwareDatetime | None = Field(
-		None,
-		description='End date of the budget limit.',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID of the associated budget.', examples=['23']
-	)
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	period: str | None = Field(
-		None,
-		description='Period of the budget limit. Only used when auto-generated by auto-budget.',
-		examples=['monthly'],
-	)
-	amount: str | None = Field(None, examples=['123.45'])
-	pc_amount: str | None = Field(
-		None,
-		description="The amount of this budget limit in the user's primary currency, if the original amount is in a different currency.",
-		examples=['123.45'],
-	)
-	spent: str | None = Field(
-		None,
-		description='Will be in the primary currency if this is turned on by the user.',
-		examples=['-1012.12'],
-	)
-	notes: str | None = Field(
-		None,
-		description='Some notes for this specific budget limit.',
-		examples=['Some example notes'],
-	)
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    start: AwareDatetime | None = Field(
+        None,
+        description='Start date of the budget limit.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    end: AwareDatetime | None = Field(
+        None,
+        description='End date of the budget limit.',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID of the associated budget.', examples=['23']
+    )
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    period: str | None = Field(
+        None,
+        description='Period of the budget limit. Only used when auto-generated by auto-budget.',
+        examples=['monthly'],
+    )
+    amount: str | None = Field(None, examples=['123.45'])
+    pc_amount: str | None = Field(
+        None,
+        description="The amount of this budget limit in the user's primary currency, if the original amount is in a different currency.",
+        examples=['123.45'],
+    )
+    spent: str | None = Field(
+        None,
+        description='Will be in the primary currency if this is turned on by the user.',
+        examples=['-1012.12'],
+    )
+    notes: str | None = Field(
+        None,
+        description='Some notes for this specific budget limit.',
+        examples=['Some example notes'],
+    )
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
 
 
 class CategoryProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	name: str = Field(..., examples=['Lunch'])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description='This object never has its own currency setting, so this value is always false.',
-		examples=[False],
-	)
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) spent in the currencies in the database for this category. ONLY present when start and date are set.',
-	)
-	pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) spent in the primary currency in the database for this category. ONLY present when start and date are set. ',
-	)
-	earned: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) earned in the currencies in the database for this category. ONLY present when start and date are set.',
-	)
-	pc_earned: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) earned in the primary currency in the database for this category. ONLY present when start and date are set. ',
-	)
-	transferred: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) transferred in the currencies in the database for this category. ONLY present when start and date are set. ',
-	)
-	pc_transferred: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Amount(s) transferred in primary currency in the database for this category. ONLY present when start and date are set. ',
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    name: str = Field(..., examples=['Lunch'])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description='This object never has its own currency setting, so this value is always false.',
+        examples=[False],
+    )
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) spent in the currencies in the database for this category. ONLY present when start and date are set.',
+    )
+    pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) spent in the primary currency in the database for this category. ONLY present when start and date are set. ',
+    )
+    earned: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) earned in the currencies in the database for this category. ONLY present when start and date are set.',
+    )
+    pc_earned: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) earned in the primary currency in the database for this category. ONLY present when start and date are set. ',
+    )
+    transferred: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) transferred in the currencies in the database for this category. ONLY present when start and date are set. ',
+    )
+    pc_transferred: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Amount(s) transferred in primary currency in the database for this category. ONLY present when start and date are set. ',
+    )
 
 
 class CategoryStore(BaseModel):
-	name: str = Field(..., examples=['Lunch'])
-	notes: str | None = Field(None, examples=['Some example notes'])
+    name: str = Field(..., examples=['Lunch'])
+    notes: str | None = Field(None, examples=['Some example notes'])
 
 
 class CategoryUpdate(BaseModel):
-	name: str = Field(..., examples=['Lunch'])
-	notes: str | None = Field(None, examples=['Some example notes'])
+    name: str = Field(..., examples=['Lunch'])
+    notes: str | None = Field(None, examples=['Some example notes'])
 
 
 class CurrencyExchangeProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	from_currency_id: str | None = Field(
-		None,
-		description='Base currency ID for this exchange rate entry.',
-		examples=['12'],
-	)
-	from_currency_name: str | None = Field(
-		None,
-		description='Base currency name for this exchange rate entry.',
-		examples=['Euro'],
-	)
-	from_currency_code: str | None = Field(
-		None,
-		description='Base currency code for this exchange rate entry.',
-		examples=['EUR'],
-	)
-	from_currency_symbol: str | None = Field(
-		None,
-		description='Base currency symbol for this exchange rate entry.',
-		examples=['$'],
-	)
-	from_currency_decimal_places: int | None = Field(
-		None,
-		description='Base currency decimal places for this exchange rate entry.',
-		examples=[2],
-	)
-	to_currency_id: str | None = Field(
-		None,
-		description='Destination currency ID for this exchange rate entry.',
-		examples=['12'],
-	)
-	to_currency_name: str | None = Field(
-		None,
-		description='Destination currency name for this exchange rate entry.',
-		examples=['EUR'],
-	)
-	to_currency_code: str | None = Field(
-		None,
-		description='Destination currency code for this exchange rate entry.',
-		examples=['EUR'],
-	)
-	to_currency_symbol: str | None = Field(
-		None,
-		description='Destination currency symbol for this exchange rate entry.',
-		examples=['$'],
-	)
-	to_currency_decimal_places: int | None = Field(
-		None,
-		description='Destination currency decimal places for this exchange rate entry.',
-		examples=[2],
-	)
-	rate: str | None = Field(
-		None,
-		description="The actual exchange rate. How many 'to' currency will you get for 1 'from' currency?",
-		examples=['1.10340'],
-	)
-	date: AwareDatetime | None = Field(
-		None,
-		description='Date and time of the exchange rate.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    from_currency_id: str | None = Field(
+        None,
+        description='Base currency ID for this exchange rate entry.',
+        examples=['12'],
+    )
+    from_currency_name: str | None = Field(
+        None,
+        description='Base currency name for this exchange rate entry.',
+        examples=['Euro'],
+    )
+    from_currency_code: str | None = Field(
+        None,
+        description='Base currency code for this exchange rate entry.',
+        examples=['EUR'],
+    )
+    from_currency_symbol: str | None = Field(
+        None,
+        description='Base currency symbol for this exchange rate entry.',
+        examples=['$'],
+    )
+    from_currency_decimal_places: int | None = Field(
+        None,
+        description='Base currency decimal places for this exchange rate entry.',
+        examples=[2],
+    )
+    to_currency_id: str | None = Field(
+        None,
+        description='Destination currency ID for this exchange rate entry.',
+        examples=['12'],
+    )
+    to_currency_name: str | None = Field(
+        None,
+        description='Destination currency name for this exchange rate entry.',
+        examples=['EUR'],
+    )
+    to_currency_code: str | None = Field(
+        None,
+        description='Destination currency code for this exchange rate entry.',
+        examples=['EUR'],
+    )
+    to_currency_symbol: str | None = Field(
+        None,
+        description='Destination currency symbol for this exchange rate entry.',
+        examples=['$'],
+    )
+    to_currency_decimal_places: int | None = Field(
+        None,
+        description='Destination currency decimal places for this exchange rate entry.',
+        examples=[2],
+    )
+    rate: str | None = Field(
+        None,
+        description="The actual exchange rate. How many 'to' currency will you get for 1 'from' currency?",
+        examples=['1.10340'],
+    )
+    date: AwareDatetime | None = Field(
+        None,
+        description='Date and time of the exchange rate.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
 
 
 class CurrencyExchangeRateStore(BaseModel):
-	date: date_aliased = Field(
-		...,
-		description='The date to which the exchange rate is applicable.',
-		examples=['2025-12-01'],
-	)
-	from_: str = Field(..., alias='from', description='The base currency code.', examples=['USD'])
-	to: str = Field(..., description='The destination currency code.', examples=['EUR'])
-	rate: str | None = Field(
-		None,
-		description='The exchange rate from the base currency to the destination currency.',
-		examples=['2.3456'],
-	)
+    date: date_aliased = Field(
+        ...,
+        description='The date to which the exchange rate is applicable.',
+        examples=['2025-12-01'],
+    )
+    from_: str = Field(..., alias='from', description='The base currency code.', examples=['USD'])
+    to: str = Field(..., description='The destination currency code.', examples=['EUR'])
+    rate: str | None = Field(
+        None,
+        description='The exchange rate from the base currency to the destination currency.',
+        examples=['2.3456'],
+    )
 
 
 class CurrencyExchangeRateStoreByDate(BaseModel):
-	from_: str = Field(..., alias='from', description="The 'from'-currency", examples=['EUR'])
-	rates: dict[str, str] = Field(
-		...,
-		description="The actual entries for this data set. They 'key' value is 'to' currency. The value is the exchange rate.",
-		examples=[{'USD': '1.2345', 'GBP': '6.3456'}],
-	)
+    from_: str = Field(..., alias='from', description="The 'from'-currency", examples=['EUR'])
+    rates: dict[str, str] = Field(
+        ...,
+        description="The actual entries for this data set. They 'key' value is 'to' currency. The value is the exchange rate.",
+        examples=[{'USD': '1.2345', 'GBP': '6.3456'}],
+    )
 
 
 class CurrencyExchangeRateStoreByPair(RootModel[dict[str, str]]):
-	root: dict[str, str]
+    root: dict[str, str]
 
 
 class CurrencyExchangeRateUpdate(BaseModel):
-	date: date_aliased = Field(
-		...,
-		description='The date to which the exchange rate is applicable.',
-		examples=['2025-12-01'],
-	)
-	rate: str = Field(
-		...,
-		description='The exchange rate from the base currency to the destination currency.',
-		examples=['2.3456'],
-	)
-	from_: str | None = Field(
-		None, alias='from', description='The base currency code.', examples=['USD']
-	)
-	to: str | None = Field(None, description='The destination currency code.', examples=['EUR'])
+    date: date_aliased = Field(
+        ...,
+        description='The date to which the exchange rate is applicable.',
+        examples=['2025-12-01'],
+    )
+    rate: str = Field(
+        ...,
+        description='The exchange rate from the base currency to the destination currency.',
+        examples=['2.3456'],
+    )
+    from_: str | None = Field(
+        None, alias='from', description='The base currency code.', examples=['USD']
+    )
+    to: str | None = Field(None, description='The destination currency code.', examples=['EUR'])
 
 
 class CurrencyExchangeRateUpdateNoDate(BaseModel):
-	rate: str = Field(
-		...,
-		description='The exchange rate from the base currency to the destination currency.',
-		examples=['2.3456'],
-	)
+    rate: str = Field(
+        ...,
+        description='The exchange rate from the base currency to the destination currency.',
+        examples=['2.3456'],
+    )
 
 
 class ObjectGroup(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	title: str = Field(..., examples=['My object group'])
-	order: int = Field(..., description='Order of the object group', examples=[1])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    title: str = Field(..., examples=['My object group'])
+    order: int = Field(..., description='Order of the object group', examples=[1])
 
 
 class ObjectGroupUpdate(BaseModel):
-	title: str = Field(..., examples=['My object group'])
-	order: int | None = Field(None, description='Order of the object group', examples=[1])
+    title: str = Field(..., examples=['My object group'])
+    order: int | None = Field(None, description='Order of the object group', examples=[1])
 
 
 class Field0(BaseModel):
-	rel: str | None = Field(None, examples=['self'])
-	uri: str | None = Field(None, examples=['/OBJECTS/1'])
+    rel: str | None = Field(None, examples=['self'])
+    uri: str | None = Field(None, examples=['/OBJECTS/1'])
 
 
 class ObjectLink(BaseModel):
-	self: AnyUrl | None = Field(None, examples=['https://demo.firefly-iii.org/api/v1/OBJECTS/1'])
-	field_0: Field0 | None = Field(None, alias='0')
+    self: AnyUrl | None = Field(None, examples=['https://demo.firefly-iii.org/api/v1/OBJECTS/1'])
+    field_0: Field0 | None = Field(None, alias='0')
 
 
 class PageLink(BaseModel):
-	self: AnyUrl | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=4']
-	)
-	first: AnyUrl | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=1']
-	)
-	next: AnyUrl | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=3']
-	)
-	prev: AnyUrl | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=2']
-	)
-	last: AnyUrl | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=12']
-	)
+    self: AnyUrl | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=4']
+    )
+    first: AnyUrl | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=1']
+    )
+    next: AnyUrl | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=3']
+    )
+    prev: AnyUrl | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=2']
+    )
+    last: AnyUrl | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/OBJECT?&page=12']
+    )
 
 
 class PiggyBankAccountRead(BaseModel):
-	account_id: str | None = Field(None, description='The ID of the account.', examples=['3'])
-	name: str | None = Field(None, examples=['Checking account'])
-	current_amount: str | None = Field(None, examples=['123.45'])
-	pc_current_amount: str | None = Field(
-		None,
-		description='If convertToPrimary is on, this will show the amount in the primary currency.',
-		examples=['123.45'],
-	)
+    account_id: str | None = Field(None, description='The ID of the account.', examples=['3'])
+    name: str | None = Field(None, examples=['Checking account'])
+    current_amount: str | None = Field(None, examples=['123.45'])
+    pc_current_amount: str | None = Field(
+        None,
+        description='If convertToPrimary is on, this will show the amount in the primary currency.',
+        examples=['123.45'],
+    )
 
 
 class PiggyBankAccountStore(BaseModel):
-	id: str = Field(..., description='The ID of the account.', examples=['3'])
-	name: str | None = Field(
-		None, description='The name of the account.', examples=['Checking account']
-	)
-	current_amount: str | None = Field(
-		None, description='The amount saved currently.', examples=['123.45']
-	)
+    id: str = Field(..., description='The ID of the account.', examples=['3'])
+    name: str | None = Field(
+        None, description='The name of the account.', examples=['Checking account']
+    )
+    current_amount: str | None = Field(
+        None, description='The amount saved currently.', examples=['123.45']
+    )
 
 
 class PiggyBankAccountUpdate(BaseModel):
-	account_id: str | None = Field(None, description='The ID of the account.', examples=['3'])
-	name: str | None = Field(
-		None, description='The name of the account.', examples=['Checking account']
-	)
-	current_amount: str | None = Field(
-		None, description='The amount saved currently.', examples=['123.45']
-	)
+    account_id: str | None = Field(None, description='The ID of the account.', examples=['3'])
+    name: str | None = Field(
+        None, description='The name of the account.', examples=['Checking account']
+    )
+    current_amount: str | None = Field(
+        None, description='The amount saved currently.', examples=['123.45']
+    )
 
 
 class PiggyBankProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	name: str = Field(..., examples=['New digital camera'])
-	percentage: int | None = Field(
-		None,
-		description='The percentage of the target amount that has been saved, if a target amount is set.',
-		examples=[12],
-	)
-	start_date: AwareDatetime | None = Field(
-		None,
-		description='The date you started with this piggy bank.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	target_date: AwareDatetime | None = Field(
-		None,
-		description='The date you intend to finish saving money.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	order: int | None = Field(None, examples=[5])
-	active: bool | None = Field(None, examples=[True])
-	notes: str | None = Field(None, examples=['Some notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_order: int | None = Field(
-		None,
-		description='The order of the group. At least 1, for the highest sorting.',
-		examples=[5],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
-	accounts: list[PiggyBankAccountRead] | None = None
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	target_amount: str = Field(..., examples=['123.45'])
-	pc_target_amount: str | None = Field(
-		None,
-		description='The target amount in the primary currency of the administration.',
-		examples=['123.45'],
-	)
-	current_amount: str | None = Field(None, examples=['123.45'])
-	pc_current_amount: str | None = Field(
-		None,
-		description='The current amount in the primary currency of the administration.',
-		examples=['123.45'],
-	)
-	left_to_save: str | None = Field(None, examples=['700.00'])
-	pc_left_to_save: str | None = Field(None, examples=['700.00'])
-	save_per_month: str | None = Field(None, examples=['12.45'])
-	pc_save_per_month: str | None = Field(None, examples=['12.45'])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    name: str = Field(..., examples=['New digital camera'])
+    percentage: int | None = Field(
+        None,
+        description='The percentage of the target amount that has been saved, if a target amount is set.',
+        examples=[12],
+    )
+    start_date: AwareDatetime | None = Field(
+        None,
+        description='The date you started with this piggy bank.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    target_date: AwareDatetime | None = Field(
+        None,
+        description='The date you intend to finish saving money.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    order: int | None = Field(None, examples=[5])
+    active: bool | None = Field(None, examples=[True])
+    notes: str | None = Field(None, examples=['Some notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_order: int | None = Field(
+        None,
+        description='The order of the group. At least 1, for the highest sorting.',
+        examples=[5],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
+    accounts: list[PiggyBankAccountRead] | None = None
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    target_amount: str = Field(..., examples=['123.45'])
+    pc_target_amount: str | None = Field(
+        None,
+        description='The target amount in the primary currency of the administration.',
+        examples=['123.45'],
+    )
+    current_amount: str | None = Field(None, examples=['123.45'])
+    pc_current_amount: str | None = Field(
+        None,
+        description='The current amount in the primary currency of the administration.',
+        examples=['123.45'],
+    )
+    left_to_save: str | None = Field(None, examples=['700.00'])
+    pc_left_to_save: str | None = Field(None, examples=['700.00'])
+    save_per_month: str | None = Field(None, examples=['12.45'])
+    pc_save_per_month: str | None = Field(None, examples=['12.45'])
 
 
 class PiggyBankStore(BaseModel):
-	name: str = Field(..., examples=['New digital camera'])
-	accounts: list[PiggyBankAccountStore] | None = None
-	target_amount: str = Field(..., examples=['123.45'])
-	current_amount: str | None = Field(None, examples=['123.45'])
-	start_date: date_aliased = Field(
-		...,
-		description='The date you started with this piggy bank.',
-		examples=['2025-12-01'],
-	)
-	target_date: date_aliased | None = Field(
-		None,
-		description='The date you intend to finish saving money.',
-		examples=['2025-12-31'],
-	)
-	order: int | None = Field(None, examples=[5])
-	active: bool | None = Field(None, examples=[True])
-	notes: str | None = Field(None, examples=['Some notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    name: str = Field(..., examples=['New digital camera'])
+    accounts: list[PiggyBankAccountStore] | None = None
+    target_amount: str = Field(..., examples=['123.45'])
+    current_amount: str | None = Field(None, examples=['123.45'])
+    start_date: date_aliased = Field(
+        ...,
+        description='The date you started with this piggy bank.',
+        examples=['2025-12-01'],
+    )
+    target_date: date_aliased | None = Field(
+        None,
+        description='The date you intend to finish saving money.',
+        examples=['2025-12-31'],
+    )
+    order: int | None = Field(None, examples=[5])
+    active: bool | None = Field(None, examples=[True])
+    notes: str | None = Field(None, examples=['Some notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class PiggyBankUpdate(BaseModel):
-	name: str | None = Field(None, examples=['New digital camera'])
-	accounts: list[PiggyBankAccountUpdate] | None = None
-	currency_id: str | None = Field(None, examples=['5'])
-	currency_code: str | None = Field(None, examples=['USD'])
-	target_amount: str | None = Field(None, examples=['123.45'])
-	start_date: date_aliased | None = Field(
-		None,
-		description='The date you started with this piggy bank.',
-		examples=['2025-12-01'],
-	)
-	target_date: date_aliased | None = Field(
-		None,
-		description='The date you intend to finish saving money.',
-		examples=['2025-12-31'],
-	)
-	order: int | None = Field(None, examples=[5])
-	active: bool | None = Field(None, examples=[True])
-	notes: str | None = Field(None, examples=['Some notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    name: str | None = Field(None, examples=['New digital camera'])
+    accounts: list[PiggyBankAccountUpdate] | None = None
+    currency_id: str | None = Field(None, examples=['5'])
+    currency_code: str | None = Field(None, examples=['USD'])
+    target_amount: str | None = Field(None, examples=['123.45'])
+    start_date: date_aliased | None = Field(
+        None,
+        description='The date you started with this piggy bank.',
+        examples=['2025-12-01'],
+    )
+    target_date: date_aliased | None = Field(
+        None,
+        description='The date you intend to finish saving money.',
+        examples=['2025-12-31'],
+    )
+    order: int | None = Field(None, examples=[5])
+    active: bool | None = Field(None, examples=[True])
+    notes: str | None = Field(None, examples=['Some notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class PiggyBankEventProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	amount: str | None = Field(None, examples=['123.45'])
-	pc_amount: str | None = Field(None, examples=['123.45'])
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	transaction_journal_id: str | None = Field(
-		None, description='The journal associated with the event.', examples=['4291']
-	)
-	transaction_group_id: str | None = Field(
-		None,
-		description='The transaction group associated with the event.',
-		examples=['4291'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    amount: str | None = Field(None, examples=['123.45'])
+    pc_amount: str | None = Field(None, examples=['123.45'])
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    transaction_journal_id: str | None = Field(
+        None, description='The journal associated with the event.', examples=['4291']
+    )
+    transaction_group_id: str | None = Field(
+        None,
+        description='The transaction group associated with the event.',
+        examples=['4291'],
+    )
 
 
 class RecurrenceTransactionStore(BaseModel):
-	description: str = Field(..., examples=['Rent for the current month'])
-	amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
-	foreign_amount: str | None = Field(
-		None, description='Foreign amount of the transaction.', examples=['123.45']
-	)
-	currency_id: str | None = Field(
-		None,
-		description='Submit either a currency_id or a currency_code.',
-		examples=['3'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='Submit either a currency_id or a currency_code.',
-		examples=['EUR'],
-	)
-	foreign_currency_id: str | None = Field(
-		None,
-		description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
-		examples=['17'],
-	)
-	foreign_currency_code: str | None = Field(
-		None,
-		description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
-		examples=['GBP'],
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	category_id: str | None = Field(
-		None, description='Category ID for this transaction.', examples=['211']
-	)
-	source_id: str = Field(..., description='ID of the source account.', examples=['913'])
-	destination_id: str = Field(..., description='ID of the destination account.', examples=['258'])
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	piggy_bank_id: str | None = Field(None, description='Optional.', examples=['123'])
-	bill_id: str | None = Field(None, description='Optional.', examples=['123'])
+    description: str = Field(..., examples=['Rent for the current month'])
+    amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
+    foreign_amount: str | None = Field(
+        None, description='Foreign amount of the transaction.', examples=['123.45']
+    )
+    currency_id: str | None = Field(
+        None,
+        description='Submit either a currency_id or a currency_code.',
+        examples=['3'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='Submit either a currency_id or a currency_code.',
+        examples=['EUR'],
+    )
+    foreign_currency_id: str | None = Field(
+        None,
+        description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
+        examples=['17'],
+    )
+    foreign_currency_code: str | None = Field(
+        None,
+        description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
+        examples=['GBP'],
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    category_id: str | None = Field(
+        None, description='Category ID for this transaction.', examples=['211']
+    )
+    source_id: str = Field(..., description='ID of the source account.', examples=['913'])
+    destination_id: str = Field(..., description='ID of the destination account.', examples=['258'])
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    piggy_bank_id: str | None = Field(None, description='Optional.', examples=['123'])
+    bill_id: str | None = Field(None, description='Optional.', examples=['123'])
 
 
 class RecurrenceTransactionUpdate(BaseModel):
-	id: str = Field(
-		...,
-		examples=[
-			'ID of the recurring transaction. Not to be confused with the ID of the recurrence itself. Is marked as REQUIRED but can be skipped when there is only ONE transaction.'
-		],
-	)
-	description: str | None = Field(None, examples=['Rent for the current month'])
-	amount: str | None = Field(None, description='Amount of the transaction.', examples=['123.45'])
-	foreign_amount: str | None = Field(
-		None, description='Foreign amount of the transaction.', examples=['123.45']
-	)
-	currency_id: str | None = Field(
-		None,
-		description='Submit either a currency_id or a currency_code.',
-		examples=['3'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='Submit either a currency_id or a currency_code.',
-		examples=['EUR'],
-	)
-	foreign_currency_id: str | None = Field(
-		None,
-		description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
-		examples=['17'],
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	category_id: str | None = Field(
-		None, description='Category ID for this transaction.', examples=['211']
-	)
-	source_id: str | None = Field(
-		None,
-		description='ID of the source account. Submit either this or source_name.',
-		examples=['913'],
-	)
-	destination_id: str | None = Field(
-		None,
-		description='ID of the destination account. Submit either this or destination_name.',
-		examples=['258'],
-	)
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	piggy_bank_id: str | None = Field(None, examples=['123'])
-	bill_id: str | None = Field(None, description='Optional.', examples=['123'])
+    id: str = Field(
+        ...,
+        examples=[
+            'ID of the recurring transaction. Not to be confused with the ID of the recurrence itself. Is marked as REQUIRED but can be skipped when there is only ONE transaction.'
+        ],
+    )
+    description: str | None = Field(None, examples=['Rent for the current month'])
+    amount: str | None = Field(None, description='Amount of the transaction.', examples=['123.45'])
+    foreign_amount: str | None = Field(
+        None, description='Foreign amount of the transaction.', examples=['123.45']
+    )
+    currency_id: str | None = Field(
+        None,
+        description='Submit either a currency_id or a currency_code.',
+        examples=['3'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='Submit either a currency_id or a currency_code.',
+        examples=['EUR'],
+    )
+    foreign_currency_id: str | None = Field(
+        None,
+        description='Submit either a foreign_currency_id or a foreign_currency_code, or neither.',
+        examples=['17'],
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    category_id: str | None = Field(
+        None, description='Category ID for this transaction.', examples=['211']
+    )
+    source_id: str | None = Field(
+        None,
+        description='ID of the source account. Submit either this or source_name.',
+        examples=['913'],
+    )
+    destination_id: str | None = Field(
+        None,
+        description='ID of the destination account. Submit either this or destination_name.',
+        examples=['258'],
+    )
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    piggy_bank_id: str | None = Field(None, examples=['123'])
+    bill_id: str | None = Field(None, description='Optional.', examples=['123'])
 
 
 class RuleGroup(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	title: str = Field(..., examples=['Default rule group'])
-	description: str | None = Field(None, examples=['Description of this rule group'])
-	order: int | None = Field(None, examples=[4])
-	active: bool | None = Field(None, examples=[True])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    title: str = Field(..., examples=['Default rule group'])
+    description: str | None = Field(None, examples=['Description of this rule group'])
+    order: int | None = Field(None, examples=[4])
+    active: bool | None = Field(None, examples=[True])
 
 
 class RuleGroupStore(BaseModel):
-	title: str = Field(..., examples=['Default rule group'])
-	description: str | None = Field(None, examples=['Description of this rule group'])
-	order: int | None = Field(None, examples=[4])
-	active: bool | None = Field(None, examples=[True])
+    title: str = Field(..., examples=['Default rule group'])
+    description: str | None = Field(None, examples=['Description of this rule group'])
+    order: int | None = Field(None, examples=[4])
+    active: bool | None = Field(None, examples=[True])
 
 
 class RuleGroupUpdate(BaseModel):
-	title: str | None = Field(None, examples=['Default rule group'])
-	description: str | None = Field(None, examples=['Description of this rule group'])
-	order: int | None = Field(None, examples=[4])
-	active: bool | None = Field(None, examples=[True])
+    title: str | None = Field(None, examples=['Default rule group'])
+    description: str | None = Field(None, examples=['Description of this rule group'])
+    order: int | None = Field(None, examples=[4])
+    active: bool | None = Field(None, examples=[True])
 
 
 class TagModel(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	tag: str = Field(..., description='The tag', examples=['expensive'])
-	date: date_aliased | None = Field(
-		None,
-		description='The date to which the tag is applicable.',
-		examples=['2025-12-01'],
-	)
-	description: str | None = Field(None, examples=['Tag for expensive stuff'])
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    tag: str = Field(..., description='The tag', examples=['expensive'])
+    date: date_aliased | None = Field(
+        None,
+        description='The date to which the tag is applicable.',
+        examples=['2025-12-01'],
+    )
+    description: str | None = Field(None, examples=['Tag for expensive stuff'])
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
 
 
 class TagModelStore(BaseModel):
-	tag: str = Field(..., description='The tag', examples=['expensive'])
-	date: date_aliased | None = Field(
-		None,
-		description='The date to which the tag is applicable.',
-		examples=['2025-12-01'],
-	)
-	description: str | None = Field(None, examples=['Tag for expensive stuff'])
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
+    tag: str = Field(..., description='The tag', examples=['expensive'])
+    date: date_aliased | None = Field(
+        None,
+        description='The date to which the tag is applicable.',
+        examples=['2025-12-01'],
+    )
+    description: str | None = Field(None, examples=['Tag for expensive stuff'])
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
 
 
 class TagModelUpdate(BaseModel):
-	tag: str | None = Field(None, description='The tag', examples=['expensive'])
-	date: date_aliased | None = Field(
-		None,
-		description='The date to which the tag is applicable.',
-		examples=['2025-12-01'],
-	)
-	description: str | None = Field(None, examples=['Tag for expensive stuff'])
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
+    tag: str | None = Field(None, description='The tag', examples=['expensive'])
+    date: date_aliased | None = Field(
+        None,
+        description='The date to which the tag is applicable.',
+        examples=['2025-12-01'],
+    )
+    description: str | None = Field(None, examples=['Tag for expensive stuff'])
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the tag's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
 
 
 class CurrencyProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	enabled: bool | None = Field(True, description='Defaults to true', examples=[True])
-	primary: bool | None = Field(None, description='Is the primary currency?', examples=[False])
-	code: str = Field(..., examples=['AMS'])
-	name: str = Field(..., examples=['Ankh-Morpork dollar'])
-	symbol: str = Field(..., examples=['AM$'])
-	decimal_places: int | None = Field(None, description='Supports 0-16 decimals.', examples=[2])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    enabled: bool | None = Field(True, description='Defaults to true', examples=[True])
+    primary: bool | None = Field(None, description='Is the primary currency?', examples=[False])
+    code: str = Field(..., examples=['AMS'])
+    name: str = Field(..., examples=['Ankh-Morpork dollar'])
+    symbol: str = Field(..., examples=['AM$'])
+    decimal_places: int | None = Field(None, description='Supports 0-16 decimals.', examples=[2])
 
 
 class CurrencyStore(BaseModel):
-	enabled: bool | None = Field(True, description='Defaults to true', examples=[True])
-	primary: bool | None = Field(
-		None,
-		description='Make this currency the primary currency for the current administration. You can set this value to FALSE, in which case nothing will change to the primary currency. If you set it to TRUE, the current primary currency will no longer be the primary currency.',
-		examples=[True],
-	)
-	code: str = Field(..., examples=['AMS'])
-	name: str = Field(..., examples=['Ankh-Morpork dollar'])
-	symbol: str = Field(..., examples=['AM$'])
-	decimal_places: int | None = Field(None, description='Supports 0-16 decimals.', examples=[2])
+    enabled: bool | None = Field(True, description='Defaults to true', examples=[True])
+    primary: bool | None = Field(
+        None,
+        description='Make this currency the primary currency for the current administration. You can set this value to FALSE, in which case nothing will change to the primary currency. If you set it to TRUE, the current primary currency will no longer be the primary currency.',
+        examples=[True],
+    )
+    code: str = Field(..., examples=['AMS'])
+    name: str = Field(..., examples=['Ankh-Morpork dollar'])
+    symbol: str = Field(..., examples=['AM$'])
+    decimal_places: int | None = Field(None, description='Supports 0-16 decimals.', examples=[2])
 
 
 class Primary(Enum):
-	boolean_True = True
+    boolean_True = True
 
 
 class CurrencyUpdate(BaseModel):
-	enabled: bool | None = Field(None, description='If the currency is enabled', examples=[True])
-	primary: Primary | None = Field(
-		None,
-		description='If the currency must be the primary for the user. You can only submit TRUE. Submitting FALSE will not drop this currency as the primary currency, because then the system would be without one.',
-		examples=[True],
-	)
-	code: str | None = Field(None, description='The currency code', examples=['AMS'])
-	name: str | None = Field(
-		None, description='The currency name', examples=['Ankh-Morpork dollar']
-	)
-	symbol: str | None = Field(None, description='The currency symbol', examples=['AM$'])
-	decimal_places: int | None = Field(
-		None,
-		description='How many decimals to use when displaying this currency. Between 0 and 16.',
-		examples=[2],
-	)
+    enabled: bool | None = Field(None, description='If the currency is enabled', examples=[True])
+    primary: Primary | None = Field(
+        None,
+        description='If the currency must be the primary for the user. You can only submit TRUE. Submitting FALSE will not drop this currency as the primary currency, because then the system would be without one.',
+        examples=[True],
+    )
+    code: str | None = Field(None, description='The currency code', examples=['AMS'])
+    name: str | None = Field(
+        None, description='The currency name', examples=['Ankh-Morpork dollar']
+    )
+    symbol: str | None = Field(None, description='The currency symbol', examples=['AM$'])
+    decimal_places: int | None = Field(
+        None,
+        description='How many decimals to use when displaying this currency. Between 0 and 16.',
+        examples=[2],
+    )
 
 
 class TransactionLink(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	link_type_id: str = Field(
-		...,
-		description='The link type ID to use. You can also use the link_type_name field.',
-		examples=['5'],
-	)
-	link_type_name: str | None = Field(
-		None,
-		description='The link type name to use. You can also use the link_type_id field.',
-		examples=['Is paid by'],
-	)
-	inward_id: str = Field(
-		...,
-		description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
-		examples=['131'],
-	)
-	outward_id: str = Field(
-		...,
-		description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
-		examples=['131'],
-	)
-	notes: str | None = Field(
-		None, description='Optional. Some notes.', examples=['Some example notes']
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    link_type_id: str = Field(
+        ...,
+        description='The link type ID to use. You can also use the link_type_name field.',
+        examples=['5'],
+    )
+    link_type_name: str | None = Field(
+        None,
+        description='The link type name to use. You can also use the link_type_id field.',
+        examples=['Is paid by'],
+    )
+    inward_id: str = Field(
+        ...,
+        description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
+        examples=['131'],
+    )
+    outward_id: str = Field(
+        ...,
+        description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
+        examples=['131'],
+    )
+    notes: str | None = Field(
+        None, description='Optional. Some notes.', examples=['Some example notes']
+    )
 
 
 class TransactionLinkStore(BaseModel):
-	link_type_id: str = Field(
-		...,
-		description='The link type ID to use. You can also use the link_type_name field.',
-		examples=['5'],
-	)
-	link_type_name: str | None = Field(
-		None,
-		description='The link type name to use. You can also use the link_type_id field.',
-		examples=['Is paid by'],
-	)
-	inward_id: str = Field(
-		...,
-		description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
-		examples=['131'],
-	)
-	outward_id: str = Field(
-		...,
-		description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
-		examples=['131'],
-	)
-	notes: str | None = Field(
-		None, description='Optional. Some notes.', examples=['Some example notes']
-	)
+    link_type_id: str = Field(
+        ...,
+        description='The link type ID to use. You can also use the link_type_name field.',
+        examples=['5'],
+    )
+    link_type_name: str | None = Field(
+        None,
+        description='The link type name to use. You can also use the link_type_id field.',
+        examples=['Is paid by'],
+    )
+    inward_id: str = Field(
+        ...,
+        description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
+        examples=['131'],
+    )
+    outward_id: str = Field(
+        ...,
+        description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
+        examples=['131'],
+    )
+    notes: str | None = Field(
+        None, description='Optional. Some notes.', examples=['Some example notes']
+    )
 
 
 class TransactionLinkUpdate(BaseModel):
-	link_type_id: str | None = Field(
-		None,
-		description='The link type ID to use. Use this field OR use the link_type_name field.',
-		examples=['5'],
-	)
-	link_type_name: str | None = Field(
-		None,
-		description='The link type name to use. Use this field OR use the link_type_id field.',
-		examples=['Is paid by'],
-	)
-	inward_id: str | None = Field(
-		None,
-		description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
-		examples=['131'],
-	)
-	outward_id: str | None = Field(
-		None,
-		description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
-		examples=['131'],
-	)
-	notes: str | None = Field(
-		None,
-		description='Optional. Some notes. If you submit an empty string the current notes will be removed',
-		examples=['Some example notes'],
-	)
+    link_type_id: str | None = Field(
+        None,
+        description='The link type ID to use. Use this field OR use the link_type_name field.',
+        examples=['5'],
+    )
+    link_type_name: str | None = Field(
+        None,
+        description='The link type name to use. Use this field OR use the link_type_id field.',
+        examples=['Is paid by'],
+    )
+    inward_id: str | None = Field(
+        None,
+        description="The inward transaction transaction_journal_id for the link. This becomes the 'is paid by' transaction of the set.",
+        examples=['131'],
+    )
+    outward_id: str | None = Field(
+        None,
+        description="The outward transaction transaction_journal_id for the link. This becomes the 'pays for' transaction of the set.",
+        examples=['131'],
+    )
+    notes: str | None = Field(
+        None,
+        description='Optional. Some notes. If you submit an empty string the current notes will be removed',
+        examples=['Some example notes'],
+    )
 
 
 class LinkType(BaseModel):
-	name: str = Field(..., examples=['Paid'])
-	inward: str = Field(..., examples=['is (partially) paid for by'])
-	outward: str = Field(..., examples=['(partially) pays for'])
-	editable: bool | None = Field(None, examples=[False])
+    name: str = Field(..., examples=['Paid'])
+    inward: str = Field(..., examples=['is (partially) paid for by'])
+    outward: str = Field(..., examples=['(partially) pays for'])
+    editable: bool | None = Field(None, examples=[False])
 
 
 class LinkTypeUpdate(BaseModel):
-	name: str | None = Field(None, examples=['Paid'])
-	inward: str | None = Field(None, examples=['is (partially) paid for by'])
-	outward: str | None = Field(None, examples=['(partially) pays for'])
+    name: str | None = Field(None, examples=['Paid'])
+    inward: str | None = Field(None, examples=['is (partially) paid for by'])
+    outward: str | None = Field(None, examples=['(partially) pays for'])
 
 
 class UserGroupReadRole(Enum):
-	ro = 'ro'
-	mng_trx = 'mng_trx'
-	mng_meta = 'mng_meta'
-	read_budgets = 'read_budgets'
-	read_piggies = 'read_piggies'
-	read_subscriptions = 'read_subscriptions'
-	read_rules = 'read_rules'
-	read_recurring = 'read_recurring'
-	read_webhooks = 'read_webhooks'
-	read_currencies = 'read_currencies'
-	mng_budgets = 'mng_budgets'
-	mng_piggies = 'mng_piggies'
-	mng_subscriptions = 'mng_subscriptions'
-	mng_rules = 'mng_rules'
-	mng_recurring = 'mng_recurring'
-	mng_webhooks = 'mng_webhooks'
-	mng_currencies = 'mng_currencies'
-	view_reports = 'view_reports'
-	view_memberships = 'view_memberships'
-	full = 'full'
-	owner = 'owner'
+    ro = 'ro'
+    mng_trx = 'mng_trx'
+    mng_meta = 'mng_meta'
+    read_budgets = 'read_budgets'
+    read_piggies = 'read_piggies'
+    read_subscriptions = 'read_subscriptions'
+    read_rules = 'read_rules'
+    read_recurring = 'read_recurring'
+    read_webhooks = 'read_webhooks'
+    read_currencies = 'read_currencies'
+    mng_budgets = 'mng_budgets'
+    mng_piggies = 'mng_piggies'
+    mng_subscriptions = 'mng_subscriptions'
+    mng_rules = 'mng_rules'
+    mng_recurring = 'mng_recurring'
+    mng_webhooks = 'mng_webhooks'
+    mng_currencies = 'mng_currencies'
+    view_reports = 'view_reports'
+    view_memberships = 'view_memberships'
+    full = 'full'
+    owner = 'owner'
 
 
 class UserGroupUpdate(BaseModel):
-	title: str = Field(
-		...,
-		description='A descriptive title for the user group.',
-		examples=['New user group title'],
-	)
-	primary_currency_id: str | None = Field(
-		None,
-		description="Use either primary_currency_id or primary_currency_code. This will set the primary currency for the user group ('financial administration').",
-		examples=['1'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="Use either primary_currency_id or primary_currency_code. This will set the primary currency for the user group ('financial administration').",
-		examples=['EUR'],
-	)
+    title: str = Field(
+        ...,
+        description='A descriptive title for the user group.',
+        examples=['New user group title'],
+    )
+    primary_currency_id: str | None = Field(
+        None,
+        description="Use either primary_currency_id or primary_currency_code. This will set the primary currency for the user group ('financial administration').",
+        examples=['1'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="Use either primary_currency_id or primary_currency_code. This will set the primary currency for the user group ('financial administration').",
+        examples=['EUR'],
+    )
 
 
 class WebhookDelivery(Enum):
-	JSON = 'JSON'
+    JSON = 'JSON'
 
 
 class WebhookDeliveryArray(RootModel[list[WebhookDelivery]]):
-	root: list[WebhookDelivery] = Field(..., examples=[['JSON']], max_length=1, min_length=1)
+    root: list[WebhookDelivery] = Field(..., examples=[['JSON']], max_length=1, min_length=1)
 
 
 class WebhookResponse(Enum):
-	TRANSACTIONS = 'TRANSACTIONS'
-	ACCOUNTS = 'ACCOUNTS'
-	BUDGET = 'BUDGET'
-	RELEVANT = 'RELEVANT'
-	NONE = 'NONE'
+    TRANSACTIONS = 'TRANSACTIONS'
+    ACCOUNTS = 'ACCOUNTS'
+    BUDGET = 'BUDGET'
+    RELEVANT = 'RELEVANT'
+    NONE = 'NONE'
 
 
 class WebhookResponseArray(RootModel[list[WebhookResponse]]):
-	root: list[WebhookResponse] = Field(
-		..., examples=[['TRANSACTIONS']], max_length=1, min_length=1
-	)
+    root: list[WebhookResponse] = Field(
+        ..., examples=[['TRANSACTIONS']], max_length=1, min_length=1
+    )
 
 
 class WebhookTrigger(Enum):
-	ANY = 'ANY'
-	STORE_TRANSACTION = 'STORE_TRANSACTION'
-	UPDATE_TRANSACTION = 'UPDATE_TRANSACTION'
-	DESTROY_TRANSACTION = 'DESTROY_TRANSACTION'
-	STORE_BUDGET = 'STORE_BUDGET'
-	UPDATE_BUDGET = 'UPDATE_BUDGET'
-	DESTROY_BUDGET = 'DESTROY_BUDGET'
-	STORE_UPDATE_BUDGET_LIMIT = 'STORE_UPDATE_BUDGET_LIMIT'
+    ANY = 'ANY'
+    STORE_TRANSACTION = 'STORE_TRANSACTION'
+    UPDATE_TRANSACTION = 'UPDATE_TRANSACTION'
+    DESTROY_TRANSACTION = 'DESTROY_TRANSACTION'
+    STORE_BUDGET = 'STORE_BUDGET'
+    UPDATE_BUDGET = 'UPDATE_BUDGET'
+    DESTROY_BUDGET = 'DESTROY_BUDGET'
+    STORE_UPDATE_BUDGET_LIMIT = 'STORE_UPDATE_BUDGET_LIMIT'
 
 
 class WebhookTriggerArray(RootModel[list[WebhookTrigger]]):
-	root: list[WebhookTrigger] = Field(
-		...,
-		examples=[['STORE_TRANSACTION', 'UPDATE_TRANSACTION']],
-		max_length=3,
-		min_length=1,
-	)
+    root: list[WebhookTrigger] = Field(
+        ...,
+        examples=[['STORE_TRANSACTION', 'UPDATE_TRANSACTION']],
+        max_length=3,
+        min_length=1,
+    )
 
 
 class WebhookUpdate(BaseModel):
-	active: bool | None = Field(
-		None,
-		description='Boolean to indicate if the webhook is active',
-		examples=[False],
-	)
-	title: str | None = Field(
-		None,
-		description='A title for the webhook for easy recognition.',
-		examples=['Update magic mirror on new transaction'],
-	)
-	secret: str | None = Field(
-		None,
-		description="A 24-character secret for the webhook. It's generated by Firefly III when saving a new webhook. If you submit a new secret through the PUT endpoint it will generate a new secret for the selected webhook, a new secret bearing no relation to whatever you just submitted.",
-		examples=['iMLZLtLx2JHWhK9Dtyuoqyir'],
-	)
-	triggers: WebhookTriggerArray | None = None
-	responses: WebhookResponseArray | None = None
-	deliveries: WebhookDeliveryArray | None = None
-	url: str | None = Field(
-		None,
-		description='The URL of the webhook. Has to start with `https`.',
-		examples=['https://example.com'],
-	)
+    active: bool | None = Field(
+        None,
+        description='Boolean to indicate if the webhook is active',
+        examples=[False],
+    )
+    title: str | None = Field(
+        None,
+        description='A title for the webhook for easy recognition.',
+        examples=['Update magic mirror on new transaction'],
+    )
+    secret: str | None = Field(
+        None,
+        description="A 24-character secret for the webhook. It's generated by Firefly III when saving a new webhook. If you submit a new secret through the PUT endpoint it will generate a new secret for the selected webhook, a new secret bearing no relation to whatever you just submitted.",
+        examples=['iMLZLtLx2JHWhK9Dtyuoqyir'],
+    )
+    triggers: WebhookTriggerArray | None = None
+    responses: WebhookResponseArray | None = None
+    deliveries: WebhookDeliveryArray | None = None
+    url: str | None = Field(
+        None,
+        description='The URL of the webhook. Has to start with `https`.',
+        examples=['https://example.com'],
+    )
 
 
 class WebhookAttempt(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	webhook_message_id: str | None = Field(
-		None,
-		description='The ID of the webhook message this attempt belongs to.',
-		examples=['5'],
-	)
-	status_code: int | None = Field(
-		None, description='The HTTP status code of the error, if any.', examples=[404]
-	)
-	logs: str | None = Field(
-		None,
-		description='Internal log for this attempt. May contain sensitive user data.',
-		examples=['Page not found'],
-	)
-	response: str | None = Field(
-		None,
-		description='Webhook receiver response for this attempt, if any. May contain sensitive user data.',
-		examples=['Page not found'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    webhook_message_id: str | None = Field(
+        None,
+        description='The ID of the webhook message this attempt belongs to.',
+        examples=['5'],
+    )
+    status_code: int | None = Field(
+        None, description='The HTTP status code of the error, if any.', examples=[404]
+    )
+    logs: str | None = Field(
+        None,
+        description='Internal log for this attempt. May contain sensitive user data.',
+        examples=['Page not found'],
+    )
+    response: str | None = Field(
+        None,
+        description='Webhook receiver response for this attempt, if any. May contain sensitive user data.',
+        examples=['Page not found'],
+    )
 
 
 class WebhookMessage(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	sent: bool | None = Field(None, description='If this message is sent yet.', examples=[False])
-	errored: bool | None = Field(
-		None, description='If this message has errored out.', examples=[False]
-	)
-	webhook_id: str | None = Field(
-		None,
-		description='The ID of the webhook this message belongs to.',
-		examples=['5'],
-	)
-	uuid: str | None = Field(
-		None,
-		description='Long UUID string for identification of this webhook message.',
-		examples=['7a344c02-5b52-46b1-90e6-a437431dcf07'],
-	)
-	message: str | None = Field(
-		None,
-		description='The actual message that is sent or will be sent as JSON string.',
-		examples=['{some:message}'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    sent: bool | None = Field(None, description='If this message is sent yet.', examples=[False])
+    errored: bool | None = Field(
+        None, description='If this message has errored out.', examples=[False]
+    )
+    webhook_id: str | None = Field(
+        None,
+        description='The ID of the webhook this message belongs to.',
+        examples=['5'],
+    )
+    uuid: str | None = Field(
+        None,
+        description='Long UUID string for identification of this webhook message.',
+        examples=['7a344c02-5b52-46b1-90e6-a437431dcf07'],
+    )
+    message: str | None = Field(
+        None,
+        description='The actual message that is sent or will be sent as JSON string.',
+        examples=['{some:message}'],
+    )
 
 
 class AttachableType(Enum):
-	Account = 'Account'
-	Budget = 'Budget'
-	Bill = 'Bill'
-	TransactionJournal = 'TransactionJournal'
-	PiggyBank = 'PiggyBank'
-	Tag = 'Tag'
+    Account = 'Account'
+    Budget = 'Budget'
+    Bill = 'Bill'
+    TransactionJournal = 'TransactionJournal'
+    PiggyBank = 'PiggyBank'
+    Tag = 'Tag'
 
 
 class AutoBudgetPeriodEnum(Enum):
-	daily = 'daily'
-	weekly = 'weekly'
-	monthly = 'monthly'
-	quarterly = 'quarterly'
-	half_year = 'half-year'
-	yearly = 'yearly'
+    daily = 'daily'
+    weekly = 'weekly'
+    monthly = 'monthly'
+    quarterly = 'quarterly'
+    half_year = 'half-year'
+    yearly = 'yearly'
 
 
 class AutoBudgetPeriod(RootModel[AutoBudgetPeriodEnum | None]):
-	root: AutoBudgetPeriodEnum | None = Field(
-		None, description='Period for the auto budget', examples=['monthly']
-	)
+    root: AutoBudgetPeriodEnum | None = Field(
+        None, description='Period for the auto budget', examples=['monthly']
+    )
 
 
 class AutoBudgetTypeEnum(Enum):
-	reset = 'reset'
-	rollover = 'rollover'
-	none = 'none'
+    reset = 'reset'
+    rollover = 'rollover'
+    none = 'none'
 
 
 class AutoBudgetType(RootModel[AutoBudgetTypeEnum | None]):
-	root: AutoBudgetTypeEnum | None = Field(
-		None,
-		description='The type of auto-budget that Firefly III must create.',
-		examples=['reset'],
-	)
+    root: AutoBudgetTypeEnum | None = Field(
+        None,
+        description='The type of auto-budget that Firefly III must create.',
+        examples=['reset'],
+    )
 
 
 class BillRepeatFrequency(Enum):
-	weekly = 'weekly'
-	monthly = 'monthly'
-	quarterly = 'quarterly'
-	half_year = 'half-year'
-	yearly = 'yearly'
+    weekly = 'weekly'
+    monthly = 'monthly'
+    quarterly = 'quarterly'
+    half_year = 'half-year'
+    yearly = 'yearly'
 
 
 class RecurrenceRepetitionType(Enum):
-	daily = 'daily'
-	weekly = 'weekly'
-	ndom = 'ndom'
-	monthly = 'monthly'
-	yearly = 'yearly'
+    daily = 'daily'
+    weekly = 'weekly'
+    ndom = 'ndom'
+    monthly = 'monthly'
+    yearly = 'yearly'
 
 
 class RecurrenceTransactionType(Enum):
-	withdrawal = 'withdrawal'
-	transfer = 'transfer'
-	deposit = 'deposit'
+    withdrawal = 'withdrawal'
+    transfer = 'transfer'
+    deposit = 'deposit'
 
 
 class RuleActionKeyword(Enum):
-	user_action = 'user_action'
-	set_category = 'set_category'
-	clear_category = 'clear_category'
-	set_budget = 'set_budget'
-	clear_budget = 'clear_budget'
-	add_tag = 'add_tag'
-	remove_tag = 'remove_tag'
-	remove_all_tags = 'remove_all_tags'
-	set_description = 'set_description'
-	append_description = 'append_description'
-	prepend_description = 'prepend_description'
-	set_source_account = 'set_source_account'
-	set_destination_account = 'set_destination_account'
-	set_notes = 'set_notes'
-	append_notes = 'append_notes'
-	prepend_notes = 'prepend_notes'
-	clear_notes = 'clear_notes'
-	link_to_bill = 'link_to_bill'
-	convert_withdrawal = 'convert_withdrawal'
-	convert_deposit = 'convert_deposit'
-	convert_transfer = 'convert_transfer'
-	delete_transaction = 'delete_transaction'
+    user_action = 'user_action'
+    set_category = 'set_category'
+    clear_category = 'clear_category'
+    set_budget = 'set_budget'
+    clear_budget = 'clear_budget'
+    add_tag = 'add_tag'
+    remove_tag = 'remove_tag'
+    remove_all_tags = 'remove_all_tags'
+    set_description = 'set_description'
+    append_description = 'append_description'
+    prepend_description = 'prepend_description'
+    set_source_account = 'set_source_account'
+    set_destination_account = 'set_destination_account'
+    set_notes = 'set_notes'
+    append_notes = 'append_notes'
+    prepend_notes = 'prepend_notes'
+    clear_notes = 'clear_notes'
+    link_to_bill = 'link_to_bill'
+    convert_withdrawal = 'convert_withdrawal'
+    convert_deposit = 'convert_deposit'
+    convert_transfer = 'convert_transfer'
+    delete_transaction = 'delete_transaction'
 
 
 class RuleTriggerKeyword(Enum):
-	from_account_starts = 'from_account_starts'
-	from_account_ends = 'from_account_ends'
-	from_account_is = 'from_account_is'
-	from_account_contains = 'from_account_contains'
-	to_account_starts = 'to_account_starts'
-	to_account_ends = 'to_account_ends'
-	to_account_is = 'to_account_is'
-	to_account_contains = 'to_account_contains'
-	amount_less = 'amount_less'
-	amount_exactly = 'amount_exactly'
-	amount_more = 'amount_more'
-	description_starts = 'description_starts'
-	description_ends = 'description_ends'
-	description_contains = 'description_contains'
-	description_is = 'description_is'
-	transaction_type = 'transaction_type'
-	category_is = 'category_is'
-	budget_is = 'budget_is'
-	tag_is = 'tag_is'
-	currency_is = 'currency_is'
-	has_attachments = 'has_attachments'
-	has_no_category = 'has_no_category'
-	has_any_category = 'has_any_category'
-	has_no_budget = 'has_no_budget'
-	has_any_budget = 'has_any_budget'
-	has_no_tag = 'has_no_tag'
-	has_any_tag = 'has_any_tag'
-	notes_contains = 'notes_contains'
-	notes_start = 'notes_start'
-	notes_end = 'notes_end'
-	notes_are = 'notes_are'
-	no_notes = 'no_notes'
-	any_notes = 'any_notes'
-	source_account_is = 'source_account_is'
-	destination_account_is = 'destination_account_is'
-	source_account_starts = 'source_account_starts'
+    from_account_starts = 'from_account_starts'
+    from_account_ends = 'from_account_ends'
+    from_account_is = 'from_account_is'
+    from_account_contains = 'from_account_contains'
+    to_account_starts = 'to_account_starts'
+    to_account_ends = 'to_account_ends'
+    to_account_is = 'to_account_is'
+    to_account_contains = 'to_account_contains'
+    amount_less = 'amount_less'
+    amount_exactly = 'amount_exactly'
+    amount_more = 'amount_more'
+    description_starts = 'description_starts'
+    description_ends = 'description_ends'
+    description_contains = 'description_contains'
+    description_is = 'description_is'
+    transaction_type = 'transaction_type'
+    category_is = 'category_is'
+    budget_is = 'budget_is'
+    tag_is = 'tag_is'
+    currency_is = 'currency_is'
+    has_attachments = 'has_attachments'
+    has_no_category = 'has_no_category'
+    has_any_category = 'has_any_category'
+    has_no_budget = 'has_no_budget'
+    has_any_budget = 'has_any_budget'
+    has_no_tag = 'has_no_tag'
+    has_any_tag = 'has_any_tag'
+    notes_contains = 'notes_contains'
+    notes_start = 'notes_start'
+    notes_end = 'notes_end'
+    notes_are = 'notes_are'
+    no_notes = 'no_notes'
+    any_notes = 'any_notes'
+    source_account_is = 'source_account_is'
+    destination_account_is = 'destination_account_is'
+    source_account_starts = 'source_account_starts'
 
 
 class RuleTriggerType(Enum):
-	store_journal = 'store-journal'
-	update_journal = 'update-journal'
-	manual_activation = 'manual-activation'
+    store_journal = 'store-journal'
+    update_journal = 'update-journal'
+    manual_activation = 'manual-activation'
 
 
 class StringArrayItem(RootModel[str]):
-	root: str = Field(..., description='The actual preference content.', examples=['EUR'])
+    root: str = Field(..., description='The actual preference content.', examples=['EUR'])
 
 
 class UserBlockedCodePropertyEnum(Enum):
-	email_changed = 'email_changed'
+    email_changed = 'email_changed'
 
 
 class UserBlockedCodeProperty(RootModel[UserBlockedCodePropertyEnum | None]):
-	root: UserBlockedCodePropertyEnum | None = Field(
-		None,
-		description='If you say the user must be blocked, this will be the reason code.',
-		examples=['email_changed'],
-	)
+    root: UserBlockedCodePropertyEnum | None = Field(
+        None,
+        description='If you say the user must be blocked, this will be the reason code.',
+        examples=['email_changed'],
+    )
 
 
 class UserRolePropertyEnum(Enum):
-	owner = 'owner'
-	demo = 'demo'
+    owner = 'owner'
+    demo = 'demo'
 
 
 class UserRoleProperty(RootModel[UserRolePropertyEnum | None]):
-	root: UserRolePropertyEnum | None = Field(
-		None,
-		description='Role for the user. Can be empty or omitted.',
-		examples=['owner'],
-	)
+    root: UserRolePropertyEnum | None = Field(
+        None,
+        description='Role for the user. Can be empty or omitted.',
+        examples=['owner'],
+    )
 
 
 class BasicSummaryEntry(BaseModel):
-	key: str | None = Field(
-		None,
-		description='This is a reference to the type of info shared, not influenced by translations or user preferences. The EUR value is a reference to the currency code. Possibilities are: balance-in-ABC, spent-in-ABC, earned-in-ABC, bills-paid-in-ABC, bills-unpaid-in-ABC, left-to-spend-in-ABC and net-worth-in-ABC.',
-		examples=['balance-in-EUR'],
-	)
-	title: str | None = Field(
-		None,
-		description='A translated title for the information shared.',
-		examples=['Balance ($)'],
-	)
-	monetary_value: float | None = Field(
-		None, description='The amount as a float.', examples=[123.45]
-	)
-	currency_id: str | None = Field(
-		None, description='The currency ID of the associated currency.', examples=['5']
-	)
-	currency_code: str | None = Field(None, examples=['EUR'])
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(
-		None,
-		description='Number of decimals for the associated currency.',
-		examples=[2],
-	)
-	no_available_budgets: bool | None = Field(
-		None,
-		description='True if there are no available budgets available.',
-		examples=[False],
-	)
-	value_parsed: str | None = Field(
-		None,
-		description='The amount formatted according to the users locale',
-		examples=['$ 12.45'],
-	)
-	local_icon: str | None = Field(
-		None,
-		description='Reference to a font-awesome icon without the fa- part.',
-		examples=['balance-scale'],
-	)
-	sub_title: str | None = Field(
-		None,
-		description='A short explanation of the amounts origin. Already formatted according to the locale of the user or translated, if relevant.',
-		examples=['$20 + $-40'],
-	)
+    key: str | None = Field(
+        None,
+        description='This is a reference to the type of info shared, not influenced by translations or user preferences. The EUR value is a reference to the currency code. Possibilities are: balance-in-ABC, spent-in-ABC, earned-in-ABC, bills-paid-in-ABC, bills-unpaid-in-ABC, left-to-spend-in-ABC and net-worth-in-ABC.',
+        examples=['balance-in-EUR'],
+    )
+    title: str | None = Field(
+        None,
+        description='A translated title for the information shared.',
+        examples=['Balance ($)'],
+    )
+    monetary_value: float | None = Field(
+        None, description='The amount as a float.', examples=[123.45]
+    )
+    currency_id: str | None = Field(
+        None, description='The currency ID of the associated currency.', examples=['5']
+    )
+    currency_code: str | None = Field(None, examples=['EUR'])
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(
+        None,
+        description='Number of decimals for the associated currency.',
+        examples=[2],
+    )
+    no_available_budgets: bool | None = Field(
+        None,
+        description='True if there are no available budgets available.',
+        examples=[False],
+    )
+    value_parsed: str | None = Field(
+        None,
+        description='The amount formatted according to the users locale',
+        examples=['$ 12.45'],
+    )
+    local_icon: str | None = Field(
+        None,
+        description='Reference to a font-awesome icon without the fa- part.',
+        examples=['balance-scale'],
+    )
+    sub_title: str | None = Field(
+        None,
+        description='A short explanation of the amounts origin. Already formatted according to the locale of the user or translated, if relevant.',
+        examples=['$20 + $-40'],
+    )
 
 
 class CronResultRow(BaseModel):
-	job_fired: bool | None = Field(
-		None,
-		description='This value tells you if this specific cron job actually fired. It may not fire. Some cron jobs\nonly fire every 24 hours, for example.\n',
-		examples=[True],
-	)
-	job_succeeded: bool | None = Field(
-		None,
-		description='This value tells you if this specific cron job actually did something. The job may fire but not\nchange anything.\n',
-		examples=[True],
-	)
-	job_errored: bool | None = Field(
-		None,
-		description='If the cron job ran into some kind of an error, this value will be true.',
-		examples=[False],
-	)
-	message: str | None = Field(
-		None,
-		description='If the cron job ran into some kind of an error, this value will be the error message. The success message\nif the job actually ran OK.\n',
-		examples=['Cron result message'],
-	)
+    job_fired: bool | None = Field(
+        None,
+        description='This value tells you if this specific cron job actually fired. It may not fire. Some cron jobs\nonly fire every 24 hours, for example.\n',
+        examples=[True],
+    )
+    job_succeeded: bool | None = Field(
+        None,
+        description='This value tells you if this specific cron job actually did something. The job may fire but not\nchange anything.\n',
+        examples=[True],
+    )
+    job_errored: bool | None = Field(
+        None,
+        description='If the cron job ran into some kind of an error, this value will be true.',
+        examples=[False],
+    )
+    message: str | None = Field(
+        None,
+        description='If the cron job ran into some kind of an error, this value will be the error message. The success message\nif the job actually ran OK.\n',
+        examples=['Cron result message'],
+    )
 
 
 class Data(BaseModel):
-	version: str | None = Field(None, examples=['6.4.14'])
-	api_version: str | None = Field(
-		None, description='Same value as the version field.', examples=['6.4.14']
-	)
-	php_version: str | None = Field(None, examples=['8.1.5'])
-	os: str | None = Field(None, examples=['Linux'])
-	driver: str | None = Field(None, examples=['mysql'])
+    version: str | None = Field(None, examples=['6.4.14'])
+    api_version: str | None = Field(
+        None, description='Same value as the version field.', examples=['6.4.14']
+    )
+    php_version: str | None = Field(None, examples=['8.1.5'])
+    os: str | None = Field(None, examples=['Linux'])
+    driver: str | None = Field(None, examples=['mysql'])
 
 
 class SystemInfo(BaseModel):
-	data: Data | None = None
+    data: Data | None = None
 
 
 class AccountTypeFilter(Enum):
-	all = 'all'
-	asset = 'asset'
-	cash = 'cash'
-	expense = 'expense'
-	revenue = 'revenue'
-	special = 'special'
-	hidden = 'hidden'
-	liability = 'liability'
-	liabilities = 'liabilities'
-	Default_account = 'Default account'
-	Cash_account = 'Cash account'
-	Asset_account = 'Asset account'
-	Expense_account = 'Expense account'
-	Revenue_account = 'Revenue account'
-	Initial_balance_account = 'Initial balance account'
-	Beneficiary_account = 'Beneficiary account'
-	Import_account = 'Import account'
-	Reconciliation_account = 'Reconciliation account'
-	Loan = 'Loan'
-	Debt = 'Debt'
-	Mortgage = 'Mortgage'
+    all = 'all'
+    asset = 'asset'
+    cash = 'cash'
+    expense = 'expense'
+    revenue = 'revenue'
+    special = 'special'
+    hidden = 'hidden'
+    liability = 'liability'
+    liabilities = 'liabilities'
+    Default_account = 'Default account'
+    Cash_account = 'Cash account'
+    Asset_account = 'Asset account'
+    Expense_account = 'Expense account'
+    Revenue_account = 'Revenue account'
+    Initial_balance_account = 'Initial balance account'
+    Beneficiary_account = 'Beneficiary account'
+    Import_account = 'Import account'
+    Reconciliation_account = 'Reconciliation account'
+    Loan = 'Loan'
+    Debt = 'Debt'
+    Mortgage = 'Mortgage'
 
 
 class TransactionTypeFilter(Enum):
-	all = 'all'
-	withdrawal = 'withdrawal'
-	withdrawals = 'withdrawals'
-	expense = 'expense'
-	deposit = 'deposit'
-	deposits = 'deposits'
-	income = 'income'
-	transfer = 'transfer'
-	transfers = 'transfers'
-	opening_balance = 'opening_balance'
-	reconciliation = 'reconciliation'
-	special = 'special'
-	specials = 'specials'
-	default = 'default'
+    all = 'all'
+    withdrawal = 'withdrawal'
+    withdrawals = 'withdrawals'
+    expense = 'expense'
+    deposit = 'deposit'
+    deposits = 'deposits'
+    income = 'income'
+    transfer = 'transfer'
+    transfers = 'transfers'
+    opening_balance = 'opening_balance'
+    reconciliation = 'reconciliation'
+    special = 'special'
+    specials = 'specials'
+    default = 'default'
 
 
 class Pagination(BaseModel):
-	total: int | None = Field(None, examples=[3])
-	count: int | None = Field(None, examples=[20])
-	per_page: int | None = Field(None, examples=[100])
-	current_page: int | None = Field(None, examples=[1])
-	total_pages: int | None = Field(None, examples=[1])
+    total: int | None = Field(None, examples=[3])
+    count: int | None = Field(None, examples=[20])
+    per_page: int | None = Field(None, examples=[100])
+    current_page: int | None = Field(None, examples=[1])
+    total_pages: int | None = Field(None, examples=[1])
 
 
 class Meta(BaseModel):
-	pagination: Pagination | None = None
+    pagination: Pagination | None = None
 
 
 class AccountRolePropertyEnum(Enum):
-	defaultAsset = 'defaultAsset'
-	sharedAsset = 'sharedAsset'
-	savingAsset = 'savingAsset'
-	ccAsset = 'ccAsset'
-	cashWalletAsset = 'cashWalletAsset'
+    defaultAsset = 'defaultAsset'
+    sharedAsset = 'sharedAsset'
+    savingAsset = 'savingAsset'
+    ccAsset = 'ccAsset'
+    cashWalletAsset = 'cashWalletAsset'
 
 
 class AccountRoleProperty(RootModel[AccountRolePropertyEnum | None]):
-	root: AccountRolePropertyEnum | None = Field(
-		None,
-		description='Is only mandatory when the type is asset.',
-		examples=['defaultAsset'],
-	)
+    root: AccountRolePropertyEnum | None = Field(
+        None,
+        description='Is only mandatory when the type is asset.',
+        examples=['defaultAsset'],
+    )
 
 
 class AccountTypeProperty(Enum):
-	Default_account = 'Default account'
-	Cash_account = 'Cash account'
-	Asset_account = 'Asset account'
-	Expense_account = 'Expense account'
-	Revenue_account = 'Revenue account'
-	Initial_balance_account = 'Initial balance account'
-	Beneficiary_account = 'Beneficiary account'
-	Import_account = 'Import account'
-	Reconciliation_account = 'Reconciliation account'
-	Loan = 'Loan'
-	Debt = 'Debt'
-	Mortgage = 'Mortgage'
+    Default_account = 'Default account'
+    Cash_account = 'Cash account'
+    Asset_account = 'Asset account'
+    Expense_account = 'Expense account'
+    Revenue_account = 'Revenue account'
+    Initial_balance_account = 'Initial balance account'
+    Beneficiary_account = 'Beneficiary account'
+    Import_account = 'Import account'
+    Reconciliation_account = 'Reconciliation account'
+    Loan = 'Loan'
+    Debt = 'Debt'
+    Mortgage = 'Mortgage'
 
 
 class ChartDatasetPeriodProperty(Enum):
-	field_1D = '1D'
-	field_1W = '1W'
-	field_1M = '1M'
-	field_3M = '3M'
-	field_1Y = '1Y'
-	custom = 'custom'
+    field_1D = '1D'
+    field_1W = '1W'
+    field_1M = '1M'
+    field_3M = '3M'
+    field_1Y = '1Y'
+    custom = 'custom'
 
 
 class CreditCardTypePropertyEnum(Enum):
-	monthlyFull = 'monthlyFull'
+    monthlyFull = 'monthlyFull'
 
 
 class CreditCardTypeProperty(RootModel[CreditCardTypePropertyEnum | None]):
-	root: CreditCardTypePropertyEnum | None = Field(
-		None,
-		description='Mandatory when the account_role is ccAsset. Can only be monthlyFull or null.',
-		examples=['monthlyFull'],
-	)
+    root: CreditCardTypePropertyEnum | None = Field(
+        None,
+        description='Mandatory when the account_role is ccAsset. Can only be monthlyFull or null.',
+        examples=['monthlyFull'],
+    )
 
 
 class InterestPeriodPropertyEnum(Enum):
-	weekly = 'weekly'
-	monthly = 'monthly'
-	quarterly = 'quarterly'
-	half_year = 'half-year'
-	yearly = 'yearly'
+    weekly = 'weekly'
+    monthly = 'monthly'
+    quarterly = 'quarterly'
+    half_year = 'half-year'
+    yearly = 'yearly'
 
 
 class InterestPeriodProperty(RootModel[InterestPeriodPropertyEnum | None]):
-	root: InterestPeriodPropertyEnum | None = Field(
-		None,
-		description='Mandatory when type is liability. Period over which the interest is calculated.',
-		examples=['monthly'],
-	)
+    root: InterestPeriodPropertyEnum | None = Field(
+        None,
+        description='Mandatory when type is liability. Period over which the interest is calculated.',
+        examples=['monthly'],
+    )
 
 
 class LiabilityDirectionPropertyEnum(Enum):
-	credit = 'credit'
-	debit = 'debit'
+    credit = 'credit'
+    debit = 'debit'
 
 
 class LiabilityDirectionProperty(RootModel[LiabilityDirectionPropertyEnum | None]):
-	root: LiabilityDirectionPropertyEnum | None = Field(
-		None,
-		description="'credit' indicates somebody owes you the liability. 'debit' Indicates you owe this debt yourself. Works only for liabilities.",
-		examples=['credit'],
-	)
+    root: LiabilityDirectionPropertyEnum | None = Field(
+        None,
+        description="'credit' indicates somebody owes you the liability. 'debit' Indicates you owe this debt yourself. Works only for liabilities.",
+        examples=['credit'],
+    )
 
 
 class LiabilityTypePropertyEnum(Enum):
-	loan = 'loan'
-	debt = 'debt'
-	mortgage = 'mortgage'
+    loan = 'loan'
+    debt = 'debt'
+    mortgage = 'mortgage'
 
 
 class LiabilityTypeProperty(RootModel[LiabilityTypePropertyEnum | None]):
-	root: LiabilityTypePropertyEnum | None = Field(
-		None,
-		description='Mandatory when type is liability. Specifies the exact type.',
-		examples=['loan'],
-	)
+    root: LiabilityTypePropertyEnum | None = Field(
+        None,
+        description='Mandatory when type is liability. Specifies the exact type.',
+        examples=['loan'],
+    )
 
 
 class ShortAccountTypeProperty(Enum):
-	asset = 'asset'
-	expense = 'expense'
-	import_ = 'import'
-	revenue = 'revenue'
-	cash = 'cash'
-	liability = 'liability'
-	liabilities = 'liabilities'
-	initial_balance = 'initial-balance'
-	reconciliation = 'reconciliation'
+    asset = 'asset'
+    expense = 'expense'
+    import_ = 'import'
+    revenue = 'revenue'
+    cash = 'cash'
+    liability = 'liability'
+    liabilities = 'liabilities'
+    initial_balance = 'initial-balance'
+    reconciliation = 'reconciliation'
 
 
 class TransactionTypeProperty(Enum):
-	withdrawal = 'withdrawal'
-	deposit = 'deposit'
-	transfer = 'transfer'
-	reconciliation = 'reconciliation'
-	opening_balance = 'opening balance'
+    withdrawal = 'withdrawal'
+    deposit = 'deposit'
+    transfer = 'transfer'
+    reconciliation = 'reconciliation'
+    opening_balance = 'opening balance'
 
 
 class BadRequestResponse(BaseModel):
-	message: str | None = Field(None, examples=['Bad Request'])
-	exception: str | None = Field(None, examples=['BadRequestHttpException'])
+    message: str | None = Field(None, examples=['Bad Request'])
+    exception: str | None = Field(None, examples=['BadRequestHttpException'])
 
 
 class InternalExceptionResponse(BaseModel):
-	message: str | None = Field(None, examples=['Internal Exception'])
-	exception: str | None = Field(None, examples=['InternalException'])
+    message: str | None = Field(None, examples=['Internal Exception'])
+    exception: str | None = Field(None, examples=['InternalException'])
 
 
 class NotFoundResponse(BaseModel):
-	message: str | None = Field(None, examples=['Resource not found'])
-	exception: str | None = Field(None, examples=['NotFoundHttpException'])
+    message: str | None = Field(None, examples=['Resource not found'])
+    exception: str | None = Field(None, examples=['NotFoundHttpException'])
 
 
 class UnauthenticatedResponse(BaseModel):
-	message: str | None = Field(None, examples=['Unauthenticated'])
-	exception: str | None = Field(None, examples=['AuthenticationException'])
+    message: str | None = Field(None, examples=['Unauthenticated'])
+    exception: str | None = Field(None, examples=['AuthenticationException'])
 
 
 class Errors(BaseModel):
-	email: list[str] | None = None
-	force: list[str] | None = None
-	blocked: list[str] | None = None
-	field: list[str] | None = None
-	role: list[str] | None = None
-	blocked_code: list[str] | None = None
-	name: list[str] | None = None
-	type: list[str] | None = None
-	iban: list[str] | None = None
-	start: list[str] | None = None
-	end: list[str] | None = None
-	date: list[str] | None = None
+    email: list[str] | None = None
+    force: list[str] | None = None
+    blocked: list[str] | None = None
+    field: list[str] | None = None
+    role: list[str] | None = None
+    blocked_code: list[str] | None = None
+    name: list[str] | None = None
+    type: list[str] | None = None
+    iban: list[str] | None = None
+    start: list[str] | None = None
+    end: list[str] | None = None
+    date: list[str] | None = None
 
 
 class ValidationErrorResponse(BaseModel):
-	message: str | None = Field(None, examples=['The given data was invalid.'])
-	errors: Errors | None = None
+    message: str | None = Field(None, examples=['The given data was invalid.'])
+    errors: Errors | None = None
 
 
 class AutocompleteAccountArray(RootModel[list[AutocompleteAccount]]):
-	root: list[AutocompleteAccount]
+    root: list[AutocompleteAccount]
 
 
 class AutocompleteBillArray(RootModel[list[AutocompleteBill]]):
-	root: list[AutocompleteBill]
+    root: list[AutocompleteBill]
 
 
 class AutocompleteBudgetArray(RootModel[list[AutocompleteBudget]]):
-	root: list[AutocompleteBudget]
+    root: list[AutocompleteBudget]
 
 
 class AutocompleteCategoryArray(RootModel[list[AutocompleteCategory]]):
-	root: list[AutocompleteCategory]
+    root: list[AutocompleteCategory]
 
 
 class AutocompleteCurrencyArray(RootModel[list[AutocompleteCurrency]]):
-	root: list[AutocompleteCurrency]
+    root: list[AutocompleteCurrency]
 
 
 class AutocompleteCurrencyCodeArray(RootModel[list[AutocompleteCurrencyCode]]):
-	root: list[AutocompleteCurrencyCode]
+    root: list[AutocompleteCurrencyCode]
 
 
 class AutocompleteObjectGroupArray(RootModel[list[AutocompleteObjectGroup]]):
-	root: list[AutocompleteObjectGroup]
+    root: list[AutocompleteObjectGroup]
 
 
 class AutocompletePiggyArray(RootModel[list[AutocompletePiggy]]):
-	root: list[AutocompletePiggy]
+    root: list[AutocompletePiggy]
 
 
 class AutocompletePiggyBalanceArray(RootModel[list[AutocompletePiggyBalance]]):
-	root: list[AutocompletePiggyBalance]
+    root: list[AutocompletePiggyBalance]
 
 
 class AutocompleteRecurrenceArray(RootModel[list[AutocompleteRecurrence]]):
-	root: list[AutocompleteRecurrence]
+    root: list[AutocompleteRecurrence]
 
 
 class AutocompleteRuleArray(RootModel[list[AutocompleteRule]]):
-	root: list[AutocompleteRule]
+    root: list[AutocompleteRule]
 
 
 class AutocompleteRuleGroupArray(RootModel[list[AutocompleteRuleGroup]]):
-	root: list[AutocompleteRuleGroup]
+    root: list[AutocompleteRuleGroup]
 
 
 class AutocompleteTagArray(RootModel[list[AutocompleteTag]]):
-	root: list[AutocompleteTag]
+    root: list[AutocompleteTag]
 
 
 class AutocompleteTransactionArray(RootModel[list[AutocompleteTransaction]]):
-	root: list[AutocompleteTransaction]
+    root: list[AutocompleteTransaction]
 
 
 class AutocompleteTransactionIDArray(RootModel[list[AutocompleteTransactionID]]):
-	root: list[AutocompleteTransactionID]
+    root: list[AutocompleteTransactionID]
 
 
 class AutocompleteTransactionTypeArray(RootModel[list[AutocompleteTransactionType]]):
-	root: list[AutocompleteTransactionType]
+    root: list[AutocompleteTransactionType]
 
 
 class AvailableBudgetArray(BaseModel):
-	data: list[AvailableBudgetRead]
-	meta: Meta
+    data: list[AvailableBudgetRead]
+    meta: Meta
 
 
 class BudgetLimitArray(BaseModel):
-	data: list[BudgetLimitRead]
-	meta: Meta
+    data: list[BudgetLimitRead]
+    meta: Meta
 
 
 class ChartDataSet(BaseModel):
-	label: str | None = Field(
-		None,
-		description='This is the title of the current set. It can refer to an account, a budget or another object (by name).',
-		examples=['Checking account'],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	start_date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	end_date: AwareDatetime | None = Field(None, examples=['2025-12-31T23:59:59+00:00'])
-	type: str | None = Field(
-		None,
-		description='Indicated the type of chart that is expected to be rendered. You can safely ignore this if you want.',
-		examples=['line'],
-	)
-	period: ChartDatasetPeriodProperty | None = None
-	yAxisID: int | None = Field(
-		None,
-		description='Used to indicate the Y axis for this data set. Is usually between 0 and 1 (left and right side of the chart).',
-		examples=[0],
-	)
-	entries: list[ChartDataPoint] | Entries | None = Field(
-		None,
-		description="The actual entries for this data set. They 'key' value is the label for the data point. The value is the actual (numerical) value.",
-	)
-	pc_entries: list[ChartDataPoint] | PcEntries | None = Field(
-		None,
-		description="The actual entries for this data set. They 'key' value is the label for the data point. The value is the actual (numerical) value.",
-	)
+    label: str | None = Field(
+        None,
+        description='This is the title of the current set. It can refer to an account, a budget or another object (by name).',
+        examples=['Checking account'],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    start_date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    end_date: AwareDatetime | None = Field(None, examples=['2025-12-31T23:59:59+00:00'])
+    type: str | None = Field(
+        None,
+        description='Indicated the type of chart that is expected to be rendered. You can safely ignore this if you want.',
+        examples=['line'],
+    )
+    period: ChartDatasetPeriodProperty | None = None
+    yAxisID: int | None = Field(
+        None,
+        description='Used to indicate the Y axis for this data set. Is usually between 0 and 1 (left and right side of the chart).',
+        examples=[0],
+    )
+    entries: list[ChartDataPoint] | Entries | None = Field(
+        None,
+        description="The actual entries for this data set. They 'key' value is the label for the data point. The value is the actual (numerical) value.",
+    )
+    pc_entries: list[ChartDataPoint] | PcEntries | None = Field(
+        None,
+        description="The actual entries for this data set. They 'key' value is the label for the data point. The value is the actual (numerical) value.",
+    )
 
 
 class ChartLine(RootModel[list[ChartDataSet]]):
-	root: list[ChartDataSet]
+    root: list[ChartDataSet]
 
 
 class InsightGroup(RootModel[list[InsightGroupEntry]]):
-	root: list[InsightGroupEntry]
+    root: list[InsightGroupEntry]
 
 
 class InsightTotal(RootModel[list[InsightTotalEntry]]):
-	root: list[InsightTotalEntry]
+    root: list[InsightTotalEntry]
 
 
 class InsightTransfer(RootModel[list[InsightTransferEntry]]):
-	root: list[InsightTransferEntry]
+    root: list[InsightTransferEntry]
 
 
 class CategoryRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['categories'])
-	id: str = Field(..., examples=['2'])
-	attributes: CategoryProperties
+    type: str = Field(..., description='Immutable value', examples=['categories'])
+    id: str = Field(..., examples=['2'])
+    attributes: CategoryProperties
 
 
 class CategorySingle(BaseModel):
-	data: CategoryRead
+    data: CategoryRead
 
 
 class CurrencyRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['currencies'])
-	id: str = Field(..., examples=['2'])
-	attributes: CurrencyProperties
+    type: str = Field(..., description='Immutable value', examples=['currencies'])
+    id: str = Field(..., examples=['2'])
+    attributes: CurrencyProperties
 
 
 class CurrencySingle(BaseModel):
-	data: CurrencyRead
+    data: CurrencyRead
 
 
 class LinkTypeRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['link_types'])
-	id: str = Field(..., examples=['2'])
-	attributes: LinkType
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['link_types'])
+    id: str = Field(..., examples=['2'])
+    attributes: LinkType
+    links: ObjectLink
 
 
 class LinkTypeSingle(BaseModel):
-	data: LinkTypeRead
+    data: LinkTypeRead
 
 
 class ObjectGroupRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['object_groups'])
-	id: str = Field(..., examples=['2'])
-	attributes: ObjectGroup
+    type: str = Field(..., description='Immutable value', examples=['object_groups'])
+    id: str = Field(..., examples=['2'])
+    attributes: ObjectGroup
 
 
 class ObjectGroupSingle(BaseModel):
-	data: ObjectGroupRead
+    data: ObjectGroupRead
 
 
 class PiggyBankEventRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['piggy_bank_events'])
-	id: str = Field(..., examples=['2'])
-	attributes: PiggyBankEventProperties
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['piggy_bank_events'])
+    id: str = Field(..., examples=['2'])
+    attributes: PiggyBankEventProperties
+    links: ObjectLink
 
 
 class PiggyBankRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['piggy_banks'])
-	id: str = Field(..., examples=['2'])
-	attributes: PiggyBankProperties
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['piggy_banks'])
+    id: str = Field(..., examples=['2'])
+    attributes: PiggyBankProperties
+    links: ObjectLink
 
 
 class PiggyBankSingle(BaseModel):
-	data: PiggyBankRead
+    data: PiggyBankRead
 
 
 class RuleGroupRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['rules_group'])
-	id: str = Field(..., examples=['2'])
-	attributes: RuleGroup
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['rules_group'])
+    id: str = Field(..., examples=['2'])
+    attributes: RuleGroup
+    links: ObjectLink
 
 
 class RuleGroupSingle(BaseModel):
-	data: RuleGroupRead
+    data: RuleGroupRead
 
 
 class TagRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['tags'])
-	id: str = Field(..., examples=['2'])
-	attributes: TagModel
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['tags'])
+    id: str = Field(..., examples=['2'])
+    attributes: TagModel
+    links: ObjectLink
 
 
 class TagSingle(BaseModel):
-	data: TagRead
+    data: TagRead
 
 
 class TransactionLinkRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['transactionLinks'])
-	id: str = Field(..., examples=['2'])
-	attributes: TransactionLink
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['transactionLinks'])
+    id: str = Field(..., examples=['2'])
+    attributes: TransactionLink
+    links: ObjectLink
 
 
 class TransactionLinkSingle(BaseModel):
-	data: TransactionLinkRead
+    data: TransactionLinkRead
 
 
 class WebhookAttemptRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['webhook_attempts'])
-	id: str = Field(..., examples=['2'])
-	attributes: WebhookAttempt
+    type: str = Field(..., description='Immutable value', examples=['webhook_attempts'])
+    id: str = Field(..., examples=['2'])
+    attributes: WebhookAttempt
 
 
 class WebhookAttemptSingle(BaseModel):
-	data: WebhookAttemptRead
+    data: WebhookAttemptRead
 
 
 class WebhookMessageRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['webhook_messages'])
-	id: str = Field(..., examples=['2'])
-	attributes: WebhookMessage
+    type: str = Field(..., description='Immutable value', examples=['webhook_messages'])
+    id: str = Field(..., examples=['2'])
+    attributes: WebhookMessage
 
 
 class WebhookMessageSingle(BaseModel):
-	data: WebhookMessageRead
+    data: WebhookMessageRead
 
 
 class AccountProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	active: bool | None = Field(True, examples=[False])
-	order: int | None = Field(
-		None,
-		description='Order of the account. Is NULL if account is not asset or liability.',
-		examples=[1],
-	)
-	name: str = Field(..., examples=['My checking account'])
-	type: ShortAccountTypeProperty
-	account_role: AccountRoleProperty | None = None
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_order: int | None = Field(
-		None,
-		description='The order of the group. At least 1, for the highest sorting.',
-		examples=[5],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the account has a currency setting. If false, the account uses the administration's primary currency. Asset accounts and liability accounts always have a currency setting, while expense and revenue accounts do not.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	current_balance: str | None = Field(
-		None,
-		description="The current balance of the account in the account's currency. If the account has no currency, this is the balance in the administration's primary currency. Either way, the `currency_*` fields reflect the currency used.",
-		examples=['123.45'],
-	)
-	pc_current_balance: str | None = Field(
-		None,
-		description="The current balance of the account in the administration's primary currency. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	balance_difference: str | None = Field(
-		None,
-		description='If you submit a start AND end date, this will be the difference between those two moments.',
-		examples=['123.45'],
-	)
-	pc_balance_difference: str | None = Field(
-		None,
-		description="If you submit a start AND end date, this will be the difference in the currency of the account or the administration's primary currency between those two moments.",
-		examples=['123.45'],
-	)
-	opening_balance: str | None = Field(
-		None,
-		description="Represents the opening balance, the initial amount this account holds in the currency of the account or the administration's primary currency if the account has no currency. Either way, the `currency_*` fields reflect the currency used.",
-		examples=['-1012.12'],
-	)
-	pc_opening_balance: str | None = Field(
-		None,
-		description="The opening balance of the account in the administration's primary currency (pc). The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['-1012.12'],
-	)
-	virtual_balance: str | None = Field(
-		None,
-		description="The virtual balance of the account in the account's currency or the administration's primary currency if the account has no currency.",
-		examples=['123.45'],
-	)
-	pc_virtual_balance: str | None = Field(
-		None,
-		description="The virtual balance of the account in the administration's primary currency (pc). The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	debt_amount: str | None = Field(
-		None,
-		description="In liability accounts (loans, debts and mortgages), this is the amount of debt in the account's currency (see the `currency_*` fields). In asset accounts, this is NULL.",
-		examples=['1012.12'],
-	)
-	pc_debt_amount: str | None = Field(
-		None,
-		description="In liability accounts (loans, debts and mortgages), this is the amount of debt in the administration's primary currency (see the `currency_*` fields. In asset accounts, this is NULL.",
-		examples=['1012.12'],
-	)
-	current_balance_date: AwareDatetime | None = Field(
-		None,
-		description="The timestamp for this date is always 23:59:59, to indicate it's the balance at the very END of that particular day.",
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	notes: str | None = Field(None, examples=['Some example notes'])
-	monthly_payment_date: AwareDatetime | None = Field(
-		None,
-		description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	credit_card_type: CreditCardTypeProperty | None = None
-	account_number: str | None = Field(None, examples=['7009312345678'])
-	iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
-	bic: str | None = Field(None, examples=['BOFAUS3N'])
-	opening_balance_date: AwareDatetime | None = Field(
-		None,
-		description='Represents the date of the opening balance.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	liability_type: LiabilityTypeProperty | None = None
-	liability_direction: LiabilityDirectionProperty | None = None
-	interest: str | None = Field(
-		None,
-		description='Mandatory when type is liability. Interest percentage.',
-		examples=['5.3'],
-	)
-	interest_period: InterestPeriodProperty | None = None
-	include_net_worth: bool | None = Field(True, examples=[True])
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
-	last_activity: AwareDatetime | None = Field(
-		None,
-		description='Last activity of the account.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    active: bool | None = Field(True, examples=[False])
+    order: int | None = Field(
+        None,
+        description='Order of the account. Is NULL if account is not asset or liability.',
+        examples=[1],
+    )
+    name: str = Field(..., examples=['My checking account'])
+    type: ShortAccountTypeProperty
+    account_role: AccountRoleProperty | None = None
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_order: int | None = Field(
+        None,
+        description='The order of the group. At least 1, for the highest sorting.',
+        examples=[5],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the account has a currency setting. If false, the account uses the administration's primary currency. Asset accounts and liability accounts always have a currency setting, while expense and revenue accounts do not.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    current_balance: str | None = Field(
+        None,
+        description="The current balance of the account in the account's currency. If the account has no currency, this is the balance in the administration's primary currency. Either way, the `currency_*` fields reflect the currency used.",
+        examples=['123.45'],
+    )
+    pc_current_balance: str | None = Field(
+        None,
+        description="The current balance of the account in the administration's primary currency. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    balance_difference: str | None = Field(
+        None,
+        description='If you submit a start AND end date, this will be the difference between those two moments.',
+        examples=['123.45'],
+    )
+    pc_balance_difference: str | None = Field(
+        None,
+        description="If you submit a start AND end date, this will be the difference in the currency of the account or the administration's primary currency between those two moments.",
+        examples=['123.45'],
+    )
+    opening_balance: str | None = Field(
+        None,
+        description="Represents the opening balance, the initial amount this account holds in the currency of the account or the administration's primary currency if the account has no currency. Either way, the `currency_*` fields reflect the currency used.",
+        examples=['-1012.12'],
+    )
+    pc_opening_balance: str | None = Field(
+        None,
+        description="The opening balance of the account in the administration's primary currency (pc). The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['-1012.12'],
+    )
+    virtual_balance: str | None = Field(
+        None,
+        description="The virtual balance of the account in the account's currency or the administration's primary currency if the account has no currency.",
+        examples=['123.45'],
+    )
+    pc_virtual_balance: str | None = Field(
+        None,
+        description="The virtual balance of the account in the administration's primary currency (pc). The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    debt_amount: str | None = Field(
+        None,
+        description="In liability accounts (loans, debts and mortgages), this is the amount of debt in the account's currency (see the `currency_*` fields). In asset accounts, this is NULL.",
+        examples=['1012.12'],
+    )
+    pc_debt_amount: str | None = Field(
+        None,
+        description="In liability accounts (loans, debts and mortgages), this is the amount of debt in the administration's primary currency (see the `currency_*` fields. In asset accounts, this is NULL.",
+        examples=['1012.12'],
+    )
+    current_balance_date: AwareDatetime | None = Field(
+        None,
+        description="The timestamp for this date is always 23:59:59, to indicate it's the balance at the very END of that particular day.",
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    notes: str | None = Field(None, examples=['Some example notes'])
+    monthly_payment_date: AwareDatetime | None = Field(
+        None,
+        description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    credit_card_type: CreditCardTypeProperty | None = None
+    account_number: str | None = Field(None, examples=['7009312345678'])
+    iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
+    bic: str | None = Field(None, examples=['BOFAUS3N'])
+    opening_balance_date: AwareDatetime | None = Field(
+        None,
+        description='Represents the date of the opening balance.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    liability_type: LiabilityTypeProperty | None = None
+    liability_direction: LiabilityDirectionProperty | None = None
+    interest: str | None = Field(
+        None,
+        description='Mandatory when type is liability. Interest percentage.',
+        examples=['5.3'],
+    )
+    interest_period: InterestPeriodProperty | None = None
+    include_net_worth: bool | None = Field(True, examples=[True])
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
+    last_activity: AwareDatetime | None = Field(
+        None,
+        description='Last activity of the account.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
 
 
 class AccountRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['accounts'])
-	id: str = Field(..., examples=['2'])
-	attributes: AccountProperties
+    type: str = Field(..., description='Immutable value', examples=['accounts'])
+    id: str = Field(..., examples=['2'])
+    attributes: AccountProperties
 
 
 class AccountSingle(BaseModel):
-	data: AccountRead
+    data: AccountRead
 
 
 class AccountStore(BaseModel):
-	name: str = Field(..., examples=['My checking account'])
-	type: ShortAccountTypeProperty
-	iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
-	bic: str | None = Field(None, examples=['BOFAUS3N'])
-	account_number: str | None = Field(None, examples=['7009312345678'])
-	opening_balance: str | None = Field(
-		None,
-		description='Represents the opening balance, the initial amount this account holds.',
-		examples=['-1012.12'],
-	)
-	opening_balance_date: AwareDatetime | None = Field(
-		None,
-		description='Represents the date of the opening balance.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	virtual_balance: str | None = Field(None, examples=['123.45'])
-	currency_id: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['EUR'],
-	)
-	active: bool | None = Field(True, description='If omitted, defaults to true.', examples=[False])
-	order: int | None = Field(None, description='Order of the account', examples=[1])
-	include_net_worth: bool | None = Field(
-		True, description='If omitted, defaults to true.', examples=[True]
-	)
-	account_role: AccountRoleProperty | None = None
-	credit_card_type: CreditCardTypeProperty | None = None
-	monthly_payment_date: AwareDatetime | None = Field(
-		None,
-		description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	liability_type: LiabilityTypeProperty | None = None
-	liability_direction: LiabilityDirectionProperty | None = None
-	interest: str | None = Field(
-		'0',
-		description='Mandatory when type is liability. Interest percentage.',
-		examples=['5.3'],
-	)
-	interest_period: InterestPeriodProperty | None = None
-	notes: str | None = Field(None, examples=['Some example notes'])
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
+    name: str = Field(..., examples=['My checking account'])
+    type: ShortAccountTypeProperty
+    iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
+    bic: str | None = Field(None, examples=['BOFAUS3N'])
+    account_number: str | None = Field(None, examples=['7009312345678'])
+    opening_balance: str | None = Field(
+        None,
+        description='Represents the opening balance, the initial amount this account holds.',
+        examples=['-1012.12'],
+    )
+    opening_balance_date: AwareDatetime | None = Field(
+        None,
+        description='Represents the date of the opening balance.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    virtual_balance: str | None = Field(None, examples=['123.45'])
+    currency_id: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['EUR'],
+    )
+    active: bool | None = Field(True, description='If omitted, defaults to true.', examples=[False])
+    order: int | None = Field(None, description='Order of the account', examples=[1])
+    include_net_worth: bool | None = Field(
+        True, description='If omitted, defaults to true.', examples=[True]
+    )
+    account_role: AccountRoleProperty | None = None
+    credit_card_type: CreditCardTypeProperty | None = None
+    monthly_payment_date: AwareDatetime | None = Field(
+        None,
+        description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    liability_type: LiabilityTypeProperty | None = None
+    liability_direction: LiabilityDirectionProperty | None = None
+    interest: str | None = Field(
+        '0',
+        description='Mandatory when type is liability. Interest percentage.',
+        examples=['5.3'],
+    )
+    interest_period: InterestPeriodProperty | None = None
+    notes: str | None = Field(None, examples=['Some example notes'])
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the accounts's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
 
 
 class AccountUpdate(BaseModel):
-	name: str = Field(..., examples=['My checking account'])
-	iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
-	bic: str | None = Field(None, examples=['BOFAUS3N'])
-	account_number: str | None = Field(None, examples=['7009312345678'])
-	opening_balance: str | None = Field(None, examples=['-1012.12'])
-	opening_balance_date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	virtual_balance: str | None = Field(None, examples=['123.45'])
-	currency_id: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['EUR'],
-	)
-	active: bool | None = Field(True, description='If omitted, defaults to true.', examples=[False])
-	order: int | None = Field(None, description='Order of the account', examples=[1])
-	include_net_worth: bool | None = Field(
-		True, description='If omitted, defaults to true.', examples=[True]
-	)
-	account_role: AccountRoleProperty | None = None
-	credit_card_type: CreditCardTypeProperty | None = None
-	monthly_payment_date: AwareDatetime | None = Field(
-		None,
-		description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	liability_type: LiabilityTypeProperty | None = None
-	interest: str | None = Field(
-		None,
-		description='Mandatory when type is liability. Interest percentage.',
-		examples=['5.3'],
-	)
-	interest_period: InterestPeriodProperty | None = None
-	notes: str | None = Field(None, examples=['Some example notes'])
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the account's location, if applicable. Can be used to draw a map. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the account's location, if applicable. Can be used to draw a map. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.',
-		examples=[6],
-	)
+    name: str = Field(..., examples=['My checking account'])
+    iban: str | None = Field(None, examples=['GB98MIDL07009312345678'])
+    bic: str | None = Field(None, examples=['BOFAUS3N'])
+    account_number: str | None = Field(None, examples=['7009312345678'])
+    opening_balance: str | None = Field(None, examples=['-1012.12'])
+    opening_balance_date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    virtual_balance: str | None = Field(None, examples=['123.45'])
+    currency_id: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['EUR'],
+    )
+    active: bool | None = Field(True, description='If omitted, defaults to true.', examples=[False])
+    order: int | None = Field(None, description='Order of the account', examples=[1])
+    include_net_worth: bool | None = Field(
+        True, description='If omitted, defaults to true.', examples=[True]
+    )
+    account_role: AccountRoleProperty | None = None
+    credit_card_type: CreditCardTypeProperty | None = None
+    monthly_payment_date: AwareDatetime | None = Field(
+        None,
+        description='Mandatory when the account_role is ccAsset. Moment at which CC payment installments are asked for by the bank.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    liability_type: LiabilityTypeProperty | None = None
+    interest: str | None = Field(
+        None,
+        description='Mandatory when type is liability. Interest percentage.',
+        examples=['5.3'],
+    )
+    interest_period: InterestPeriodProperty | None = None
+    notes: str | None = Field(None, examples=['Some example notes'])
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the account's location, if applicable. Can be used to draw a map. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the account's location, if applicable. Can be used to draw a map. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels. If omitted, the existing location will be kept. If submitted as NULL, the current location will be removed.',
+        examples=[6],
+    )
 
 
 class AttachmentProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	attachable_type: AttachableType | None = None
-	attachable_id: str | None = Field(
-		None,
-		description='ID of the model this attachment is linked to.',
-		examples=['134'],
-	)
-	hash: str | None = Field(
-		None,
-		description='Hash of the file for basic duplicate detection.',
-		examples=['0c3f95f34370baa88f9fd9a671fea305'],
-	)
-	filename: str | None = Field(None, examples=['file.pdf'])
-	download_url: str | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/attachments/191/download']
-	)
-	upload_url: str | None = Field(
-		None, examples=['https://demo.firefly-iii.org/api/v1/attachments/191/download']
-	)
-	title: str | None = Field(None, examples=['Some PDF file'])
-	notes: str | None = Field(None, examples=['Some notes'])
-	mime: str | None = Field(None, examples=['application/pdf'])
-	size: int | None = Field(None, examples=[48211])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    attachable_type: AttachableType | None = None
+    attachable_id: str | None = Field(
+        None,
+        description='ID of the model this attachment is linked to.',
+        examples=['134'],
+    )
+    hash: str | None = Field(
+        None,
+        description='Hash of the file for basic duplicate detection.',
+        examples=['0c3f95f34370baa88f9fd9a671fea305'],
+    )
+    filename: str | None = Field(None, examples=['file.pdf'])
+    download_url: str | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/attachments/191/download']
+    )
+    upload_url: str | None = Field(
+        None, examples=['https://demo.firefly-iii.org/api/v1/attachments/191/download']
+    )
+    title: str | None = Field(None, examples=['Some PDF file'])
+    notes: str | None = Field(None, examples=['Some notes'])
+    mime: str | None = Field(None, examples=['application/pdf'])
+    size: int | None = Field(None, examples=[48211])
 
 
 class AttachmentRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['attachments'])
-	id: str = Field(..., examples=['2'])
-	attributes: AttachmentProperties
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['attachments'])
+    id: str = Field(..., examples=['2'])
+    attributes: AttachmentProperties
+    links: ObjectLink
 
 
 class AttachmentSingle(BaseModel):
-	data: AttachmentRead
+    data: AttachmentRead
 
 
 class AttachmentStore(BaseModel):
-	filename: str = Field(..., examples=['file.pdf'])
-	attachable_type: AttachableType
-	attachable_id: str = Field(
-		...,
-		description='ID of the model this attachment is linked to.',
-		examples=['134'],
-	)
-	title: str | None = Field(None, examples=['Some PDF file'])
-	notes: str | None = Field(None, examples=['Some notes'])
+    filename: str = Field(..., examples=['file.pdf'])
+    attachable_type: AttachableType
+    attachable_id: str = Field(
+        ...,
+        description='ID of the model this attachment is linked to.',
+        examples=['134'],
+    )
+    title: str | None = Field(None, examples=['Some PDF file'])
+    notes: str | None = Field(None, examples=['Some notes'])
 
 
 class BillProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	name: str | None = Field(None, description='The name of the subscription.', examples=['Rent'])
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	amount_min: str | None = Field(
-		None,
-		description="The minimum amount that is expected for this subscription in the subscription's currency.",
-		examples=['123.45'],
-	)
-	pc_amount_min: str | None = Field(
-		None,
-		description="The minimum amount that is expected for this subscription in the administration's primary currency.",
-		examples=['123.45'],
-	)
-	amount_max: str | None = Field(
-		None,
-		description="The maximum amount that is expected for this subscription in the subscription's currency.",
-		examples=['123.45'],
-	)
-	pc_amount_max: str | None = Field(
-		None,
-		description="The maximum amount that is expected for this subscription in the administration's primary currency.",
-		examples=['123.45'],
-	)
-	amount_avg: str | None = Field(
-		None,
-		description="The average amount that is expected for this subscription in the subscription's currency.",
-		examples=['123.45'],
-	)
-	pc_amount_avg: str | None = Field(
-		None,
-		description="The average amount that is expected for this subscription in the administration's primary currency.",
-		examples=['123.45'],
-	)
-	date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	end_date: AwareDatetime | None = Field(
-		None,
-		description='The date after which this subscription is no longer valid or applicable',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	extension_date: AwareDatetime | None = Field(
-		None,
-		description='The date before which the subscription must be renewed (or cancelled)',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	repeat_freq: BillRepeatFrequency | None = None
-	skip: int | None = Field(
-		None,
-		description='How often the subscription will be skipped. 1 means a bi-monthly subscription.',
-		examples=[0],
-	)
-	active: bool | None = Field(None, description='If the subscription is active.', examples=[True])
-	order: int | None = Field(None, description='Order of the subscription.', examples=[1])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_order: int | None = Field(
-		None,
-		description='The order of the group. At least 1, for the highest sorting.',
-		examples=[5],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
-	paid_dates: list[PaidDate] | None = Field(
-		None, description='Array of past transactions when the subscription was paid.'
-	)
-	pay_dates: list[AwareDatetime] | None = Field(
-		None,
-		description='Array of future dates when the bill is expected to be paid. Autogenerated.',
-	)
-	next_expected_match: AwareDatetime | None = Field(
-		None,
-		description='When the subscription is expected to be due.',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	next_expected_match_diff: str | None = Field(
-		None,
-		description='Formatted (locally) when the subscription is due.',
-		examples=['today'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    name: str | None = Field(None, description='The name of the subscription.', examples=['Rent'])
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    amount_min: str | None = Field(
+        None,
+        description="The minimum amount that is expected for this subscription in the subscription's currency.",
+        examples=['123.45'],
+    )
+    pc_amount_min: str | None = Field(
+        None,
+        description="The minimum amount that is expected for this subscription in the administration's primary currency.",
+        examples=['123.45'],
+    )
+    amount_max: str | None = Field(
+        None,
+        description="The maximum amount that is expected for this subscription in the subscription's currency.",
+        examples=['123.45'],
+    )
+    pc_amount_max: str | None = Field(
+        None,
+        description="The maximum amount that is expected for this subscription in the administration's primary currency.",
+        examples=['123.45'],
+    )
+    amount_avg: str | None = Field(
+        None,
+        description="The average amount that is expected for this subscription in the subscription's currency.",
+        examples=['123.45'],
+    )
+    pc_amount_avg: str | None = Field(
+        None,
+        description="The average amount that is expected for this subscription in the administration's primary currency.",
+        examples=['123.45'],
+    )
+    date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    end_date: AwareDatetime | None = Field(
+        None,
+        description='The date after which this subscription is no longer valid or applicable',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    extension_date: AwareDatetime | None = Field(
+        None,
+        description='The date before which the subscription must be renewed (or cancelled)',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    repeat_freq: BillRepeatFrequency | None = None
+    skip: int | None = Field(
+        None,
+        description='How often the subscription will be skipped. 1 means a bi-monthly subscription.',
+        examples=[0],
+    )
+    active: bool | None = Field(None, description='If the subscription is active.', examples=[True])
+    order: int | None = Field(None, description='Order of the subscription.', examples=[1])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_order: int | None = Field(
+        None,
+        description='The order of the group. At least 1, for the highest sorting.',
+        examples=[5],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
+    paid_dates: list[PaidDate] | None = Field(
+        None, description='Array of past transactions when the subscription was paid.'
+    )
+    pay_dates: list[AwareDatetime] | None = Field(
+        None,
+        description='Array of future dates when the bill is expected to be paid. Autogenerated.',
+    )
+    next_expected_match: AwareDatetime | None = Field(
+        None,
+        description='When the subscription is expected to be due.',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    next_expected_match_diff: str | None = Field(
+        None,
+        description='Formatted (locally) when the subscription is due.',
+        examples=['today'],
+    )
 
 
 class BillRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['bills'])
-	id: str = Field(..., examples=['2'])
-	attributes: BillProperties
+    type: str = Field(..., description='Immutable value', examples=['bills'])
+    id: str = Field(..., examples=['2'])
+    attributes: BillProperties
 
 
 class BillSingle(BaseModel):
-	data: BillRead
+    data: BillRead
 
 
 class BillStore(BaseModel):
-	currency_id: str | None = Field(
-		None, description='Use either currency_id or currency_code', examples=['5']
-	)
-	currency_code: str | None = Field(
-		None, description='Use either currency_id or currency_code', examples=['EUR']
-	)
-	name: str = Field(..., examples=['Rent'])
-	amount_min: str = Field(..., examples=['123.45'])
-	amount_max: str = Field(..., examples=['123.45'])
-	date: AwareDatetime = Field(..., examples=['2025-12-01T00:00:00+00:00'])
-	end_date: AwareDatetime | None = Field(
-		None,
-		description='The date after which this bill is no longer valid or applicable',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	extension_date: AwareDatetime | None = Field(
-		None,
-		description='The date before which the bill must be renewed (or cancelled)',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	repeat_freq: BillRepeatFrequency
-	skip: int | None = Field(
-		None,
-		description='How often the bill must be skipped. 1 means a bi-monthly bill.',
-		examples=[0],
-	)
-	active: bool | None = Field(None, description='If the bill is active.', examples=[True])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    currency_id: str | None = Field(
+        None, description='Use either currency_id or currency_code', examples=['5']
+    )
+    currency_code: str | None = Field(
+        None, description='Use either currency_id or currency_code', examples=['EUR']
+    )
+    name: str = Field(..., examples=['Rent'])
+    amount_min: str = Field(..., examples=['123.45'])
+    amount_max: str = Field(..., examples=['123.45'])
+    date: AwareDatetime = Field(..., examples=['2025-12-01T00:00:00+00:00'])
+    end_date: AwareDatetime | None = Field(
+        None,
+        description='The date after which this bill is no longer valid or applicable',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    extension_date: AwareDatetime | None = Field(
+        None,
+        description='The date before which the bill must be renewed (or cancelled)',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    repeat_freq: BillRepeatFrequency
+    skip: int | None = Field(
+        None,
+        description='How often the bill must be skipped. 1 means a bi-monthly bill.',
+        examples=[0],
+    )
+    active: bool | None = Field(None, description='If the bill is active.', examples=[True])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class BillUpdate(BaseModel):
-	currency_id: str | None = Field(
-		None, description='Use either currency_id or currency_code', examples=['5']
-	)
-	currency_code: str | None = Field(
-		None, description='Use either currency_id or currency_code', examples=['EUR']
-	)
-	name: str = Field(..., examples=['Rent'])
-	amount_min: str | None = Field(None, examples=['123.45'])
-	amount_max: str | None = Field(None, examples=['123.45'])
-	date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	end_date: AwareDatetime | None = Field(
-		None,
-		description='The date after which this bill is no longer valid or applicable',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	extension_date: AwareDatetime | None = Field(
-		None,
-		description='The date before which the bill must be renewed (or cancelled)',
-		examples=['2025-12-31T23:59:59+00:00'],
-	)
-	repeat_freq: BillRepeatFrequency | None = None
-	skip: int | None = Field(
-		None,
-		description='How often the bill must be skipped. 1 means a bi-monthly bill.',
-		examples=[0],
-	)
-	active: bool | None = Field(None, description='If the bill is active.', examples=[True])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
+    currency_id: str | None = Field(
+        None, description='Use either currency_id or currency_code', examples=['5']
+    )
+    currency_code: str | None = Field(
+        None, description='Use either currency_id or currency_code', examples=['EUR']
+    )
+    name: str = Field(..., examples=['Rent'])
+    amount_min: str | None = Field(None, examples=['123.45'])
+    amount_max: str | None = Field(None, examples=['123.45'])
+    date: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    end_date: AwareDatetime | None = Field(
+        None,
+        description='The date after which this bill is no longer valid or applicable',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    extension_date: AwareDatetime | None = Field(
+        None,
+        description='The date before which the bill must be renewed (or cancelled)',
+        examples=['2025-12-31T23:59:59+00:00'],
+    )
+    repeat_freq: BillRepeatFrequency | None = None
+    skip: int | None = Field(
+        None,
+        description='How often the bill must be skipped. 1 means a bi-monthly bill.',
+        examples=[0],
+    )
+    active: bool | None = Field(None, description='If the bill is active.', examples=[True])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
 
 
 class BudgetProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	active: bool | None = Field(None, examples=[False])
-	name: str = Field(..., examples=['Bills'])
-	order: int | None = Field(None, examples=[5])
-	notes: str | None = Field(None, examples=['Some notes'])
-	auto_budget_type: AutoBudgetType | None = None
-	auto_budget_period: AutoBudgetPeriod | None = None
-	object_group_id: str | None = Field(
-		None,
-		description='The group ID of the group this object is part of. NULL if no group.',
-		examples=['5'],
-	)
-	object_group_order: int | None = Field(
-		None,
-		description='The order of the group. At least 1, for the highest sorting.',
-		examples=[5],
-	)
-	object_group_title: str | None = Field(
-		None,
-		description='The name of the group. NULL if no group.',
-		examples=['Example Group'],
-	)
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	auto_budget_amount: str | None = Field(
-		None,
-		description='The amount for the auto-budget, if set.',
-		examples=['-1012.12'],
-	)
-	pc_auto_budget_amount: str | None = Field(
-		None,
-		description='The amount for the auto-budget, if set in the primary currency of the administration.',
-		examples=['-1012.12'],
-	)
-	spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Information on how much was spent in this budget. Is only filled in when the start and end date are submitted.',
-	)
-	pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
-		None,
-		description='Information on how much was spent in this budget. Is only filled in when the start and end date are submitted. It is converted to the primary currency of the administration.',
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    active: bool | None = Field(None, examples=[False])
+    name: str = Field(..., examples=['Bills'])
+    order: int | None = Field(None, examples=[5])
+    notes: str | None = Field(None, examples=['Some notes'])
+    auto_budget_type: AutoBudgetType | None = None
+    auto_budget_period: AutoBudgetPeriod | None = None
+    object_group_id: str | None = Field(
+        None,
+        description='The group ID of the group this object is part of. NULL if no group.',
+        examples=['5'],
+    )
+    object_group_order: int | None = Field(
+        None,
+        description='The order of the group. At least 1, for the highest sorting.',
+        examples=[5],
+    )
+    object_group_title: str | None = Field(
+        None,
+        description='The name of the group. NULL if no group.',
+        examples=['Example Group'],
+    )
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    auto_budget_amount: str | None = Field(
+        None,
+        description='The amount for the auto-budget, if set.',
+        examples=['-1012.12'],
+    )
+    pc_auto_budget_amount: str | None = Field(
+        None,
+        description='The amount for the auto-budget, if set in the primary currency of the administration.',
+        examples=['-1012.12'],
+    )
+    spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Information on how much was spent in this budget. Is only filled in when the start and end date are submitted.',
+    )
+    pc_spent: list[ArrayEntryWithCurrencyAndSum] | None = Field(
+        None,
+        description='Information on how much was spent in this budget. Is only filled in when the start and end date are submitted. It is converted to the primary currency of the administration.',
+    )
 
 
 class BudgetRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['budgets'])
-	id: str = Field(..., examples=['2'])
-	attributes: BudgetProperties
+    type: str = Field(..., description='Immutable value', examples=['budgets'])
+    id: str = Field(..., examples=['2'])
+    attributes: BudgetProperties
 
 
 class BudgetSingle(BaseModel):
-	data: BudgetRead
+    data: BudgetRead
 
 
 class BudgetStore(BaseModel):
-	name: str = Field(..., examples=['Bills'])
-	active: bool | None = Field(None, examples=[False])
-	order: int | None = Field(None, examples=[5])
-	notes: str | None = Field(None, examples=['Some notes'])
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
-	auto_budget_type: AutoBudgetType | None = None
-	auto_budget_currency_id: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['12'],
-	)
-	auto_budget_currency_code: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['EUR'],
-	)
-	auto_budget_amount: str | None = Field(None, examples=['-1012.12'])
-	auto_budget_period: AutoBudgetPeriod | None = None
+    name: str = Field(..., examples=['Bills'])
+    active: bool | None = Field(None, examples=[False])
+    order: int | None = Field(None, examples=[5])
+    notes: str | None = Field(None, examples=['Some notes'])
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
+    auto_budget_type: AutoBudgetType | None = None
+    auto_budget_currency_id: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['12'],
+    )
+    auto_budget_currency_code: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['EUR'],
+    )
+    auto_budget_amount: str | None = Field(None, examples=['-1012.12'])
+    auto_budget_period: AutoBudgetPeriod | None = None
 
 
 class BudgetUpdate(BaseModel):
-	name: str = Field(..., examples=['Bills'])
-	active: bool | None = Field(None, examples=[False])
-	order: int | None = Field(None, examples=[5])
-	notes: str | None = Field(None, examples=['Some notes'])
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
-	auto_budget_type: AutoBudgetType | None = None
-	auto_budget_currency_id: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['12'],
-	)
-	auto_budget_currency_code: str | None = Field(
-		None,
-		description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
-		examples=['EUR'],
-	)
-	auto_budget_amount: str | None = Field(None, examples=['-1012.12'])
-	auto_budget_period: AutoBudgetPeriod | None = None
+    name: str = Field(..., examples=['Bills'])
+    active: bool | None = Field(None, examples=[False])
+    order: int | None = Field(None, examples=[5])
+    notes: str | None = Field(None, examples=['Some notes'])
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
+    auto_budget_type: AutoBudgetType | None = None
+    auto_budget_currency_id: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['12'],
+    )
+    auto_budget_currency_code: str | None = Field(
+        None,
+        description="Use either currency_id or currency_code. Defaults to the user's financial administration's currency.",
+        examples=['EUR'],
+    )
+    auto_budget_amount: str | None = Field(None, examples=['-1012.12'])
+    auto_budget_period: AutoBudgetPeriod | None = None
 
 
 class CurrencyExchangeRateRead(BaseModel):
-	type: str | None = Field(
-		None, description='Immutable value', examples=['currency_exchange_rates']
-	)
-	id: str | None = Field(None, examples=['2'])
-	attributes: CurrencyExchangeProperties | None = None
-	links: ObjectLink | None = None
+    type: str | None = Field(
+        None, description='Immutable value', examples=['currency_exchange_rates']
+    )
+    id: str | None = Field(None, examples=['2'])
+    attributes: CurrencyExchangeProperties | None = None
+    links: ObjectLink | None = None
 
 
 class CurrencyExchangeRateSingle(BaseModel):
-	data: CurrencyExchangeRateRead
+    data: CurrencyExchangeRateRead
 
 
 class RecurrenceRepetition(BaseModel):
-	id: str | None = Field(None, examples=['2'])
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	type: RecurrenceRepetitionType
-	moment: str = Field(
-		...,
-		description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
-		examples=['3'],
-	)
-	skip: int | None = Field(
-		None,
-		description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
-		examples=[0],
-	)
-	weekend: int | None = Field(
-		None,
-		description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
-		examples=[1],
-	)
-	description: str | None = Field(
-		None,
-		description='Auto-generated repetition description.',
-		examples=['Every week on Friday'],
-	)
-	occurrences: list[AwareDatetime] | None = Field(
-		None,
-		description='Array of future dates when the repetition will apply to. Auto generated.',
-	)
+    id: str | None = Field(None, examples=['2'])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    type: RecurrenceRepetitionType
+    moment: str = Field(
+        ...,
+        description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
+        examples=['3'],
+    )
+    skip: int | None = Field(
+        None,
+        description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
+        examples=[0],
+    )
+    weekend: int | None = Field(
+        None,
+        description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
+        examples=[1],
+    )
+    description: str | None = Field(
+        None,
+        description='Auto-generated repetition description.',
+        examples=['Every week on Friday'],
+    )
+    occurrences: list[AwareDatetime] | None = Field(
+        None,
+        description='Array of future dates when the repetition will apply to. Auto generated.',
+    )
 
 
 class RecurrenceRepetitionStore(BaseModel):
-	type: RecurrenceRepetitionType
-	moment: str = Field(
-		...,
-		description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
-		examples=['3'],
-	)
-	skip: int | None = Field(
-		None,
-		description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
-		examples=[0],
-	)
-	weekend: int | None = Field(
-		None,
-		description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
-		examples=[1],
-	)
+    type: RecurrenceRepetitionType
+    moment: str = Field(
+        ...,
+        description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
+        examples=['3'],
+    )
+    skip: int | None = Field(
+        None,
+        description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
+        examples=[0],
+    )
+    weekend: int | None = Field(
+        None,
+        description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
+        examples=[1],
+    )
 
 
 class RecurrenceRepetitionUpdate(BaseModel):
-	type: RecurrenceRepetitionType | None = None
-	moment: str | None = Field(
-		None,
-		description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
-		examples=['3'],
-	)
-	skip: int | None = Field(
-		None,
-		description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
-		examples=[0],
-	)
-	weekend: int | None = Field(
-		None,
-		description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
-		examples=[1],
-	)
+    type: RecurrenceRepetitionType | None = None
+    moment: str | None = Field(
+        None,
+        description="Information that defined the type of repetition.\n- For 'daily', this is empty.\n- For 'weekly', it is day of the week between 1 and 7 (Monday - Sunday).\n- For 'ndom', it is '1,2' or '4,5' or something else, where the first number is the week in the month, and the second number is the day in the week (between 1 and 7). '2,3' means: the 2nd Wednesday of the month\n- For 'monthly' it is the day of the month (1 - 31)\n- For yearly, it is a full date, ie '2025-12-01'. The year you use does not matter.\n",
+        examples=['3'],
+    )
+    skip: int | None = Field(
+        None,
+        description='How many occurrences to skip. 0 means skip nothing. 1 means every other.',
+        examples=[0],
+    )
+    weekend: int | None = Field(
+        None,
+        description='How to respond when the recurring transaction falls in the weekend. Possible values:\n1. Do nothing, just create it\n2. Create no transaction.\n3. Skip to the previous Friday.\n4. Skip to the next Monday.\n',
+        examples=[1],
+    )
 
 
 class RecurrenceTransaction(BaseModel):
-	id: str | None = Field(
-		None,
-		examples=[
-			'ID of the recurring transaction. Not to be confused with the ID of the recurrence itself.'
-		],
-	)
-	description: str = Field(..., examples=['Rent for the current month'])
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='The currency ID of the currency associated with this object.',
-		examples=['5'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='The currency name of the currency associated with this object.',
-		examples=['Euro'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='The currency code of the currency associated with this object.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_decimal_places: int | None = Field(None, examples=[2])
-	primary_currency_id: str | None = Field(
-		None,
-		description="The currency ID of the administration's primary currency.",
-		examples=['5'],
-	)
-	primary_currency_name: str | None = Field(
-		None,
-		description="The currency name of the administration's primary currency.",
-		examples=['Euro'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description="The currency code of the administration's primary currency.",
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description="The currency symbol of the administration's primary currency.",
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description="The currency decimal places of the administration's primary currency.",
-		examples=[2],
-	)
-	amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
-	pc_amount: str | None = Field(
-		None,
-		description='Amount of the transaction in primary currency.',
-		examples=['123.45'],
-	)
-	foreign_amount: str | None = Field(
-		None, description='Foreign amount of the transaction.', examples=['123.45']
-	)
-	pc_foreign_amount: str | None = Field(
-		None, description='Foreign amount of the transaction.', examples=['123.45']
-	)
-	foreign_currency_id: str | None = Field(None, examples=['17'])
-	foreign_currency_name: str | None = Field(None, examples=['British Pound'])
-	foreign_currency_code: str | None = Field(None, examples=['GBP'])
-	foreign_currency_symbol: str | None = Field(None, examples=['$'])
-	foreign_currency_decimal_places: int | None = Field(
-		None, description='Number of decimals in the currency', examples=[2]
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	budget_name: str | None = Field(
-		None,
-		description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
-		examples=['Groceries'],
-	)
-	category_id: str | None = Field(
-		None, description='Category ID for this transaction.', examples=['211']
-	)
-	category_name: str | None = Field(
-		None, description='Category name for this transaction.', examples=['Bills']
-	)
-	source_id: str | None = Field(
-		None,
-		description='ID of the source account. Submit either this or source_name.',
-		examples=['913'],
-	)
-	source_name: str | None = Field(
-		None,
-		description='Name of the source account. Submit either this or source_id.',
-		examples=['Checking account'],
-	)
-	source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	source_type: AccountTypeProperty | None = None
-	destination_id: str | None = Field(
-		None,
-		description='ID of the destination account. Submit either this or destination_name.',
-		examples=['258'],
-	)
-	destination_name: str | None = Field(
-		None,
-		description='Name of the destination account. Submit either this or destination_id.',
-		examples=['Buy and Large'],
-	)
-	destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	destination_type: AccountTypeProperty | None = None
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	piggy_bank_id: str | None = Field(None, examples=['123'])
-	piggy_bank_name: str | None = None
-	subscription_id: str | None = Field(None, examples=['123'])
-	subscription_name: str | None = None
+    id: str | None = Field(
+        None,
+        examples=[
+            'ID of the recurring transaction. Not to be confused with the ID of the recurrence itself.'
+        ],
+    )
+    description: str = Field(..., examples=['Rent for the current month'])
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description="Indicates whether the object has a currency setting. If false, the object uses the administration's primary currency.",
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='The currency ID of the currency associated with this object.',
+        examples=['5'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='The currency name of the currency associated with this object.',
+        examples=['Euro'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='The currency code of the currency associated with this object.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_decimal_places: int | None = Field(None, examples=[2])
+    primary_currency_id: str | None = Field(
+        None,
+        description="The currency ID of the administration's primary currency.",
+        examples=['5'],
+    )
+    primary_currency_name: str | None = Field(
+        None,
+        description="The currency name of the administration's primary currency.",
+        examples=['Euro'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description="The currency code of the administration's primary currency.",
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description="The currency symbol of the administration's primary currency.",
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description="The currency decimal places of the administration's primary currency.",
+        examples=[2],
+    )
+    amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
+    pc_amount: str | None = Field(
+        None,
+        description='Amount of the transaction in primary currency.',
+        examples=['123.45'],
+    )
+    foreign_amount: str | None = Field(
+        None, description='Foreign amount of the transaction.', examples=['123.45']
+    )
+    pc_foreign_amount: str | None = Field(
+        None, description='Foreign amount of the transaction.', examples=['123.45']
+    )
+    foreign_currency_id: str | None = Field(None, examples=['17'])
+    foreign_currency_name: str | None = Field(None, examples=['British Pound'])
+    foreign_currency_code: str | None = Field(None, examples=['GBP'])
+    foreign_currency_symbol: str | None = Field(None, examples=['$'])
+    foreign_currency_decimal_places: int | None = Field(
+        None, description='Number of decimals in the currency', examples=[2]
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    budget_name: str | None = Field(
+        None,
+        description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
+        examples=['Groceries'],
+    )
+    category_id: str | None = Field(
+        None, description='Category ID for this transaction.', examples=['211']
+    )
+    category_name: str | None = Field(
+        None, description='Category name for this transaction.', examples=['Bills']
+    )
+    source_id: str | None = Field(
+        None,
+        description='ID of the source account. Submit either this or source_name.',
+        examples=['913'],
+    )
+    source_name: str | None = Field(
+        None,
+        description='Name of the source account. Submit either this or source_id.',
+        examples=['Checking account'],
+    )
+    source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    source_type: AccountTypeProperty | None = None
+    destination_id: str | None = Field(
+        None,
+        description='ID of the destination account. Submit either this or destination_name.',
+        examples=['258'],
+    )
+    destination_name: str | None = Field(
+        None,
+        description='Name of the destination account. Submit either this or destination_id.',
+        examples=['Buy and Large'],
+    )
+    destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    destination_type: AccountTypeProperty | None = None
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    piggy_bank_id: str | None = Field(None, examples=['123'])
+    piggy_bank_name: str | None = None
+    subscription_id: str | None = Field(None, examples=['123'])
+    subscription_name: str | None = None
 
 
 class RuleAction(BaseModel):
-	id: str | None = Field(None, examples=['2'])
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	type: RuleActionKeyword
-	value: str = Field(
-		...,
-		description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
-		examples=['Daily groceries'],
-	)
-	order: int | None = Field(None, description='Order of the action', examples=[5])
-	active: bool | None = Field(
-		True, description='If the action is active. Defaults to true.', examples=[True]
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='When true, other actions will not be fired after this action has fired. Defaults to false.',
-		examples=[False],
-	)
+    id: str | None = Field(None, examples=['2'])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    type: RuleActionKeyword
+    value: str = Field(
+        ...,
+        description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
+        examples=['Daily groceries'],
+    )
+    order: int | None = Field(None, description='Order of the action', examples=[5])
+    active: bool | None = Field(
+        True, description='If the action is active. Defaults to true.', examples=[True]
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='When true, other actions will not be fired after this action has fired. Defaults to false.',
+        examples=[False],
+    )
 
 
 class RuleActionStore(BaseModel):
-	type: RuleActionKeyword
-	value: str = Field(
-		...,
-		description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
-		examples=['Daily groceries'],
-	)
-	order: int | None = Field(None, description='Order of the action', examples=[5])
-	active: bool | None = Field(
-		True, description='If the action is active. Defaults to true.', examples=[True]
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='When true, other actions will not be fired after this action has fired. Defaults to false.',
-		examples=[False],
-	)
+    type: RuleActionKeyword
+    value: str = Field(
+        ...,
+        description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
+        examples=['Daily groceries'],
+    )
+    order: int | None = Field(None, description='Order of the action', examples=[5])
+    active: bool | None = Field(
+        True, description='If the action is active. Defaults to true.', examples=[True]
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='When true, other actions will not be fired after this action has fired. Defaults to false.',
+        examples=[False],
+    )
 
 
 class RuleActionUpdate(BaseModel):
-	type: RuleActionKeyword | None = None
-	value: str | None = Field(
-		None,
-		description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
-		examples=['Daily groceries'],
-	)
-	order: int | None = Field(None, description='Order of the action', examples=[5])
-	active: bool | None = Field(None, description='If the action is active.', examples=[True])
-	stop_processing: bool | None = Field(
-		None,
-		description='When true, other actions will not be fired after this action has fired.',
-		examples=[False],
-	)
+    type: RuleActionKeyword | None = None
+    value: str | None = Field(
+        None,
+        description='The accompanying value the action will set, change or update. Can be empty, but for some types this value is mandatory.',
+        examples=['Daily groceries'],
+    )
+    order: int | None = Field(None, description='Order of the action', examples=[5])
+    active: bool | None = Field(None, description='If the action is active.', examples=[True])
+    stop_processing: bool | None = Field(
+        None,
+        description='When true, other actions will not be fired after this action has fired.',
+        examples=[False],
+    )
 
 
 class RuleTrigger(BaseModel):
-	id: str | None = Field(None, examples=['2'])
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	type: RuleTriggerKeyword
-	value: str = Field(
-		...,
-		description='The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger.',
-		examples=['tag1'],
-	)
-	prohibited: bool | None = Field(
-		False,
-		description="If 'prohibited' is true, this rule trigger will be negated. 'Description is' will become 'Description is NOT' etc.",
-		examples=[False],
-	)
-	order: int | None = Field(None, description='Order of the trigger', examples=[5])
-	active: bool | None = Field(
-		True, description='If the trigger is active. Defaults to true.', examples=[True]
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='When true, other triggers will not be checked if this trigger was triggered. Defaults to false.',
-		examples=[False],
-	)
+    id: str | None = Field(None, examples=['2'])
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    type: RuleTriggerKeyword
+    value: str = Field(
+        ...,
+        description='The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger.',
+        examples=['tag1'],
+    )
+    prohibited: bool | None = Field(
+        False,
+        description="If 'prohibited' is true, this rule trigger will be negated. 'Description is' will become 'Description is NOT' etc.",
+        examples=[False],
+    )
+    order: int | None = Field(None, description='Order of the trigger', examples=[5])
+    active: bool | None = Field(
+        True, description='If the trigger is active. Defaults to true.', examples=[True]
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='When true, other triggers will not be checked if this trigger was triggered. Defaults to false.',
+        examples=[False],
+    )
 
 
 class RuleTriggerStore(BaseModel):
-	type: RuleTriggerKeyword
-	value: str = Field(
-		...,
-		description='The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger.',
-		examples=['tag1'],
-	)
-	order: int | None = Field(None, description='Order of the trigger', examples=[5])
-	active: bool | None = Field(
-		True, description='If the trigger is active. Defaults to true.', examples=[True]
-	)
-	prohibited: bool | None = Field(
-		False,
-		description="If 'prohibited' is true, this rule trigger will be negated. 'Description is' will become 'Description is NOT' etc.",
-		examples=[False],
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='When true, other triggers will not be checked if this trigger was triggered. Defaults to false.',
-		examples=[False],
-	)
+    type: RuleTriggerKeyword
+    value: str = Field(
+        ...,
+        description='The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger.',
+        examples=['tag1'],
+    )
+    order: int | None = Field(None, description='Order of the trigger', examples=[5])
+    active: bool | None = Field(
+        True, description='If the trigger is active. Defaults to true.', examples=[True]
+    )
+    prohibited: bool | None = Field(
+        False,
+        description="If 'prohibited' is true, this rule trigger will be negated. 'Description is' will become 'Description is NOT' etc.",
+        examples=[False],
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='When true, other triggers will not be checked if this trigger was triggered. Defaults to false.',
+        examples=[False],
+    )
 
 
 class RuleTriggerUpdate(BaseModel):
-	type: RuleTriggerKeyword | None = None
-	value: str | None = Field(
-		None,
-		description="The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger. If the rule trigger is something like 'has any tag', submit the string 'true'.",
-		examples=['tag1'],
-	)
-	order: int | None = Field(None, description='Order of the trigger', examples=[5])
-	active: bool | None = Field(None, description='If the trigger is active.', examples=[True])
-	stop_processing: bool | None = Field(
-		None,
-		description='When true, other triggers will not be checked if this trigger was triggered.',
-		examples=[False],
-	)
+    type: RuleTriggerKeyword | None = None
+    value: str | None = Field(
+        None,
+        description="The accompanying value the trigger responds to. This value is often mandatory, but this depends on the trigger. If the rule trigger is something like 'has any tag', submit the string 'true'.",
+        examples=['tag1'],
+    )
+    order: int | None = Field(None, description='Order of the trigger', examples=[5])
+    active: bool | None = Field(None, description='If the trigger is active.', examples=[True])
+    stop_processing: bool | None = Field(
+        None,
+        description='When true, other triggers will not be checked if this trigger was triggered.',
+        examples=[False],
+    )
 
 
 class TransactionSplit(BaseModel):
-	user: str | None = Field(None, description='User ID', examples=['3'])
-	transaction_journal_id: str | None = Field(
-		None,
-		description='ID of the underlying transaction journal. Each transaction consists of a transaction group (see the top ID) and one or more journals\nmaking up the splits of the transaction.\n',
-		examples=['10421'],
-	)
-	type: TransactionTypeProperty
-	date: AwareDatetime = Field(
-		...,
-		description='Date of the transaction',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	order: int | None = Field(
-		None,
-		description='Order of this entry in the list of transactions.',
-		examples=[0],
-	)
-	object_has_currency_setting: bool | None = Field(
-		None,
-		description='Indicates whether the transaction has a currency setting. For transactions this is always true.',
-		examples=[True],
-	)
-	currency_id: str | None = Field(
-		None,
-		description='Currency ID for the currency of this transaction.',
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description='Currency code for the currency of this transaction.',
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(
-		None,
-		description='Currency symbol for the currency of this transaction.',
-		examples=['$'],
-	)
-	currency_name: str | None = Field(
-		None,
-		description='Currency name for the currency of this transaction.',
-		examples=['Euro'],
-	)
-	currency_decimal_places: int | None = Field(
-		None, description='Number of decimals used in this currency.', examples=[2]
-	)
-	foreign_currency_id: str | None = Field(
-		None,
-		description='Currency ID of the foreign currency, if this transaction has a foreign amount.',
-		examples=['17'],
-	)
-	foreign_currency_code: str | None = Field(
-		None,
-		description='Currency code of the foreign currency. Default is NULL.',
-		examples=['USD'],
-	)
-	foreign_currency_symbol: str | None = Field(None, examples=['$'])
-	foreign_currency_decimal_places: int | None = Field(
-		None, description='Number of decimals in the foreign currency.', examples=[2]
-	)
-	primary_currency_id: str | None = Field(
-		None,
-		description='Returns the primary currency ID of the administration. This currency is used as the currency for all `pc_*` amount and balance fields of this account.',
-		examples=['12'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description='Returns the primary currency code of the administration. This currency is used as the currency for all `pc_*` amount and balance fields of this account.',
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None, description='See the other `primary_*` fields.', examples=['$']
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None, description='See the other `primary_*` fields.', examples=[2]
-	)
-	amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
-	pc_amount: str | None = Field(
-		None,
-		description="Amount of the transaction in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	foreign_amount: str | None = Field(
-		None,
-		description='The amount in the set foreign currency. May be NULL if the transaction does not have a foreign amount.',
-		examples=['123.45'],
-	)
-	pc_foreign_amount: str | None = Field(
-		None,
-		description="Foreign amount of the transaction in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	source_balance_after: str | None = Field(
-		None,
-		description="The balance of the source account. This is the balance in the account's currency which may be different from this transaction, and is not provided in this model.",
-		examples=['123.45'],
-	)
-	pc_source_balance_after: str | None = Field(
-		None,
-		description="The balance of the source account in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	destination_balance_after: str | None = Field(
-		None,
-		description="The balance of the destination account. This is the balance in the account's currency which may be different from this transaction, and is not provided in this model.",
-		examples=['123.45'],
-	)
-	pc_destination_balance_after: str | None = Field(
-		None,
-		description="The balance of the destination account in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
-		examples=['123.45'],
-	)
-	description: str = Field(
-		..., description='Description of the transaction.', examples=['Vegetables']
-	)
-	source_id: str = Field(
-		...,
-		description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
-		examples=['2'],
-	)
-	source_name: str | None = Field(
-		None,
-		description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
-		examples=['Checking account'],
-	)
-	source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	source_type: AccountTypeProperty | None = None
-	destination_id: str = Field(
-		...,
-		description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
-		examples=['2'],
-	)
-	destination_name: str | None = Field(
-		None,
-		description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
-		examples=['Buy and Large'],
-	)
-	destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	destination_type: AccountTypeProperty | None = None
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	budget_name: str | None = Field(
-		None, description='The name of the budget used.', examples=['Groceries']
-	)
-	category_id: str | None = Field(
-		None, description='The category ID for this transaction.', examples=['43']
-	)
-	category_name: str | None = Field(
-		None,
-		description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
-		examples=['Groceries'],
-	)
-	bill_id: str | None = Field(
-		None,
-		description='The associated subscription ID for this transaction. `bill` refers to the OLD name for subscriptions and this field will be removed.',
-		examples=['111'],
-	)
-	bill_name: str | None = Field(
-		None,
-		description='The associated subscription name for this transaction. `bill` refers to the OLD name for subscriptions and this field will be removed.',
-		examples=['Monthly rent'],
-	)
-	subscription_id: str | None = Field(
-		None,
-		description='The associated subscription ID for this transaction.',
-		examples=['111'],
-	)
-	subscription_name: str | None = Field(
-		None,
-		description='The associated subscription name for this transaction.',
-		examples=['Monthly rent'],
-	)
-	reconciled: bool | None = Field(
-		None,
-		description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
-		examples=[False],
-	)
-	notes: str | None = Field(None, examples=['Some example notes'])
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	internal_reference: str | None = Field(
-		None, description='Reference to internal reference of other systems.'
-	)
-	external_id: str | None = Field(None, description='Reference to external ID in other systems.')
-	external_url: str | None = Field(None, description='External, custom URL for this transaction.')
-	original_source: str | None = Field(
-		None,
-		description='System generated identifier for original creator of transaction.',
-	)
-	recurrence_id: str | None = Field(
-		None, description='Reference to recurrence that made the transaction.'
-	)
-	recurrence_total: int | None = Field(
-		None,
-		description='Total number of transactions expected to be created by this recurrence repetition. Will be 0 if infinite.',
-		examples=[0],
-	)
-	recurrence_count: int | None = Field(
-		None,
-		description='The # of the current transaction created under this recurrence.',
-		examples=[12],
-	)
-	import_hash_v2: str | None = Field(
-		None,
-		description='Hash value of original import transaction (for duplicate detection).',
-	)
-	sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
-	sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
-	sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
-	sepa_db: str | None = Field(None, description='SEPA mandate identifier')
-	sepa_country: str | None = Field(None, description='SEPA Country')
-	sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
-	sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
-	sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
-	interest_date: AwareDatetime | None = None
-	book_date: AwareDatetime | None = None
-	process_date: AwareDatetime | None = None
-	due_date: AwareDatetime | None = None
-	payment_date: AwareDatetime | None = None
-	invoice_date: AwareDatetime | None = None
-	latitude: float | None = Field(
-		None,
-		description="Latitude of the transaction's location, if applicable. Can be used to draw a map.",
-		examples=[51.983333],
-	)
-	longitude: float | None = Field(
-		None,
-		description="Latitude of the transaction's location, if applicable. Can be used to draw a map.",
-		examples=[5.916667],
-	)
-	zoom_level: int | None = Field(
-		None,
-		description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
-		examples=[6],
-	)
-	has_attachments: bool | None = Field(
-		None, description='If the transaction has attachments.', examples=[False]
-	)
+    user: str | None = Field(None, description='User ID', examples=['3'])
+    transaction_journal_id: str | None = Field(
+        None,
+        description='ID of the underlying transaction journal. Each transaction consists of a transaction group (see the top ID) and one or more journals\nmaking up the splits of the transaction.\n',
+        examples=['10421'],
+    )
+    type: TransactionTypeProperty
+    date: AwareDatetime = Field(
+        ...,
+        description='Date of the transaction',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    order: int | None = Field(
+        None,
+        description='Order of this entry in the list of transactions.',
+        examples=[0],
+    )
+    object_has_currency_setting: bool | None = Field(
+        None,
+        description='Indicates whether the transaction has a currency setting. For transactions this is always true.',
+        examples=[True],
+    )
+    currency_id: str | None = Field(
+        None,
+        description='Currency ID for the currency of this transaction.',
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description='Currency code for the currency of this transaction.',
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(
+        None,
+        description='Currency symbol for the currency of this transaction.',
+        examples=['$'],
+    )
+    currency_name: str | None = Field(
+        None,
+        description='Currency name for the currency of this transaction.',
+        examples=['Euro'],
+    )
+    currency_decimal_places: int | None = Field(
+        None, description='Number of decimals used in this currency.', examples=[2]
+    )
+    foreign_currency_id: str | None = Field(
+        None,
+        description='Currency ID of the foreign currency, if this transaction has a foreign amount.',
+        examples=['17'],
+    )
+    foreign_currency_code: str | None = Field(
+        None,
+        description='Currency code of the foreign currency. Default is NULL.',
+        examples=['USD'],
+    )
+    foreign_currency_symbol: str | None = Field(None, examples=['$'])
+    foreign_currency_decimal_places: int | None = Field(
+        None, description='Number of decimals in the foreign currency.', examples=[2]
+    )
+    primary_currency_id: str | None = Field(
+        None,
+        description='Returns the primary currency ID of the administration. This currency is used as the currency for all `pc_*` amount and balance fields of this account.',
+        examples=['12'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description='Returns the primary currency code of the administration. This currency is used as the currency for all `pc_*` amount and balance fields of this account.',
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None, description='See the other `primary_*` fields.', examples=['$']
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None, description='See the other `primary_*` fields.', examples=[2]
+    )
+    amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
+    pc_amount: str | None = Field(
+        None,
+        description="Amount of the transaction in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    foreign_amount: str | None = Field(
+        None,
+        description='The amount in the set foreign currency. May be NULL if the transaction does not have a foreign amount.',
+        examples=['123.45'],
+    )
+    pc_foreign_amount: str | None = Field(
+        None,
+        description="Foreign amount of the transaction in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    source_balance_after: str | None = Field(
+        None,
+        description="The balance of the source account. This is the balance in the account's currency which may be different from this transaction, and is not provided in this model.",
+        examples=['123.45'],
+    )
+    pc_source_balance_after: str | None = Field(
+        None,
+        description="The balance of the source account in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    destination_balance_after: str | None = Field(
+        None,
+        description="The balance of the destination account. This is the balance in the account's currency which may be different from this transaction, and is not provided in this model.",
+        examples=['123.45'],
+    )
+    pc_destination_balance_after: str | None = Field(
+        None,
+        description="The balance of the destination account in the primary currency of this administration. The `primary_currency_*` fields reflect the currency used. This field is NULL if the user does have 'convert to primary' set to true in their settings.",
+        examples=['123.45'],
+    )
+    description: str = Field(
+        ..., description='Description of the transaction.', examples=['Vegetables']
+    )
+    source_id: str = Field(
+        ...,
+        description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
+        examples=['2'],
+    )
+    source_name: str | None = Field(
+        None,
+        description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
+        examples=['Checking account'],
+    )
+    source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    source_type: AccountTypeProperty | None = None
+    destination_id: str = Field(
+        ...,
+        description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
+        examples=['2'],
+    )
+    destination_name: str | None = Field(
+        None,
+        description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
+        examples=['Buy and Large'],
+    )
+    destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    destination_type: AccountTypeProperty | None = None
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    budget_name: str | None = Field(
+        None, description='The name of the budget used.', examples=['Groceries']
+    )
+    category_id: str | None = Field(
+        None, description='The category ID for this transaction.', examples=['43']
+    )
+    category_name: str | None = Field(
+        None,
+        description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
+        examples=['Groceries'],
+    )
+    bill_id: str | None = Field(
+        None,
+        description='The associated subscription ID for this transaction. `bill` refers to the OLD name for subscriptions and this field will be removed.',
+        examples=['111'],
+    )
+    bill_name: str | None = Field(
+        None,
+        description='The associated subscription name for this transaction. `bill` refers to the OLD name for subscriptions and this field will be removed.',
+        examples=['Monthly rent'],
+    )
+    subscription_id: str | None = Field(
+        None,
+        description='The associated subscription ID for this transaction.',
+        examples=['111'],
+    )
+    subscription_name: str | None = Field(
+        None,
+        description='The associated subscription name for this transaction.',
+        examples=['Monthly rent'],
+    )
+    reconciled: bool | None = Field(
+        None,
+        description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
+        examples=[False],
+    )
+    notes: str | None = Field(None, examples=['Some example notes'])
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    internal_reference: str | None = Field(
+        None, description='Reference to internal reference of other systems.'
+    )
+    external_id: str | None = Field(None, description='Reference to external ID in other systems.')
+    external_url: str | None = Field(None, description='External, custom URL for this transaction.')
+    original_source: str | None = Field(
+        None,
+        description='System generated identifier for original creator of transaction.',
+    )
+    recurrence_id: str | None = Field(
+        None, description='Reference to recurrence that made the transaction.'
+    )
+    recurrence_total: int | None = Field(
+        None,
+        description='Total number of transactions expected to be created by this recurrence repetition. Will be 0 if infinite.',
+        examples=[0],
+    )
+    recurrence_count: int | None = Field(
+        None,
+        description='The # of the current transaction created under this recurrence.',
+        examples=[12],
+    )
+    import_hash_v2: str | None = Field(
+        None,
+        description='Hash value of original import transaction (for duplicate detection).',
+    )
+    sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
+    sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
+    sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
+    sepa_db: str | None = Field(None, description='SEPA mandate identifier')
+    sepa_country: str | None = Field(None, description='SEPA Country')
+    sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
+    sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
+    sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
+    interest_date: AwareDatetime | None = None
+    book_date: AwareDatetime | None = None
+    process_date: AwareDatetime | None = None
+    due_date: AwareDatetime | None = None
+    payment_date: AwareDatetime | None = None
+    invoice_date: AwareDatetime | None = None
+    latitude: float | None = Field(
+        None,
+        description="Latitude of the transaction's location, if applicable. Can be used to draw a map.",
+        examples=[51.983333],
+    )
+    longitude: float | None = Field(
+        None,
+        description="Latitude of the transaction's location, if applicable. Can be used to draw a map.",
+        examples=[5.916667],
+    )
+    zoom_level: int | None = Field(
+        None,
+        description='Zoom level for the map, if drawn. This to set the box right. Unfortunately this is a proprietary value because each map provider has different zoom levels.',
+        examples=[6],
+    )
+    has_attachments: bool | None = Field(
+        None, description='If the transaction has attachments.', examples=[False]
+    )
 
 
 class TransactionSplitStore(BaseModel):
-	type: TransactionTypeProperty
-	date: AwareDatetime = Field(
-		...,
-		description='Date of the transaction',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
-	description: str = Field(
-		..., description='Description of the transaction.', examples=['Vegetables']
-	)
-	order: int | None = Field(
-		None,
-		description='Order of this entry in the list of transactions.',
-		examples=[0],
-	)
-	currency_id: str | None = Field(
-		None,
-		description="Currency ID. Default is the source account's currency, or the user's financial administration's currency. The value you submit may be overruled by the source or destination account.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Currency code. Default is the source account's currency, or the user's financial administration's primary currency. The value you submit may be overruled by the source or destination account.",
-		examples=['EUR'],
-	)
-	foreign_amount: str | None = Field(
-		None, description='The amount in a foreign currency.', examples=['123.45']
-	)
-	foreign_currency_id: str | None = Field(
-		None,
-		description='Currency ID of the foreign currency. Default is null. Is required when you submit a foreign amount.',
-		examples=['17'],
-	)
-	foreign_currency_code: str | None = Field(
-		None,
-		description='Currency code of the foreign currency. Default is NULL. Can be used instead of the foreign_currency_id, but this or the ID is required when submitting a foreign amount.',
-		examples=['USD'],
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	budget_name: str | None = Field(
-		None,
-		description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
-		examples=['Groceries'],
-	)
-	category_id: str | None = Field(
-		None, description='The category ID for this transaction.', examples=['43']
-	)
-	category_name: str | None = Field(
-		None,
-		description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
-		examples=['Groceries'],
-	)
-	source_id: str | None = Field(
-		None,
-		description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
-		examples=['2'],
-	)
-	source_name: str | None = Field(
-		None,
-		description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
-		examples=['Checking account'],
-	)
-	destination_id: str | None = Field(
-		None,
-		description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
-		examples=['2'],
-	)
-	destination_name: str | None = Field(
-		None,
-		description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
-		examples=['Buy and Large'],
-	)
-	reconciled: bool | None = Field(
-		None,
-		description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
-		examples=[False],
-	)
-	piggy_bank_id: int | None = Field(
-		None, description='Optional. Use either this or the piggy_bank_name'
-	)
-	piggy_bank_name: str | None = Field(
-		None, description='Optional. Use either this or the piggy_bank_id'
-	)
-	bill_id: str | None = Field(
-		None, description='Optional. Use either this or the bill_name', examples=['112']
-	)
-	bill_name: str | None = Field(
-		None,
-		description='Optional. Use either this or the bill_id',
-		examples=['Monthly rent'],
-	)
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	internal_reference: str | None = Field(
-		None, description='Reference to internal reference of other systems.'
-	)
-	external_id: str | None = Field(None, description='Reference to external ID in other systems.')
-	external_url: str | None = Field(None, description='External, custom URL for this transaction.')
-	sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
-	sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
-	sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
-	sepa_db: str | None = Field(None, description='SEPA mandate identifier')
-	sepa_country: str | None = Field(None, description='SEPA Country')
-	sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
-	sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
-	sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
-	interest_date: AwareDatetime | None = None
-	book_date: AwareDatetime | None = None
-	process_date: AwareDatetime | None = None
-	due_date: AwareDatetime | None = None
-	payment_date: AwareDatetime | None = None
-	invoice_date: AwareDatetime | None = None
+    type: TransactionTypeProperty
+    date: AwareDatetime = Field(
+        ...,
+        description='Date of the transaction',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    amount: str = Field(..., description='Amount of the transaction.', examples=['123.45'])
+    description: str = Field(
+        ..., description='Description of the transaction.', examples=['Vegetables']
+    )
+    order: int | None = Field(
+        None,
+        description='Order of this entry in the list of transactions.',
+        examples=[0],
+    )
+    currency_id: str | None = Field(
+        None,
+        description="Currency ID. Default is the source account's currency, or the user's financial administration's currency. The value you submit may be overruled by the source or destination account.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Currency code. Default is the source account's currency, or the user's financial administration's primary currency. The value you submit may be overruled by the source or destination account.",
+        examples=['EUR'],
+    )
+    foreign_amount: str | None = Field(
+        None, description='The amount in a foreign currency.', examples=['123.45']
+    )
+    foreign_currency_id: str | None = Field(
+        None,
+        description='Currency ID of the foreign currency. Default is null. Is required when you submit a foreign amount.',
+        examples=['17'],
+    )
+    foreign_currency_code: str | None = Field(
+        None,
+        description='Currency code of the foreign currency. Default is NULL. Can be used instead of the foreign_currency_id, but this or the ID is required when submitting a foreign amount.',
+        examples=['USD'],
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    budget_name: str | None = Field(
+        None,
+        description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
+        examples=['Groceries'],
+    )
+    category_id: str | None = Field(
+        None, description='The category ID for this transaction.', examples=['43']
+    )
+    category_name: str | None = Field(
+        None,
+        description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
+        examples=['Groceries'],
+    )
+    source_id: str | None = Field(
+        None,
+        description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
+        examples=['2'],
+    )
+    source_name: str | None = Field(
+        None,
+        description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
+        examples=['Checking account'],
+    )
+    destination_id: str | None = Field(
+        None,
+        description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
+        examples=['2'],
+    )
+    destination_name: str | None = Field(
+        None,
+        description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
+        examples=['Buy and Large'],
+    )
+    reconciled: bool | None = Field(
+        None,
+        description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
+        examples=[False],
+    )
+    piggy_bank_id: int | None = Field(
+        None, description='Optional. Use either this or the piggy_bank_name'
+    )
+    piggy_bank_name: str | None = Field(
+        None, description='Optional. Use either this or the piggy_bank_id'
+    )
+    bill_id: str | None = Field(
+        None, description='Optional. Use either this or the bill_name', examples=['112']
+    )
+    bill_name: str | None = Field(
+        None,
+        description='Optional. Use either this or the bill_id',
+        examples=['Monthly rent'],
+    )
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    internal_reference: str | None = Field(
+        None, description='Reference to internal reference of other systems.'
+    )
+    external_id: str | None = Field(None, description='Reference to external ID in other systems.')
+    external_url: str | None = Field(None, description='External, custom URL for this transaction.')
+    sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
+    sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
+    sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
+    sepa_db: str | None = Field(None, description='SEPA mandate identifier')
+    sepa_country: str | None = Field(None, description='SEPA Country')
+    sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
+    sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
+    sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
+    interest_date: AwareDatetime | None = None
+    book_date: AwareDatetime | None = None
+    process_date: AwareDatetime | None = None
+    due_date: AwareDatetime | None = None
+    payment_date: AwareDatetime | None = None
+    invoice_date: AwareDatetime | None = None
 
 
 class TransactionSplitUpdate(BaseModel):
-	transaction_journal_id: str | None = Field(
-		None,
-		description='Transaction journal ID of current transaction (split).',
-		examples=['123'],
-	)
-	type: TransactionTypeProperty | None = None
-	date: AwareDatetime | None = Field(
-		None,
-		description='Date of the transaction',
-		examples=['2025-12-01T00:00:00+00:00'],
-	)
-	amount: str | None = Field(None, description='Amount of the transaction.', examples=['123.45'])
-	description: str | None = Field(
-		None, description='Description of the transaction.', examples=['Vegetables']
-	)
-	order: int | None = Field(
-		None,
-		description='Order of this entry in the list of transactions.',
-		examples=[0],
-	)
-	currency_id: str | None = Field(
-		None,
-		description="Currency ID. Default is the source account's currency, or the user's financial administration's primary currency. Can be used instead of currency_code.",
-		examples=['12'],
-	)
-	currency_code: str | None = Field(
-		None,
-		description="Currency code. Default is the source account's currency, or the user's financial administration's primary currency. Can be used instead of currency_id.",
-		examples=['EUR'],
-	)
-	currency_symbol: str | None = Field(None, examples=['$'])
-	currency_name: str | None = Field(None, examples=['Euro'])
-	currency_decimal_places: int | None = Field(
-		None, description='Number of decimals used in this currency.', examples=[2]
-	)
-	foreign_amount: str | None = Field(
-		None, description='The amount in a foreign currency.', examples=['123.45']
-	)
-	foreign_currency_id: str | None = Field(
-		None,
-		description='Currency ID of the foreign currency. Default is null. Is required when you submit a foreign amount.',
-		examples=['17'],
-	)
-	foreign_currency_code: str | None = Field(
-		None,
-		description='Currency code of the foreign currency. Default is NULL. Can be used instead of the foreign_currency_id, but this or the ID is required when submitting a foreign amount.',
-		examples=['USD'],
-	)
-	foreign_currency_symbol: str | None = Field(None, examples=['$'])
-	foreign_currency_decimal_places: int | None = Field(
-		None, description='Number of decimals in the currency', examples=[2]
-	)
-	budget_id: str | None = Field(
-		None, description='The budget ID for this transaction.', examples=['4']
-	)
-	budget_name: str | None = Field(
-		None,
-		description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
-		examples=['Groceries'],
-	)
-	category_id: str | None = Field(
-		None, description='The category ID for this transaction.', examples=['43']
-	)
-	category_name: str | None = Field(
-		None,
-		description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
-		examples=['Groceries'],
-	)
-	source_id: str | None = Field(
-		None,
-		description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
-		examples=['2'],
-	)
-	source_name: str | None = Field(
-		None,
-		description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
-		examples=['Checking account'],
-	)
-	source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	destination_id: str | None = Field(
-		None,
-		description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
-		examples=['2'],
-	)
-	destination_name: str | None = Field(
-		None,
-		description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
-		examples=['Buy and Large'],
-	)
-	destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
-	reconciled: bool | None = Field(
-		None,
-		description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
-		examples=[False],
-	)
-	bill_id: str | None = Field(
-		None, description='Optional. Use either this or the bill_name', examples=['111']
-	)
-	bill_name: str | None = Field(
-		None,
-		description='Optional. Use either this or the bill_id',
-		examples=['Monthly rent'],
-	)
-	tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
-	notes: str | None = Field(None, examples=['Some example notes'])
-	internal_reference: str | None = Field(
-		None, description='Reference to internal reference of other systems.'
-	)
-	external_id: str | None = Field(None, description='Reference to external ID in other systems.')
-	external_url: str | None = Field(None, description='External, custom URL for this transaction.')
-	sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
-	sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
-	sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
-	sepa_db: str | None = Field(None, description='SEPA mandate identifier')
-	sepa_country: str | None = Field(None, description='SEPA Country')
-	sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
-	sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
-	sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
-	interest_date: AwareDatetime | None = None
-	book_date: AwareDatetime | None = None
-	process_date: AwareDatetime | None = None
-	due_date: AwareDatetime | None = None
-	payment_date: AwareDatetime | None = None
-	invoice_date: AwareDatetime | None = None
+    transaction_journal_id: str | None = Field(
+        None,
+        description='Transaction journal ID of current transaction (split).',
+        examples=['123'],
+    )
+    type: TransactionTypeProperty | None = None
+    date: AwareDatetime | None = Field(
+        None,
+        description='Date of the transaction',
+        examples=['2025-12-01T00:00:00+00:00'],
+    )
+    amount: str | None = Field(None, description='Amount of the transaction.', examples=['123.45'])
+    description: str | None = Field(
+        None, description='Description of the transaction.', examples=['Vegetables']
+    )
+    order: int | None = Field(
+        None,
+        description='Order of this entry in the list of transactions.',
+        examples=[0],
+    )
+    currency_id: str | None = Field(
+        None,
+        description="Currency ID. Default is the source account's currency, or the user's financial administration's primary currency. Can be used instead of currency_code.",
+        examples=['12'],
+    )
+    currency_code: str | None = Field(
+        None,
+        description="Currency code. Default is the source account's currency, or the user's financial administration's primary currency. Can be used instead of currency_id.",
+        examples=['EUR'],
+    )
+    currency_symbol: str | None = Field(None, examples=['$'])
+    currency_name: str | None = Field(None, examples=['Euro'])
+    currency_decimal_places: int | None = Field(
+        None, description='Number of decimals used in this currency.', examples=[2]
+    )
+    foreign_amount: str | None = Field(
+        None, description='The amount in a foreign currency.', examples=['123.45']
+    )
+    foreign_currency_id: str | None = Field(
+        None,
+        description='Currency ID of the foreign currency. Default is null. Is required when you submit a foreign amount.',
+        examples=['17'],
+    )
+    foreign_currency_code: str | None = Field(
+        None,
+        description='Currency code of the foreign currency. Default is NULL. Can be used instead of the foreign_currency_id, but this or the ID is required when submitting a foreign amount.',
+        examples=['USD'],
+    )
+    foreign_currency_symbol: str | None = Field(None, examples=['$'])
+    foreign_currency_decimal_places: int | None = Field(
+        None, description='Number of decimals in the currency', examples=[2]
+    )
+    budget_id: str | None = Field(
+        None, description='The budget ID for this transaction.', examples=['4']
+    )
+    budget_name: str | None = Field(
+        None,
+        description='The name of the budget to be used. If the budget name is unknown, the ID will be used or the value will be ignored.',
+        examples=['Groceries'],
+    )
+    category_id: str | None = Field(
+        None, description='The category ID for this transaction.', examples=['43']
+    )
+    category_name: str | None = Field(
+        None,
+        description='The name of the category to be used. If the category is unknown, it will be created. If the ID and the name point to different categories, the ID overrules the name.',
+        examples=['Groceries'],
+    )
+    source_id: str | None = Field(
+        None,
+        description='ID of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account.',
+        examples=['2'],
+    )
+    source_name: str | None = Field(
+        None,
+        description='Name of the source account. For a withdrawal or a transfer, this must always be an asset account. For deposits, this must be a revenue account. Can be used instead of the source_id. If the transaction is a deposit, the source_name can be filled in freely: the account will be created based on the name.',
+        examples=['Checking account'],
+    )
+    source_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    destination_id: str | None = Field(
+        None,
+        description='ID of the destination account. For a deposit or a transfer, this must always be an asset account. For withdrawals this must be an expense account.',
+        examples=['2'],
+    )
+    destination_name: str | None = Field(
+        None,
+        description='Name of the destination account. You can submit the name instead of the ID. For everything except transfers, the account will be auto-generated if unknown, so submitting a name is enough.',
+        examples=['Buy and Large'],
+    )
+    destination_iban: str | None = Field(None, examples=['NL02ABNA0123456789'])
+    reconciled: bool | None = Field(
+        None,
+        description='If the transaction has been reconciled already. When you set this, the amount can no longer be edited by the user.',
+        examples=[False],
+    )
+    bill_id: str | None = Field(
+        None, description='Optional. Use either this or the bill_name', examples=['111']
+    )
+    bill_name: str | None = Field(
+        None,
+        description='Optional. Use either this or the bill_id',
+        examples=['Monthly rent'],
+    )
+    tags: list[str] | None = Field(None, description='Array of tags.', examples=[None])
+    notes: str | None = Field(None, examples=['Some example notes'])
+    internal_reference: str | None = Field(
+        None, description='Reference to internal reference of other systems.'
+    )
+    external_id: str | None = Field(None, description='Reference to external ID in other systems.')
+    external_url: str | None = Field(None, description='External, custom URL for this transaction.')
+    sepa_cc: str | None = Field(None, description='SEPA Clearing Code')
+    sepa_ct_op: str | None = Field(None, description='SEPA Opposing Account Identifier')
+    sepa_ct_id: str | None = Field(None, description='SEPA end-to-end Identifier')
+    sepa_db: str | None = Field(None, description='SEPA mandate identifier')
+    sepa_country: str | None = Field(None, description='SEPA Country')
+    sepa_ep: str | None = Field(None, description='SEPA External Purpose indicator')
+    sepa_ci: str | None = Field(None, description='SEPA Creditor Identifier')
+    sepa_batch_id: str | None = Field(None, description='SEPA Batch ID')
+    interest_date: AwareDatetime | None = None
+    book_date: AwareDatetime | None = None
+    process_date: AwareDatetime | None = None
+    due_date: AwareDatetime | None = None
+    payment_date: AwareDatetime | None = None
+    invoice_date: AwareDatetime | None = None
 
 
 class User(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	email: EmailStr = Field(
-		...,
-		description='The new users email address.',
-		examples=['james@firefly-iii.org'],
-	)
-	blocked: bool | None = Field(
-		None,
-		description='Boolean to indicate if the user is blocked.',
-		examples=[False],
-	)
-	blocked_code: UserBlockedCodeProperty | None = None
-	role: UserRoleProperty | None = None
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    email: EmailStr = Field(
+        ...,
+        description='The new users email address.',
+        examples=['james@firefly-iii.org'],
+    )
+    blocked: bool | None = Field(
+        None,
+        description='Boolean to indicate if the user is blocked.',
+        examples=[False],
+    )
+    blocked_code: UserBlockedCodeProperty | None = None
+    role: UserRoleProperty | None = None
 
 
 class UserGroupReadMembers(BaseModel):
-	user_id: str | None = Field(None, description='The ID of the member.', examples=['5'])
-	user_email: EmailStr | None = Field(
-		None,
-		description='The email address of the member',
-		examples=['james@firefly-iii.org'],
-	)
-	you: bool | None = Field(None, description='Is this you? (the current user)', examples=[False])
-	roles: list[UserGroupReadRole] | None = None
+    user_id: str | None = Field(None, description='The ID of the member.', examples=['5'])
+    user_email: EmailStr | None = Field(
+        None,
+        description='The email address of the member',
+        examples=['james@firefly-iii.org'],
+    )
+    you: bool | None = Field(None, description='Is this you? (the current user)', examples=[False])
+    roles: list[UserGroupReadRole] | None = None
 
 
 class WebhookProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	active: bool | None = Field(
-		None,
-		description='Boolean to indicate if the webhook is active',
-		examples=[False],
-	)
-	title: str = Field(
-		...,
-		description='A title for the webhook for easy recognition.',
-		examples=['Update magic mirror on new transaction'],
-	)
-	secret: str | None = Field(
-		None,
-		description="A 24-character secret for the webhook. It's generated by Firefly III when saving a new webhook. If you submit a new secret through the PUT endpoint it will generate a new secret for the selected webhook, a new secret bearing no relation to whatever you just submitted.",
-		examples=['iMLZLtLx2JHWhK9Dtyuoqyir'],
-	)
-	triggers: WebhookTriggerArray | None = None
-	responses: WebhookResponseArray | None = None
-	deliveries: WebhookDeliveryArray | None = None
-	url: str = Field(
-		...,
-		description='The URL of the webhook. Has to start with `https`.',
-		examples=['https://example.com'],
-	)
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    active: bool | None = Field(
+        None,
+        description='Boolean to indicate if the webhook is active',
+        examples=[False],
+    )
+    title: str = Field(
+        ...,
+        description='A title for the webhook for easy recognition.',
+        examples=['Update magic mirror on new transaction'],
+    )
+    secret: str | None = Field(
+        None,
+        description="A 24-character secret for the webhook. It's generated by Firefly III when saving a new webhook. If you submit a new secret through the PUT endpoint it will generate a new secret for the selected webhook, a new secret bearing no relation to whatever you just submitted.",
+        examples=['iMLZLtLx2JHWhK9Dtyuoqyir'],
+    )
+    triggers: WebhookTriggerArray | None = None
+    responses: WebhookResponseArray | None = None
+    deliveries: WebhookDeliveryArray | None = None
+    url: str = Field(
+        ...,
+        description='The URL of the webhook. Has to start with `https`.',
+        examples=['https://example.com'],
+    )
 
 
 class WebhookStore(BaseModel):
-	active: bool | None = Field(
-		None,
-		description='Boolean to indicate if the webhook is active',
-		examples=[False],
-	)
-	title: str = Field(
-		...,
-		description='A title for the webhook for easy recognition.',
-		examples=['Update magic mirror on new transaction'],
-	)
-	triggers: WebhookTriggerArray | None = None
-	responses: WebhookResponseArray | None = None
-	deliveries: WebhookDeliveryArray | None = None
-	url: str = Field(
-		...,
-		description='The URL of the webhook. Has to start with `https`.',
-		examples=['https://example.com'],
-	)
+    active: bool | None = Field(
+        None,
+        description='Boolean to indicate if the webhook is active',
+        examples=[False],
+    )
+    title: str = Field(
+        ...,
+        description='A title for the webhook for easy recognition.',
+        examples=['Update magic mirror on new transaction'],
+    )
+    triggers: WebhookTriggerArray | None = None
+    responses: WebhookResponseArray | None = None
+    deliveries: WebhookDeliveryArray | None = None
+    url: str = Field(
+        ...,
+        description='The URL of the webhook. Has to start with `https`.',
+        examples=['https://example.com'],
+    )
 
 
 class PolymorphicProperty(RootModel[bool | str | dict[str, Any] | list[StringArrayItem]]):
-	root: bool | str | dict[str, Any] | list[StringArrayItem]
+    root: bool | str | dict[str, Any] | list[StringArrayItem]
 
 
 class BasicSummary(RootModel[dict[str, BasicSummaryEntry]]):
-	root: dict[str, BasicSummaryEntry]
+    root: dict[str, BasicSummaryEntry]
 
 
 class Configuration(BaseModel):
-	title: ConfigValueFilter
-	value: PolymorphicProperty
-	editable: bool = Field(
-		...,
-		description='If this config variable can be edited by the user',
-		examples=[True],
-	)
+    title: ConfigValueFilter
+    value: PolymorphicProperty
+    editable: bool = Field(
+        ...,
+        description='If this config variable can be edited by the user',
+        examples=[True],
+    )
 
 
 class ConfigurationUpdate(BaseModel):
-	value: PolymorphicProperty
+    value: PolymorphicProperty
 
 
 class CronResult(BaseModel):
-	recurring_transactions: CronResultRow | None = None
-	auto_budgets: CronResultRow | None = None
-	telemetry: CronResultRow | None = None
+    recurring_transactions: CronResultRow | None = None
+    auto_budgets: CronResultRow | None = None
+    telemetry: CronResultRow | None = None
 
 
 class AccountArray(BaseModel):
-	data: list[AccountRead]
-	meta: Meta
+    data: list[AccountRead]
+    meta: Meta
 
 
 class AttachmentArray(BaseModel):
-	data: list[AttachmentRead]
-	meta: Meta
+    data: list[AttachmentRead]
+    meta: Meta
 
 
 class BillArray(BaseModel):
-	data: list[BillRead]
-	meta: Meta
+    data: list[BillRead]
+    meta: Meta
 
 
 class BudgetArray(BaseModel):
-	data: list[BudgetRead]
-	meta: Meta
+    data: list[BudgetRead]
+    meta: Meta
 
 
 class CategoryArray(BaseModel):
-	data: list[CategoryRead]
-	meta: Meta
+    data: list[CategoryRead]
+    meta: Meta
 
 
 class ConfigurationArray(RootModel[list[Configuration]]):
-	root: list[Configuration]
+    root: list[Configuration]
 
 
 class CurrencyArray(BaseModel):
-	data: list[CurrencyRead]
-	meta: Meta
-	links: PageLink
+    data: list[CurrencyRead]
+    meta: Meta
+    links: PageLink
 
 
 class CurrencyExchangeRateArray(BaseModel):
-	data: list[CurrencyExchangeRateRead]
-	meta: Meta
-	links: PageLink
+    data: list[CurrencyExchangeRateRead]
+    meta: Meta
+    links: PageLink
 
 
 class LinkTypeArray(BaseModel):
-	data: list[LinkTypeRead]
-	meta: Meta
-	links: PageLink
+    data: list[LinkTypeRead]
+    meta: Meta
+    links: PageLink
 
 
 class ObjectGroupArray(BaseModel):
-	data: list[ObjectGroupRead]
-	meta: Meta
+    data: list[ObjectGroupRead]
+    meta: Meta
 
 
 class PiggyBankArray(BaseModel):
-	data: list[PiggyBankRead]
-	meta: Meta
-	links: PageLink
+    data: list[PiggyBankRead]
+    meta: Meta
+    links: PageLink
 
 
 class PiggyBankEventArray(BaseModel):
-	data: list[PiggyBankEventRead]
-	meta: Meta
-	links: PageLink
+    data: list[PiggyBankEventRead]
+    meta: Meta
+    links: PageLink
 
 
 class RuleGroupArray(BaseModel):
-	data: list[RuleGroupRead]
-	meta: Meta
-	links: PageLink
+    data: list[RuleGroupRead]
+    meta: Meta
+    links: PageLink
 
 
 class TagArray(BaseModel):
-	data: list[TagRead]
-	meta: Meta
-	links: PageLink
+    data: list[TagRead]
+    meta: Meta
+    links: PageLink
 
 
 class TransactionLinkArray(BaseModel):
-	data: list[TransactionLinkRead]
-	meta: Meta
-	links: PageLink
+    data: list[TransactionLinkRead]
+    meta: Meta
+    links: PageLink
 
 
 class WebhookAttemptArray(BaseModel):
-	data: list[WebhookAttemptRead]
-	meta: Meta
+    data: list[WebhookAttemptRead]
+    meta: Meta
 
 
 class WebhookMessageArray(BaseModel):
-	data: list[WebhookMessageRead]
-	meta: Meta
+    data: list[WebhookMessageRead]
+    meta: Meta
 
 
 class ConfigurationSingle(BaseModel):
-	data: Configuration
+    data: Configuration
 
 
 class UserRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['users'])
-	id: str = Field(..., examples=['2'])
-	attributes: User
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['users'])
+    id: str = Field(..., examples=['2'])
+    attributes: User
+    links: ObjectLink
 
 
 class WebhookRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['webhooks'])
-	id: str = Field(..., examples=['2'])
-	attributes: WebhookProperties
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['webhooks'])
+    id: str = Field(..., examples=['2'])
+    attributes: WebhookProperties
+    links: ObjectLink
 
 
 class WebhookSingle(BaseModel):
-	data: WebhookRead
+    data: WebhookRead
 
 
 class Preference(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	name: str = Field(..., examples=['currencyPreference'])
-	data: PolymorphicProperty
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    name: str = Field(..., examples=['currencyPreference'])
+    data: PolymorphicProperty
 
 
 class PreferenceUpdate(BaseModel):
-	data: PolymorphicProperty
+    data: PolymorphicProperty
 
 
 class RecurrenceProperties(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	type: RecurrenceTransactionType | None = None
-	title: str | None = Field(None, examples=['Rent'])
-	description: str | None = Field(
-		None,
-		description='Not to be confused with the description of the actual transaction(s) being created.',
-		examples=['Recurring transaction for the monthly rent'],
-	)
-	first_date: date_aliased | None = Field(
-		None,
-		description='First time the recurring transaction will fire. Must be after today.',
-		examples=['2025-12-31'],
-	)
-	latest_date: date_aliased | None = Field(
-		None,
-		description='Last time the recurring transaction has fired.',
-		examples=['2025-12-01'],
-	)
-	repeat_until: date_aliased | None = Field(
-		None,
-		description='Date until the recurring transaction can fire. Use either this field or repetitions.',
-		examples=['2025-12-31'],
-	)
-	apply_rules: bool | None = Field(
-		None,
-		description='Whether or not to fire the rules after the creation of a transaction.',
-		examples=[True],
-	)
-	active: bool | None = Field(
-		None, description='If the recurrence is even active.', examples=[True]
-	)
-	nr_of_repetitions: int | None = Field(
-		None,
-		description='Max number of created transactions. Use either this field or repeat_until.',
-		examples=[5],
-	)
-	notes: str | None = Field(None, examples=['Some notes'])
-	repetitions: list[RecurrenceRepetition] | None = None
-	transactions: list[RecurrenceTransaction] | None = None
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    type: RecurrenceTransactionType | None = None
+    title: str | None = Field(None, examples=['Rent'])
+    description: str | None = Field(
+        None,
+        description='Not to be confused with the description of the actual transaction(s) being created.',
+        examples=['Recurring transaction for the monthly rent'],
+    )
+    first_date: date_aliased | None = Field(
+        None,
+        description='First time the recurring transaction will fire. Must be after today.',
+        examples=['2025-12-31'],
+    )
+    latest_date: date_aliased | None = Field(
+        None,
+        description='Last time the recurring transaction has fired.',
+        examples=['2025-12-01'],
+    )
+    repeat_until: date_aliased | None = Field(
+        None,
+        description='Date until the recurring transaction can fire. Use either this field or repetitions.',
+        examples=['2025-12-31'],
+    )
+    apply_rules: bool | None = Field(
+        None,
+        description='Whether or not to fire the rules after the creation of a transaction.',
+        examples=[True],
+    )
+    active: bool | None = Field(
+        None, description='If the recurrence is even active.', examples=[True]
+    )
+    nr_of_repetitions: int | None = Field(
+        None,
+        description='Max number of created transactions. Use either this field or repeat_until.',
+        examples=[5],
+    )
+    notes: str | None = Field(None, examples=['Some notes'])
+    repetitions: list[RecurrenceRepetition] | None = None
+    transactions: list[RecurrenceTransaction] | None = None
 
 
 class RecurrenceStore(BaseModel):
-	type: RecurrenceTransactionType
-	title: str = Field(..., examples=['Rent'])
-	description: str | None = Field(
-		None,
-		description='Not to be confused with the description of the actual transaction(s) being created.',
-		examples=['Recurring transaction for the monthly rent'],
-	)
-	first_date: date_aliased = Field(
-		...,
-		description='First time the recurring transaction will fire. Must be after today.',
-		examples=['2025-12-31'],
-	)
-	repeat_until: date_aliased = Field(
-		...,
-		description='Date until the recurring transaction can fire. Use either this field or repetitions.',
-		examples=['2025-12-31'],
-	)
-	nr_of_repetitions: int | None = Field(
-		None,
-		description='Max number of created transactions. Use either this field or repeat_until.',
-		examples=[5],
-	)
-	apply_rules: bool | None = Field(
-		None,
-		description='Whether or not to fire the rules after the creation of a transaction.',
-		examples=[True],
-	)
-	active: bool | None = Field(
-		None, description='If the recurrence is even active.', examples=[True]
-	)
-	notes: str | None = Field(None, examples=['Some notes'])
-	repetitions: list[RecurrenceRepetitionStore]
-	transactions: list[RecurrenceTransactionStore]
+    type: RecurrenceTransactionType
+    title: str = Field(..., examples=['Rent'])
+    description: str | None = Field(
+        None,
+        description='Not to be confused with the description of the actual transaction(s) being created.',
+        examples=['Recurring transaction for the monthly rent'],
+    )
+    first_date: date_aliased = Field(
+        ...,
+        description='First time the recurring transaction will fire. Must be after today.',
+        examples=['2025-12-31'],
+    )
+    repeat_until: date_aliased = Field(
+        ...,
+        description='Date until the recurring transaction can fire. Use either this field or repetitions.',
+        examples=['2025-12-31'],
+    )
+    nr_of_repetitions: int | None = Field(
+        None,
+        description='Max number of created transactions. Use either this field or repeat_until.',
+        examples=[5],
+    )
+    apply_rules: bool | None = Field(
+        None,
+        description='Whether or not to fire the rules after the creation of a transaction.',
+        examples=[True],
+    )
+    active: bool | None = Field(
+        None, description='If the recurrence is even active.', examples=[True]
+    )
+    notes: str | None = Field(None, examples=['Some notes'])
+    repetitions: list[RecurrenceRepetitionStore]
+    transactions: list[RecurrenceTransactionStore]
 
 
 class RecurrenceUpdate(BaseModel):
-	title: str | None = Field(None, examples=['Rent'])
-	description: str | None = Field(
-		None,
-		description='Not to be confused with the description of the actual transaction(s) being created.',
-		examples=['Recurring transaction for the monthly rent'],
-	)
-	first_date: date_aliased | None = Field(
-		None,
-		description='First time the recurring transaction will fire.',
-		examples=['2025-12-31'],
-	)
-	repeat_until: date_aliased | None = Field(
-		None,
-		description="Date until when the recurring transaction can fire. After that date, it's basically inactive. Use either this field or repetitions.",
-		examples=['2025-12-31'],
-	)
-	nr_of_repetitions: int | None = Field(
-		None,
-		description='Max number of created transactions. Use either this field or repeat_until.',
-		examples=[5],
-	)
-	apply_rules: bool | None = Field(
-		None,
-		description='Whether or not to fire the rules after the creation of a transaction.',
-		examples=[True],
-	)
-	active: bool | None = Field(
-		None, description='If the recurrence is even active.', examples=[True]
-	)
-	notes: str | None = Field(None, examples=['Some notes'])
-	repetitions: list[RecurrenceRepetitionUpdate] | None = None
-	transactions: list[RecurrenceTransactionUpdate] | None = None
+    title: str | None = Field(None, examples=['Rent'])
+    description: str | None = Field(
+        None,
+        description='Not to be confused with the description of the actual transaction(s) being created.',
+        examples=['Recurring transaction for the monthly rent'],
+    )
+    first_date: date_aliased | None = Field(
+        None,
+        description='First time the recurring transaction will fire.',
+        examples=['2025-12-31'],
+    )
+    repeat_until: date_aliased | None = Field(
+        None,
+        description="Date until when the recurring transaction can fire. After that date, it's basically inactive. Use either this field or repetitions.",
+        examples=['2025-12-31'],
+    )
+    nr_of_repetitions: int | None = Field(
+        None,
+        description='Max number of created transactions. Use either this field or repeat_until.',
+        examples=[5],
+    )
+    apply_rules: bool | None = Field(
+        None,
+        description='Whether or not to fire the rules after the creation of a transaction.',
+        examples=[True],
+    )
+    active: bool | None = Field(
+        None, description='If the recurrence is even active.', examples=[True]
+    )
+    notes: str | None = Field(None, examples=['Some notes'])
+    repetitions: list[RecurrenceRepetitionUpdate] | None = None
+    transactions: list[RecurrenceTransactionUpdate] | None = None
 
 
 class Rule(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	title: str = Field(..., examples=['First rule title.'])
-	description: str | None = Field(None, examples=['First rule description'])
-	rule_group_id: str = Field(
-		...,
-		description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
-		examples=['81'],
-	)
-	rule_group_title: str | None = Field(
-		None,
-		description='Title of the rule group under which the rule must be stored. Either this field or rule_group_id is mandatory.',
-		examples=['New rule group'],
-	)
-	order: int | None = Field(None, examples=[5])
-	trigger: RuleTriggerType
-	active: bool | None = Field(
-		True,
-		description='Whether or not the rule is even active. Default is true.',
-		examples=[True],
-	)
-	strict: bool | None = Field(
-		None,
-		description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
-		examples=[True],
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
-		examples=[False],
-	)
-	triggers: list[RuleTrigger]
-	actions: list[RuleAction]
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    title: str = Field(..., examples=['First rule title.'])
+    description: str | None = Field(None, examples=['First rule description'])
+    rule_group_id: str = Field(
+        ...,
+        description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
+        examples=['81'],
+    )
+    rule_group_title: str | None = Field(
+        None,
+        description='Title of the rule group under which the rule must be stored. Either this field or rule_group_id is mandatory.',
+        examples=['New rule group'],
+    )
+    order: int | None = Field(None, examples=[5])
+    trigger: RuleTriggerType
+    active: bool | None = Field(
+        True,
+        description='Whether or not the rule is even active. Default is true.',
+        examples=[True],
+    )
+    strict: bool | None = Field(
+        None,
+        description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
+        examples=[True],
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
+        examples=[False],
+    )
+    triggers: list[RuleTrigger]
+    actions: list[RuleAction]
 
 
 class RuleStore(BaseModel):
-	title: str = Field(..., examples=['First rule title.'])
-	description: str | None = Field(None, examples=['First rule description'])
-	rule_group_id: str = Field(
-		...,
-		description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
-		examples=['81'],
-	)
-	rule_group_title: str | None = Field(
-		None,
-		description='Title of the rule group under which the rule must be stored. Either this field or rule_group_id is mandatory.',
-		examples=['New rule group'],
-	)
-	order: int | None = Field(None, examples=[5])
-	trigger: RuleTriggerType
-	active: bool | None = Field(
-		True,
-		description='Whether or not the rule is even active. Default is true.',
-		examples=[True],
-	)
-	strict: bool | None = Field(
-		True,
-		description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
-		examples=[True],
-	)
-	stop_processing: bool | None = Field(
-		None,
-		description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
-		examples=[False],
-	)
-	triggers: list[RuleTriggerStore]
-	actions: list[RuleActionStore]
+    title: str = Field(..., examples=['First rule title.'])
+    description: str | None = Field(None, examples=['First rule description'])
+    rule_group_id: str = Field(
+        ...,
+        description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
+        examples=['81'],
+    )
+    rule_group_title: str | None = Field(
+        None,
+        description='Title of the rule group under which the rule must be stored. Either this field or rule_group_id is mandatory.',
+        examples=['New rule group'],
+    )
+    order: int | None = Field(None, examples=[5])
+    trigger: RuleTriggerType
+    active: bool | None = Field(
+        True,
+        description='Whether or not the rule is even active. Default is true.',
+        examples=[True],
+    )
+    strict: bool | None = Field(
+        True,
+        description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
+        examples=[True],
+    )
+    stop_processing: bool | None = Field(
+        None,
+        description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
+        examples=[False],
+    )
+    triggers: list[RuleTriggerStore]
+    actions: list[RuleActionStore]
 
 
 class RuleUpdate(BaseModel):
-	title: str | None = Field(None, examples=['First rule title.'])
-	description: str | None = Field(None, examples=['First rule description'])
-	rule_group_id: str | None = Field(
-		None,
-		description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
-		examples=['81'],
-	)
-	order: int | None = Field(None, examples=[5])
-	trigger: RuleTriggerType | None = None
-	active: bool | None = Field(
-		True,
-		description='Whether or not the rule is even active. Default is true.',
-		examples=[True],
-	)
-	strict: bool | None = Field(
-		None,
-		description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
-		examples=[True],
-	)
-	stop_processing: bool | None = Field(
-		False,
-		description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
-		examples=[False],
-	)
-	triggers: list[RuleTriggerUpdate] | None = None
-	actions: list[RuleActionUpdate] | None = None
+    title: str | None = Field(None, examples=['First rule title.'])
+    description: str | None = Field(None, examples=['First rule description'])
+    rule_group_id: str | None = Field(
+        None,
+        description='ID of the rule group under which the rule must be stored. Either this field or rule_group_title is mandatory.',
+        examples=['81'],
+    )
+    order: int | None = Field(None, examples=[5])
+    trigger: RuleTriggerType | None = None
+    active: bool | None = Field(
+        True,
+        description='Whether or not the rule is even active. Default is true.',
+        examples=[True],
+    )
+    strict: bool | None = Field(
+        None,
+        description='If the rule is set to be strict, ALL triggers must hit in order for the rule to fire. Otherwise, just one is enough. Default value is true.',
+        examples=[True],
+    )
+    stop_processing: bool | None = Field(
+        False,
+        description='If this value is true and the rule is triggered, other rules  after this one in the group will be skipped. Default value is false.',
+        examples=[False],
+    )
+    triggers: list[RuleTriggerUpdate] | None = None
+    actions: list[RuleActionUpdate] | None = None
 
 
 class Transaction(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	user: str | None = Field(None, description='User ID', examples=['3'])
-	group_title: str | None = Field(
-		None,
-		description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
-		examples=['Split transaction title.'],
-	)
-	transactions: list[TransactionSplit]
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    user: str | None = Field(None, description='User ID', examples=['3'])
+    group_title: str | None = Field(
+        None,
+        description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
+        examples=['Split transaction title.'],
+    )
+    transactions: list[TransactionSplit]
 
 
 class TransactionStore(BaseModel):
-	error_if_duplicate_hash: bool | None = Field(
-		None,
-		description='Break if the submitted transaction exists already.',
-		examples=[False],
-	)
-	apply_rules: bool | None = Field(
-		None,
-		description='Whether or not to apply rules when submitting transaction.',
-		examples=[False],
-	)
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
-	group_title: str | None = Field(
-		None,
-		description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
-		examples=['Split transaction title.'],
-	)
-	transactions: list[TransactionSplitStore]
+    error_if_duplicate_hash: bool | None = Field(
+        None,
+        description='Break if the submitted transaction exists already.',
+        examples=[False],
+    )
+    apply_rules: bool | None = Field(
+        None,
+        description='Whether or not to apply rules when submitting transaction.',
+        examples=[False],
+    )
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
+    group_title: str | None = Field(
+        None,
+        description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
+        examples=['Split transaction title.'],
+    )
+    transactions: list[TransactionSplitStore]
 
 
 class TransactionUpdate(BaseModel):
-	apply_rules: bool | None = Field(
-		None,
-		description='Whether or not to apply rules when submitting transaction.',
-		examples=[False],
-	)
-	fire_webhooks: bool | None = Field(
-		True,
-		description='Whether or not to fire the webhooks that are related to this event.',
-		examples=[True],
-	)
-	group_title: str | None = Field(
-		None,
-		description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
-		examples=['Split transaction title.'],
-	)
-	transactions: list[TransactionSplitUpdate] | None = None
+    apply_rules: bool | None = Field(
+        None,
+        description='Whether or not to apply rules when submitting transaction.',
+        examples=[False],
+    )
+    fire_webhooks: bool | None = Field(
+        True,
+        description='Whether or not to fire the webhooks that are related to this event.',
+        examples=[True],
+    )
+    group_title: str | None = Field(
+        None,
+        description='Title of the transaction if it has been split in more than one piece. Empty otherwise.',
+        examples=['Split transaction title.'],
+    )
+    transactions: list[TransactionSplitUpdate] | None = None
 
 
 class UserGroupReadAttributes(BaseModel):
-	created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
-	in_use: bool | None = Field(
-		None,
-		description="Is this user group ('financial administration') currently the active administration?",
-		examples=[False],
-	)
-	can_see_members: bool | None = Field(
-		None,
-		description='Can the current user see the members of this user group?',
-		examples=[True],
-	)
-	title: str | None = Field(
-		None,
-		description="Title of the user group. By default, it is the same as the user's email address.",
-		examples=['demo@firefly'],
-	)
-	primary_currency_id: str | None = Field(
-		None,
-		description='Returns the primary currency ID of the user group.',
-		examples=['12'],
-	)
-	primary_currency_code: str | None = Field(
-		None,
-		description='Returns the primary currency code of the user group.',
-		examples=['EUR'],
-	)
-	primary_currency_symbol: str | None = Field(
-		None,
-		description='Returns the primary currency symbol of the user group.',
-		examples=['$'],
-	)
-	primary_currency_decimal_places: int | None = Field(
-		None,
-		description='Returns the primary currency decimal places of the user group.',
-		examples=[2],
-	)
-	members: list[UserGroupReadMembers] | None = None
+    created_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    updated_at: AwareDatetime | None = Field(None, examples=['2025-12-01T00:00:00+00:00'])
+    in_use: bool | None = Field(
+        None,
+        description="Is this user group ('financial administration') currently the active administration?",
+        examples=[False],
+    )
+    can_see_members: bool | None = Field(
+        None,
+        description='Can the current user see the members of this user group?',
+        examples=[True],
+    )
+    title: str | None = Field(
+        None,
+        description="Title of the user group. By default, it is the same as the user's email address.",
+        examples=['demo@firefly'],
+    )
+    primary_currency_id: str | None = Field(
+        None,
+        description='Returns the primary currency ID of the user group.',
+        examples=['12'],
+    )
+    primary_currency_code: str | None = Field(
+        None,
+        description='Returns the primary currency code of the user group.',
+        examples=['EUR'],
+    )
+    primary_currency_symbol: str | None = Field(
+        None,
+        description='Returns the primary currency symbol of the user group.',
+        examples=['$'],
+    )
+    primary_currency_decimal_places: int | None = Field(
+        None,
+        description='Returns the primary currency decimal places of the user group.',
+        examples=[2],
+    )
+    members: list[UserGroupReadMembers] | None = None
 
 
 class UserSingle(BaseModel):
-	data: UserRead
+    data: UserRead
 
 
 class UserArray(BaseModel):
-	data: list[UserRead]
-	meta: Meta
-	links: PageLink
+    data: list[UserRead]
+    meta: Meta
+    links: PageLink
 
 
 class WebhookArray(BaseModel):
-	data: list[WebhookRead]
-	meta: Meta
-	links: PageLink
+    data: list[WebhookRead]
+    meta: Meta
+    links: PageLink
 
 
 class PreferenceRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['preferences'])
-	id: str = Field(..., examples=['2'])
-	attributes: Preference
+    type: str = Field(..., description='Immutable value', examples=['preferences'])
+    id: str = Field(..., examples=['2'])
+    attributes: Preference
 
 
 class PreferenceSingle(BaseModel):
-	data: PreferenceRead
+    data: PreferenceRead
 
 
 class RecurrenceRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['recurrences'])
-	id: str = Field(..., examples=['2'])
-	attributes: RecurrenceProperties
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['recurrences'])
+    id: str = Field(..., examples=['2'])
+    attributes: RecurrenceProperties
+    links: ObjectLink
 
 
 class RecurrenceSingle(BaseModel):
-	data: RecurrenceRead
+    data: RecurrenceRead
 
 
 class RuleRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['rules'])
-	id: str = Field(..., examples=['2'])
-	attributes: Rule
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['rules'])
+    id: str = Field(..., examples=['2'])
+    attributes: Rule
+    links: ObjectLink
 
 
 class RuleSingle(BaseModel):
-	data: RuleRead
+    data: RuleRead
 
 
 class TransactionRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['transactions'])
-	id: str = Field(..., examples=['2'])
-	attributes: Transaction
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['transactions'])
+    id: str = Field(..., examples=['2'])
+    attributes: Transaction
+    links: ObjectLink
 
 
 class TransactionSingle(BaseModel):
-	data: TransactionRead
+    data: TransactionRead
 
 
 class UserGroupRead(BaseModel):
-	type: str = Field(..., description='Immutable value', examples=['user_groups'])
-	id: str = Field(..., examples=['2'])
-	attributes: UserGroupReadAttributes
-	links: ObjectLink
+    type: str = Field(..., description='Immutable value', examples=['user_groups'])
+    id: str = Field(..., examples=['2'])
+    attributes: UserGroupReadAttributes
+    links: ObjectLink
 
 
 class UserGroupSingle(BaseModel):
-	data: UserGroupRead
+    data: UserGroupRead
 
 
 class PreferenceArray(BaseModel):
-	data: list[PreferenceRead]
-	meta: Meta
-	links: PageLink
+    data: list[PreferenceRead]
+    meta: Meta
+    links: PageLink
 
 
 class RecurrenceArray(BaseModel):
-	data: list[RecurrenceRead]
-	meta: Meta
-	links: PageLink
+    data: list[RecurrenceRead]
+    meta: Meta
+    links: PageLink
 
 
 class RuleArray(BaseModel):
-	data: list[RuleRead]
-	meta: Meta
-	links: PageLink
+    data: list[RuleRead]
+    meta: Meta
+    links: PageLink
 
 
 class TransactionArray(BaseModel):
-	data: list[TransactionRead]
-	meta: Meta
-	links: PageLink
+    data: list[TransactionRead]
+    meta: Meta
+    links: PageLink
 
 
 class UserGroupArray(BaseModel):
-	data: list[UserGroupRead]
-	meta: Meta
-	links: PageLink
+    data: list[UserGroupRead]
+    meta: Meta
+    links: PageLink
