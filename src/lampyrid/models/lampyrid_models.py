@@ -93,9 +93,7 @@ class Transaction(BaseModel):
     amount: float = Field(..., description='Amount of the transaction')
     description: str = Field(..., description='Description of the transaction')
     type: TransactionTypeProperty = Field(..., description='Type of the transaction')
-    date: datetime = Field(
-        default_factory=datetime.now, description='Date and time of the transaction'
-    )
+    date: datetime = Field(default_factory=utc_now, description='Date and time of the transaction')
     source_id: Optional[str] = Field(
         None,
         description=(
