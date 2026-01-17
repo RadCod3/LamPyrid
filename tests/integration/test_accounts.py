@@ -52,6 +52,13 @@ async def test_list_accounts_all(mcp_client):
             },
             {
                 'id': '6',
+                'name': 'Test Expense 2',
+                'type': 'expense',
+                'currency_code': 'EUR',
+                'current_balance': 0.0,
+            },
+            {
+                'id': '7',
                 'name': 'Test Revenue',
                 'type': 'revenue',
                 'currency_code': 'EUR',
@@ -131,7 +138,14 @@ async def test_list_accounts_by_type_expense(mcp_client):
                 'type': 'expense',
                 'currency_code': 'EUR',
                 'current_balance': IsFloat(),
-            }
+            },
+            {
+                'id': '6',
+                'name': 'Test Expense 2',
+                'type': 'expense',
+                'currency_code': 'EUR',
+                'current_balance': 0.0,
+            },
         ]
     )
 
@@ -148,7 +162,7 @@ async def test_list_accounts_by_type_revenue(mcp_client: Client):
     assert accounts == snapshot(
         [
             {
-                'id': '6',
+                'id': '7',
                 'name': 'Test Revenue',
                 'type': 'revenue',
                 'currency_code': 'EUR',

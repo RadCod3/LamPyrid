@@ -143,7 +143,7 @@ async def test_create_deposit_basic(
             'description': 'Test deposit - salary',
             'type': 'deposit',
             'date': IsDatetime(iso_string=True),
-            'source_id': '6',
+            'source_id': '7',
             'destination_id': '1',
             'source_name': 'Test Revenue',
             'destination_name': 'Test Checking',
@@ -275,7 +275,7 @@ async def test_create_bulk_transactions(
             'description': 'Bulk test - transaction 2',
             'type': 'deposit',
             'date': IsDatetime(iso_string=True),
-            'source_id': '6',
+            'source_id': '7',
             'destination_id': '1',
             'source_name': 'Test Revenue',
             'destination_name': 'Test Checking',
@@ -678,3 +678,407 @@ async def test_delete_nonexistent_transaction(mcp_client: Client):
         await mcp_client.call_tool('delete_transaction', {'req': {'id': '999999'}})
 
     assert '404' in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_get_transactions_with_account_id(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test getting transactions filtered by account ID."""
+    # Create a transaction first
+    create_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 18.00,
+                'description': 'Test account filter',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created = Transaction.model_validate(create_result.structured_content)
+    assert created is not None
+    assert created.id is not None
+    transaction_cleanup.append(created.id)
+
+    # Get transactions filtered by account ID
+    result = await mcp_client.call_tool(
+        'get_transactions', {'req': {'account_id': test_asset_account.id}}
+    )
+    transactions_response = TransactionListResponse.model_validate(result.structured_content)
+
+    # Should include our test transaction
+    transaction_ids = [t.id for t in transactions_response.transactions]
+    assert created.id in transaction_ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_with_type_filter(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test searching transactions with type filter."""
+    # Create a transaction first
+    create_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 7.00,
+                'description': 'Test type filter',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created = Transaction.model_validate(create_result.structured_content)
+    assert created is not None
+    assert created.id is not None
+    transaction_cleanup.append(created.id)
+
+    # Search by type
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'type': 'withdrawal'}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_with_amount_filters(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test searching transactions with amount filters."""
+    # Create a transaction first
+    create_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 25.00,
+                'description': 'Test amount filters',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created = Transaction.model_validate(create_result.structured_content)
+    assert created is not None
+    assert created.id is not None
+    transaction_cleanup.append(created.id)
+
+    # Search by exact amount
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'amount_equals': 25.00}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+    # Search by amount range
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'amount_more': 20.00, 'amount_less': 30.00}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_with_date_filters(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test searching transactions with date filters."""
+    test_date = datetime.now(timezone.utc).date() - timedelta(days=1)
+
+    # Create a transaction first
+    create_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 9.00,
+                'description': 'Test date filters',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.combine(
+                    test_date, datetime.min.time(), tzinfo=timezone.utc
+                ).isoformat(),
+            }
+        },
+    )
+    created = Transaction.model_validate(create_result.structured_content)
+    assert created is not None
+    assert created.id is not None
+    transaction_cleanup.append(created.id)
+
+    # Search by date_on
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'date_on': test_date}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+    # Search by date range
+    search_result = await mcp_client.call_tool(
+        'search_transactions',
+        {
+            'req': {
+                'date_after': (
+                    datetime.combine(test_date, datetime.min.time(), tzinfo=timezone.utc)
+                    - timedelta(days=1)
+                ).isoformat(),
+                'date_before': (
+                    datetime.combine(test_date, datetime.min.time(), tzinfo=timezone.utc)
+                    + timedelta(days=1)
+                ).isoformat(),
+            }
+        },
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_with_metadata_filters(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    test_budget: Budget,
+    transaction_cleanup: List[str],
+):
+    """Test searching transactions with metadata filters (category, budget)."""
+    # Create a transaction with budget
+    create_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 30.00,
+                'description': 'Test metadata filters',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'budget_id': test_budget.id,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created = Transaction.model_validate(create_result.structured_content)
+    assert created is not None
+    assert created.id is not None
+    transaction_cleanup.append(created.id)
+
+    # Search by budget
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'budget': test_budget.name}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+    # Search by account contains
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'account_contains': test_asset_account.name[:5]}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+    # Search by account_id
+    search_result = await mcp_client.call_tool(
+        'search_transactions', {'req': {'account_id': test_asset_account.id}}
+    )
+    search_response = TransactionListResponse.model_validate(search_result.structured_content)
+
+    # Should find our transaction
+    assert len(search_response.transactions) > 0
+    transaction_ids = [t.id for t in search_response.transactions]
+    assert created.id in transaction_ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_update_transaction_all_fields(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_second_asset_account: Account,
+    test_expense_account: str,
+    test_second_expense_account: str,
+    test_budget: Budget,
+    transaction_cleanup: List[str],
+):
+    """Test updating transaction with all possible fields."""
+    # Create a transaction first
+    create_1_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 12.00,
+                'description': 'Test update all fields',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+
+    create_2_result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 12.00,
+                'description': 'Test update all fields',
+                'source_id': test_asset_account.id,
+                'destination_name': test_second_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+
+    created = [
+        Transaction.model_validate(create_1_result.structured_content),
+        Transaction.model_validate(create_2_result.structured_content),
+    ]
+    assert created is not None
+    assert created[0].id is not None
+    assert created[1].id is not None
+    transaction_cleanup.append(created[0].id)
+    transaction_cleanup.append(created[1].id)
+
+    # Update all fields
+    update_result = await mcp_client.call_tool(
+        'update_transaction',
+        {
+            'req': {
+                'transaction_id': created[0].id,
+                'amount': 15.00,
+                'description': 'Updated all fields',
+                'date': (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+                'source_id': test_second_asset_account.id,
+                'destination_id': created[1].destination_id,
+                'budget_id': test_budget.id,
+                'category_name': 'Test Category',
+            }
+        },
+    )
+    updated = Transaction.model_validate(update_result.structured_content)
+
+    # Verify all fields were updated
+    assert updated.id == created[0].id
+    assert updated.amount == 15.00
+    assert updated.description == 'Updated all fields'
+    assert updated.budget_id == test_budget.id
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_bulk_update_transactions_with_failure(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test bulk update transactions with one failure to test exception handling."""
+    # Create two transactions first
+    create_result1 = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 5.00,
+                'description': 'Test bulk update 1',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created1 = Transaction.model_validate(create_result1.structured_content)
+    assert created1 is not None
+    assert created1.id is not None
+    transaction_cleanup.append(created1.id)
+
+    create_result2 = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 6.00,
+                'description': 'Test bulk update 2',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created2 = Transaction.model_validate(create_result2.structured_content)
+    assert created2 is not None
+    assert created2.id is not None
+    transaction_cleanup.append(created2.id)
+
+    # Try to bulk update where one update will fail (using non-existent transaction)
+    with pytest.raises(ToolError) as exc_info:
+        await mcp_client.call_tool(
+            'bulk_update_transactions',
+            {
+                'req': {
+                    'updates': [
+                        {
+                            'transaction_id': created1.id,
+                            'description': 'Updated successfully',
+                        },
+                        {
+                            'transaction_id': '999999',  # Non-existent transaction
+                            'description': 'This should fail',
+                        },
+                    ]
+                }
+            },
+        )
+
+    assert 'Failed to update transaction 999999' in str(exc_info.value)

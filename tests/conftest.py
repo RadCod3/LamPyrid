@@ -124,10 +124,12 @@ async def _setup_test_data():
             )
 
             expense = None
+            expense2 = None
             for account in existing_expense:
-                if 'test expense' in account.name.lower():
+                if account.name == 'Test Expense':
                     expense = account
-                    break
+                elif account.name == 'Test Expense 2':
+                    expense2 = account
 
             if expense is None:
                 expense_store = AccountStore(
@@ -139,6 +141,17 @@ async def _setup_test_data():
                 _created_account_ids.append(expense.id)
 
             _cached_test_accounts.append(expense)
+
+            if expense2 is None:
+                expense2_store = AccountStore(
+                    name='Test Expense 2',
+                    type=ShortAccountTypeProperty.expense,
+                    currency_code='EUR',
+                )
+                expense2 = await account_service.create_account(expense2_store)
+                _created_account_ids.append(expense2.id)
+
+            _cached_test_accounts.append(expense2)
 
             # Create revenue account for deposit tests
             existing_revenue = await account_service.list_accounts(
@@ -263,6 +276,16 @@ def test_expense_account() -> str:
     """
     # Return a default name - Firefly III will create it automatically
     return 'Test Expense'
+
+
+@pytest.fixture(scope='session')
+def test_second_expense_account() -> str:
+    """Get second expense account name for testing.
+
+    This can be used in tests that require multiple expense accounts.
+    """
+    # Return a default name - Firefly III will create it automatically
+    return 'Test Expense 2'
 
 
 @pytest.fixture(scope='session')
