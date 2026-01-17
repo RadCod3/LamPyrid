@@ -312,19 +312,23 @@ class TransactionService:
         if req.date_before:
             query_parts.append(f'date_before:{req.date_before}')
 
-        # Content filters
+        # Content filters - sanitize user-provided values to escape special characters
         if req.description_contains:
-            query_parts.append(f'description_contains:"{req.description_contains}"')
+            sanitized = FireflyClient._sanitize_value(req.description_contains)
+            query_parts.append(f'description_contains:{sanitized}')
 
-        # Metadata filters
+        # Metadata filters - sanitize user-provided values to escape special characters
         if req.category:
-            query_parts.append(f'category_is:"{req.category}"')
+            sanitized = FireflyClient._sanitize_value(req.category)
+            query_parts.append(f'category_is:{sanitized}')
         if req.budget:
-            query_parts.append(f'budget_is:"{req.budget}"')
+            sanitized = FireflyClient._sanitize_value(req.budget)
+            query_parts.append(f'budget_is:{sanitized}')
 
-        # Account filters
+        # Account filters - sanitize user-provided values to escape special characters
         if req.account_contains:
-            query_parts.append(f'account_contains:"{req.account_contains}"')
+            sanitized = FireflyClient._sanitize_value(req.account_contains)
+            query_parts.append(f'account_contains:{sanitized}')
         if req.account_id is not None:
             query_parts.append(f'account_id:{req.account_id}')
 
