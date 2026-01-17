@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 from cryptography.fernet import Fernet
 
 from lampyrid.server import _create_auth_provider, _initialize_server

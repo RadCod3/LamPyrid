@@ -195,7 +195,7 @@ async def _setup_test_data():
             _cached_test_budgets.append(test_budget)
 
     finally:
-        await client._client.aclose()
+        await client.aclose()
 
 
 @pytest.fixture(scope='function')
@@ -218,7 +218,7 @@ async def firefly_client():
 
     # Explicitly close the client to clean up connections
     try:
-        await client._client.aclose()
+        await client.aclose()
     except Exception:
         pass  # Ignore errors during cleanup
 

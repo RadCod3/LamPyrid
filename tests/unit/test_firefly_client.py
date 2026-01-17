@@ -402,3 +402,50 @@ class TestFireflyClient:
 
             # Should not do anything for successful response
             client._handle_api_error(mock_response)
+
+    @pytest.mark.asyncio
+    async def test_aclose(self, mock_client):
+        """Test aclose method closes the underlying HTTP client."""
+        client, mock_http_client, _ = mock_client
+
+        await client.aclose()
+
+        # Verify the underlying client's aclose was called
+        mock_http_client.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_async_context_manager(self):
+        """Test FireflyClient can be used as an async context manager."""
+        with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_http_client:
+            with patch('lampyrid.clients.firefly.settings') as mock_settings:
+                mock_settings.firefly_base_url = 'https://firefly.example.com'
+                mock_settings.firefly_token = 'test_token'
+
+                mock_client_instance = AsyncMock()
+                mock_http_client.return_value = mock_client_instance
+
+                async with FireflyClient() as client:
+                    # Verify we get the client instance
+                    assert isinstance(client, FireflyClient)
+
+                # Verify aclose was called when exiting the context
+                mock_client_instance.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_async_context_manager_closes_on_exception(self):
+        """Test that async context manager closes client even when exception occurs."""
+        with patch('lampyrid.clients.firefly.httpx.AsyncClient') as mock_http_client:
+            with patch('lampyrid.clients.firefly.settings') as mock_settings:
+                mock_settings.firefly_base_url = 'https://firefly.example.com'
+                mock_settings.firefly_token = 'test_token'
+
+                mock_client_instance = AsyncMock()
+                mock_http_client.return_value = mock_client_instance
+
+                with pytest.raises(ValueError):
+                    async with FireflyClient() as client:
+                        assert client is not None
+                        raise ValueError('Test exception')
+
+                # Verify aclose was still called despite the exception
+                mock_client_instance.aclose.assert_called_once()

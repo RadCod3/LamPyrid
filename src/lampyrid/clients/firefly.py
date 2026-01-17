@@ -42,6 +42,22 @@ class FireflyClient:
             timeout=30.0,
         )
 
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client.
+
+        Should be called when the client is no longer needed to release resources.
+        Alternatively, use the client as an async context manager.
+        """
+        await self._client.aclose()
+
+    async def __aenter__(self) -> 'FireflyClient':
+        """Async context manager entry."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Async context manager exit - close the client."""
+        await self.aclose()
+
     def _serialize_model(self, model: Any, exclude_unset: bool = False) -> Dict[str, Any]:
         """Serialize a Pydantic model to dict, excluding None values by default.
 
