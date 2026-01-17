@@ -24,6 +24,7 @@ dev = [
   "pytest-cov>=7.0.0",
   "python-dotenv>=1.2.1",
   "ruff>=0.14.11",
+  "ty>=0.0.12",
 ]
 
 [build-system]
