@@ -9,7 +9,15 @@ from fastmcp import Client
 from fastmcp.exceptions import ToolError
 from inline_snapshot import snapshot
 
-from lampyrid.models.lampyrid_models import Account, Budget, Transaction, TransactionListResponse
+from lampyrid.models.firefly_models import TransactionTypeProperty
+from lampyrid.models.lampyrid_models import (
+    Account,
+    Budget,
+    BulkCreateResult,
+    BulkUpdateResult,
+    Transaction,
+    TransactionListResponse,
+)
 
 # ==================== Create Operations ====================
 
@@ -242,22 +250,27 @@ async def test_create_bulk_transactions(
     result = await mcp_client.call_tool(
         'create_bulk_transactions', {'req': {'transactions': transactions}}
     )
-    created = result.data
+    bulk_result = BulkCreateResult.model_validate(result.structured_content)
 
-    # Add all to cleanup
-    for txn in created:
-        assert txn is not None
-        assert txn['id'] is not None
-        transaction_cleanup.append(txn['id'])
+    # Add successful transactions to cleanup
+    for txn in bulk_result.successful:
+        assert txn.id is not None
+        transaction_cleanup.append(txn.id)
 
-    # Verify all transactions were created
-    assert len(created) == 3
-    assert created[0] == snapshot(
+    # Verify all transactions were created successfully
+    assert bulk_result.total_requested == 3
+    assert bulk_result.total_succeeded == 3
+    assert bulk_result.total_failed == 0
+    assert len(bulk_result.successful) == 3
+    assert len(bulk_result.failed) == 0
+
+    # Verify transaction details using snapshots
+    assert bulk_result.successful[0].model_dump() == snapshot(
         {
             'id': IsStr(min_length=1),
             'amount': 5.0,
             'description': 'Bulk test - transaction 1',
-            'type': 'withdrawal',
+            'type': TransactionTypeProperty.withdrawal,
             'date': IsDatetime(iso_string=True),
             'source_id': '1',
             'destination_id': '5',
@@ -268,12 +281,12 @@ async def test_create_bulk_transactions(
             'budget_name': None,
         }
     )
-    assert created[1] == snapshot(
+    assert bulk_result.successful[1].model_dump() == snapshot(
         {
             'id': IsStr(min_length=1),
             'amount': 100.0,
             'description': 'Bulk test - transaction 2',
-            'type': 'deposit',
+            'type': TransactionTypeProperty.deposit,
             'date': IsDatetime(iso_string=True),
             'source_id': '7',
             'destination_id': '1',
@@ -284,12 +297,12 @@ async def test_create_bulk_transactions(
             'budget_name': None,
         }
     )
-    assert created[2] == snapshot(
+    assert bulk_result.successful[2].model_dump() == snapshot(
         {
             'id': IsStr(min_length=1),
             'amount': 15.0,
             'description': 'Bulk test - transaction 3',
-            'type': 'withdrawal',
+            'type': TransactionTypeProperty.withdrawal,
             'date': IsDatetime(iso_string=True),
             'source_id': '1',
             'destination_id': '5',
@@ -1062,6 +1075,414 @@ async def test_bulk_update_transactions_with_failure(
     transaction_cleanup.append(created2.id)
 
     # Try to bulk update where one update will fail (using non-existent transaction)
+    result = await mcp_client.call_tool(
+        'bulk_update_transactions',
+        {
+            'req': {
+                'updates': [
+                    {
+                        'transaction_id': created1.id,
+                        'description': 'Updated successfully',
+                    },
+                    {
+                        'transaction_id': '999999',  # Non-existent transaction
+                        'description': 'This should fail',
+                    },
+                ]
+            }
+        },
+    )
+
+    bulk_result = BulkUpdateResult.model_validate(result.structured_content)
+
+    # Verify partial success
+    assert bulk_result.total_requested == 2
+    assert bulk_result.total_succeeded == 1
+    assert bulk_result.total_failed == 1
+    assert len(bulk_result.successful) == 1
+    assert len(bulk_result.failed) == 1
+
+    # Verify successful update
+    updated_txn = bulk_result.successful[0]
+    assert updated_txn.id == created1.id
+    assert updated_txn.description == 'Updated successfully'
+
+    # Verify failure details
+    failure = bulk_result.failed[0]
+    assert failure.index == 1  # Second update failed
+    assert failure.transaction_id == '999999'
+    assert '404' in failure.error and 'not found' in failure.error.lower()
+
+    assert bulk_result.model_dump() == snapshot(
+        {
+            'successful': [
+                {
+                    'id': IsStr(min_length=1),
+                    'amount': 5.0,
+                    'description': 'Updated successfully',
+                    'type': TransactionTypeProperty.withdrawal,
+                    'date': IsDatetime(iso_string=True),
+                    'source_id': '1',
+                    'destination_id': '5',
+                    'source_name': 'Test Checking',
+                    'destination_name': 'Test Expense',
+                    'currency_code': 'USD',
+                    'budget_id': None,
+                    'budget_name': None,
+                }
+            ],
+            'failed': [
+                {
+                    'index': 1,
+                    'transaction_id': '999999',
+                    'error': """\
+Client error '404 Not Found' for url 'http://localhost:8080/api/v1/transactions/999999'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\
+""",
+                }
+            ],
+            'total_requested': 2,
+            'total_succeeded': 1,
+            'total_failed': 1,
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_bulk_transactions_atomic_rollback(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+):
+    """Test atomic bulk create with rollback when middle transaction fails."""
+    transactions = [
+        {
+            'amount': 5.00,
+            'description': 'Valid transaction 1',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+        {
+            'amount': -10.00,  # Invalid negative amount
+            'description': 'Invalid transaction with negative amount',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+        {
+            'amount': 15.00,
+            'description': 'Valid transaction 2',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+    ]
+
+    # Should fail with rollback
+    with pytest.raises(ToolError) as exc_info:
+        await mcp_client.call_tool(
+            'create_bulk_transactions', {'req': {'transactions': transactions, 'atomic': True}}
+        )
+
+    assert 'rolled back 1' in str(exc_info.value) and 'failed at index 1' in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_bulk_transactions_non_atomic_partial_success(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test non-atomic bulk create with partial success."""
+    transactions = [
+        {
+            'amount': 5.00,
+            'description': 'Valid transaction 1',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+        {
+            'amount': -10.00,  # Invalid negative amount
+            'description': 'Invalid transaction with negative amount',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+        {
+            'amount': 15.00,
+            'description': 'Valid transaction 2',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+    ]
+
+    result = await mcp_client.call_tool(
+        'create_bulk_transactions', {'req': {'transactions': transactions, 'atomic': False}}
+    )
+    bulk_result = BulkCreateResult.model_validate(result.structured_content)
+
+    # Add successful transactions to cleanup
+    for txn in bulk_result.successful:
+        if txn.id:
+            transaction_cleanup.append(txn.id)
+
+    # Verify partial success
+    assert bulk_result.total_requested == 3
+    assert bulk_result.total_succeeded == 2
+    assert bulk_result.total_failed == 1
+    assert len(bulk_result.successful) == 2
+    assert len(bulk_result.failed) == 1
+
+    # Verify failure details
+    failure = bulk_result.failed[0]
+    assert failure.index == 1  # Second transaction failed
+    assert 'unprocessable' in failure.error.lower()
+
+    assert bulk_result.model_dump() == snapshot(
+        {
+            'successful': [
+                {
+                    'id': IsStr(min_length=1),
+                    'amount': 5.0,
+                    'description': 'Valid transaction 1',
+                    'type': TransactionTypeProperty.withdrawal,
+                    'date': IsDatetime(iso_string=True),
+                    'source_id': '1',
+                    'destination_id': '5',
+                    'source_name': 'Test Checking',
+                    'destination_name': 'Test Expense',
+                    'currency_code': 'USD',
+                    'budget_id': None,
+                    'budget_name': None,
+                },
+                {
+                    'id': IsStr(min_length=1),
+                    'amount': 15.0,
+                    'description': 'Valid transaction 2',
+                    'type': TransactionTypeProperty.withdrawal,
+                    'date': IsDatetime(iso_string=True),
+                    'source_id': '1',
+                    'destination_id': '5',
+                    'source_name': 'Test Checking',
+                    'destination_name': 'Test Expense',
+                    'currency_code': 'USD',
+                    'budget_id': None,
+                    'budget_name': None,
+                },
+            ],
+            'failed': [
+                {
+                    'index': 1,
+                    'transaction_id': None,
+                    'error': """\
+Client error '422 Unprocessable Content' for url 'http://localhost:8080/api/v1/transactions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422\
+""",
+                }
+            ],
+            'total_requested': 3,
+            'total_succeeded': 2,
+            'total_failed': 1,
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_bulk_transactions_non_atomic_all_fail(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+):
+    """Test non-atomic bulk create where all transactions fail."""
+    transactions = [
+        {
+            'amount': -10.00,  # Invalid negative amount
+            'description': 'Invalid transaction 1',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+        {
+            'amount': -20.00,  # Invalid negative amount
+            'description': 'Invalid transaction 2',
+            'type': 'withdrawal',
+            'date': datetime.now(timezone.utc).isoformat(),
+            'source_id': test_asset_account.id,
+            'destination_name': test_expense_account,
+        },
+    ]
+
+    # Should fail since all transactions failed
+    with pytest.raises(ToolError) as exc_info:
+        await mcp_client.call_tool(
+            'create_bulk_transactions', {'req': {'transactions': transactions, 'atomic': False}}
+        )
+
+    assert str(exc_info.value) == snapshot(
+        "Error calling tool 'create_bulk_transactions': All 2 transactions failed to create"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_bulk_update_transactions_partial_success(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Test bulk update transactions with partial success."""
+    # Create two transactions first
+    create_result1 = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 5.00,
+                'description': 'Test bulk update partial 1',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created1 = Transaction.model_validate(create_result1.structured_content)
+    if created1.id:
+        transaction_cleanup.append(created1.id)
+
+    create_result2 = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 6.00,
+                'description': 'Test bulk update partial 2',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    created2 = Transaction.model_validate(create_result2.structured_content)
+    if created2.id:
+        transaction_cleanup.append(created2.id)
+
+    # Update 3 transactions where 1 will fail
+    result = await mcp_client.call_tool(
+        'bulk_update_transactions',
+        {
+            'req': {
+                'updates': [
+                    {
+                        'transaction_id': created1.id,
+                        'description': 'Updated successfully 1',
+                    },
+                    {
+                        'transaction_id': '999999',  # Non-existent transaction
+                        'description': 'This should fail',
+                    },
+                    {
+                        'transaction_id': created2.id,
+                        'description': 'Updated successfully 2',
+                    },
+                ]
+            }
+        },
+    )
+
+    bulk_result = BulkUpdateResult.model_validate(result.structured_content)
+
+    # Verify partial success
+    assert bulk_result.total_requested == 3
+    assert bulk_result.total_succeeded == 2
+    assert bulk_result.total_failed == 1
+    assert len(bulk_result.successful) == 2
+    assert len(bulk_result.failed) == 1
+
+    # Verify successful updates
+    descriptions = [txn.description for txn in bulk_result.successful]
+    assert 'Updated successfully 1' in descriptions
+    assert 'Updated successfully 2' in descriptions
+
+    # Verify failure details
+    failure = bulk_result.failed[0]
+    assert failure.index == 1  # Second update failed
+    assert failure.transaction_id == '999999'
+    assert '404' in failure.error or 'not found' in failure.error.lower()
+
+    assert bulk_result.model_dump() == snapshot(
+        {
+            'successful': [
+                {
+                    'id': IsStr(min_length=1),
+                    'amount': 5.0,
+                    'description': 'Updated successfully 1',
+                    'type': TransactionTypeProperty.withdrawal,
+                    'date': IsDatetime(iso_string=True),
+                    'source_id': '1',
+                    'destination_id': '5',
+                    'source_name': 'Test Checking',
+                    'destination_name': 'Test Expense',
+                    'currency_code': 'USD',
+                    'budget_id': None,
+                    'budget_name': None,
+                },
+                {
+                    'id': IsStr(min_length=1),
+                    'amount': 6.0,
+                    'description': 'Updated successfully 2',
+                    'type': TransactionTypeProperty.withdrawal,
+                    'date': IsDatetime(iso_string=True),
+                    'source_id': '1',
+                    'destination_id': '5',
+                    'source_name': 'Test Checking',
+                    'destination_name': 'Test Expense',
+                    'currency_code': 'USD',
+                    'budget_id': None,
+                    'budget_name': None,
+                },
+            ],
+            'failed': [
+                {
+                    'index': 1,
+                    'transaction_id': '999999',
+                    'error': """\
+Client error '404 Not Found' for url 'http://localhost:8080/api/v1/transactions/999999'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\
+""",
+                }
+            ],
+            'total_requested': 3,
+            'total_succeeded': 2,
+            'total_failed': 1,
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_bulk_update_transactions_all_fail(
+    mcp_client: Client,
+):
+    """Test bulk update where all updates fail."""
+    # Should fail since all updates are for non-existent transactions
     with pytest.raises(ToolError) as exc_info:
         await mcp_client.call_tool(
             'bulk_update_transactions',
@@ -1069,16 +1490,18 @@ async def test_bulk_update_transactions_with_failure(
                 'req': {
                     'updates': [
                         {
-                            'transaction_id': created1.id,
-                            'description': 'Updated successfully',
+                            'transaction_id': '999999',  # Non-existent transaction
+                            'description': 'This should fail 1',
                         },
                         {
-                            'transaction_id': '999999',  # Non-existent transaction
-                            'description': 'This should fail',
+                            'transaction_id': '888888',  # Non-existent transaction
+                            'description': 'This should fail 2',
                         },
                     ]
                 }
             },
         )
 
-    assert 'Failed to update transaction 999999' in str(exc_info.value)
+    assert str(exc_info.value) == snapshot(
+        "Error calling tool 'bulk_update_transactions': All 2 transaction updates failed"
+    )

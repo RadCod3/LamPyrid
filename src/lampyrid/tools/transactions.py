@@ -4,12 +4,12 @@ This module provides MCP tools for managing Firefly III transactions including
 creating, retrieving, searching, updating, and deleting transactions.
 """
 
-from typing import List
-
 from fastmcp import FastMCP
 
 from ..clients.firefly import FireflyClient
 from ..models.lampyrid_models import (
+    BulkCreateResult,
+    BulkUpdateResult,
     BulkUpdateTransactionsRequest,
     CreateBulkTransactionsRequest,
     CreateDepositRequest,
@@ -70,13 +70,13 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         return transaction
 
     @transactions_mcp.tool(tags={'transactions', 'create', 'bulk'})
-    async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> List[Transaction]:
+    async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> BulkCreateResult:
         """Efficiently create multiple transactions in one operation.
 
-        Ideal for importing transaction batches, recording monthly bills, or processing CSV data.
+        By default (atomic=True), rolls back all transactions if any fail.
+        Set atomic=False to continue on error and return partial results.
         """
-        transactions = await transaction_service.create_bulk_transactions(req)
-        return transactions
+        return await transaction_service.create_bulk_transactions(req)
 
     @transactions_mcp.tool(tags={'transactions', 'query'})
     async def get_transaction(req: GetTransactionRequest) -> Transaction:
@@ -123,10 +123,11 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         return await transaction_service.update_transaction(req)
 
     @transactions_mcp.tool(tags={'transactions', 'manage', 'bulk'})
-    async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> List[Transaction]:
+    async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> BulkUpdateResult:
         """Efficiently update multiple transactions in one operation.
 
-        Ideal for batch account changes, budget reassignments, or correcting imported data.
+        Continues on error and returns partial results with error details.
+        Raises exception only if ALL updates fail.
         """
         return await transaction_service.bulk_update_transactions(req)
 

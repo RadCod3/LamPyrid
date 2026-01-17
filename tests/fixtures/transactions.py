@@ -83,9 +83,10 @@ def make_create_transfer_request(
 
 def make_create_bulk_transactions_request(
     transactions: List[Transaction],
+    atomic: bool = True,
 ) -> CreateBulkTransactionsRequest:
     """Create a CreateBulkTransactionsRequest for testing."""
-    return CreateBulkTransactionsRequest(transactions=transactions)
+    return CreateBulkTransactionsRequest(transactions=transactions, atomic=atomic)
 
 
 def make_get_transaction_request(transaction_id: str) -> GetTransactionRequest:

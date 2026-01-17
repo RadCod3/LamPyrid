@@ -464,6 +464,44 @@ class GetTransactionRequest(BaseModel):
     id: str = Field(..., description='Unique identifier of the transaction to get details for')
 
 
+class BulkOperationError(BaseModel):
+    """Error details for a failed operation in a bulk request."""
+
+    index: int = Field(..., description='Zero-based index of the failed item in the request')
+    transaction_id: Optional[str] = Field(
+        None, description='Transaction ID if available (for updates)'
+    )
+    error: str = Field(..., description='Error message describing what went wrong')
+
+
+class BulkCreateResult(BaseModel):
+    """Result of a bulk transaction creation operation."""
+
+    successful: List[Transaction] = Field(
+        default_factory=list, description='Transactions that were successfully created'
+    )
+    failed: List[BulkOperationError] = Field(
+        default_factory=list, description='Errors for transactions that failed to create'
+    )
+    total_requested: int = Field(..., description='Total number of transactions requested')
+    total_succeeded: int = Field(..., description='Number of transactions successfully created')
+    total_failed: int = Field(..., description='Number of transactions that failed')
+
+
+class BulkUpdateResult(BaseModel):
+    """Result of a bulk transaction update operation."""
+
+    successful: List[Transaction] = Field(
+        default_factory=list, description='Transactions that were successfully updated'
+    )
+    failed: List[BulkOperationError] = Field(
+        default_factory=list, description='Errors for transactions that failed to update'
+    )
+    total_requested: int = Field(..., description='Total number of updates requested')
+    total_succeeded: int = Field(..., description='Number of transactions successfully updated')
+    total_failed: int = Field(..., description='Number of updates that failed')
+
+
 class TransactionListResponse(BaseModel):
     """Response model for transaction listings."""
 
@@ -608,6 +646,13 @@ class CreateBulkTransactionsRequest(BaseModel):
         ),
         min_length=1,
         max_length=100,
+    )
+    atomic: bool = Field(
+        default=True,
+        description=(
+            'If True (default), all transactions are rolled back if any creation fails. '
+            'If False, continues on error and returns partial results.'
+        ),
     )
 
     @model_validator(mode='after')
