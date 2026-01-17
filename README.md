@@ -1,6 +1,8 @@
 # LamPyrid
 
-A Model Context Protocol (MCP) server providing comprehensive tools for interacting with Firefly III personal finance software. LamPyrid enables automated personal finance workflows and analysis through 18 MCP tools with support for account management, transaction operations, and budget management.
+A Model Context Protocol (MCP) server providing comprehensive tools for interacting with [Firefly III](https://github.com/firefly-iii/firefly-iii) personal finance software. LamPyrid enables automated personal finance workflows and analysis through 18 MCP tools with support for account management, transaction operations, and budget management.
+
+> **What is Firefly III?** [Firefly III](https://www.firefly-iii.org/) is a free and open-source personal finance manager that helps you track expenses, income, budgets, and more. LamPyrid provides an MCP interface to automate interactions with your Firefly III instance.
 
 ## Features
 
