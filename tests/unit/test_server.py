@@ -184,11 +184,3 @@ class TestServer:
 
                 # Verify logging was configured with correct level
                 mock_configure_logging.assert_called_once_with(level='DEBUG')
-
-    @pytest.mark.skip(reason='Module-level execution is complex to test reliably')
-    def test_server_module_level_execution(self):
-        """Test that server module executes _initialize_server at module level."""
-        # This test verifies the module-level code execution
-        # Skipping because module-level code is already executed during test imports
-        # and complex to mock reliably
-        pass
