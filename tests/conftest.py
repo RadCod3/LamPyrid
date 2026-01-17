@@ -1,5 +1,4 @@
-"""
-Test configuration and shared fixtures for LamPyrid integration tests.
+"""Test configuration and shared fixtures for LamPyrid integration tests.
 
 This module provides pytest fixtures for:
 - FireflyClient instance configured for testing
@@ -27,7 +26,7 @@ from lampyrid.models.firefly_models import (
 from lampyrid.models.lampyrid_models import (
 	Account,
 	Budget,
-	DeleteTransactionRequest,
+	ListAccountRequest,
 	ListBudgetsRequest,
 )
 
@@ -45,6 +44,7 @@ else:
 
 from lampyrid.clients.firefly import FireflyClient  # noqa: E402
 from lampyrid.config import settings  # noqa: E402
+from lampyrid.services import AccountService, BudgetService  # noqa: E402
 from lampyrid.tools import compose_all_servers  # noqa: E402
 
 # Global cache for test data created programmatically
@@ -56,11 +56,9 @@ _created_budget_ids: List[str] = []  # Track created budgets for cleanup
 
 @pytest.fixture(scope='session', autouse=True)
 async def _setup_test_data():
-	"""
-	Autouse fixture to create test accounts and budget at session start.
+	"""Autouse fixture to create test accounts and budget at session start.
 	This ensures test data exists before any tests run.
 	"""
-
 	global _cached_test_accounts, _cached_test_budgets
 
 	test_env_path = Path(__file__).parent / '.env.test'
@@ -71,16 +69,17 @@ async def _setup_test_data():
 		return  # Skip setup if no config
 
 	client = FireflyClient()
+	account_service = AccountService(client)
+	budget_service = BudgetService(client)
 
 	try:
 		# Create test accounts
 		if _cached_test_accounts is None or len(_cached_test_accounts) < 2:
 			_cached_test_accounts = []
 
-			account_array = await client.list_accounts(page=1, type=AccountTypeFilter.asset)
-			existing_accounts = [
-				Account.from_account_read(account_read) for account_read in account_array.data
-			]
+			existing_accounts = await account_service.list_accounts(
+				ListAccountRequest(type=AccountTypeFilter.asset)
+			)
 
 			checking = None
 			savings = None
@@ -99,7 +98,7 @@ async def _setup_test_data():
 					opening_balance='1000.00',
 					opening_balance_date=datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
 				)
-				checking = await client.create_account(checking_store)
+				checking = await account_service.create_account(checking_store)
 				_created_account_ids.append(checking.id)
 
 			_cached_test_accounts.append(checking)
@@ -113,16 +112,15 @@ async def _setup_test_data():
 					opening_balance='500.00',
 					opening_balance_date=datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
 				)
-				savings = await client.create_account(savings_store)
+				savings = await account_service.create_account(savings_store)
 				_created_account_ids.append(savings.id)
 
 			_cached_test_accounts.append(savings)
 
 			# Create expense account for withdrawal tests
-			expense_accounts = await client.list_accounts(page=1, type=AccountTypeFilter.expense)
-			existing_expense = [
-				Account.from_account_read(account_read) for account_read in expense_accounts.data
-			]
+			existing_expense = await account_service.list_accounts(
+				ListAccountRequest(type=AccountTypeFilter.expense)
+			)
 
 			expense = None
 			for account in existing_expense:
@@ -136,16 +134,15 @@ async def _setup_test_data():
 					type=ShortAccountTypeProperty.expense,
 					currency_code='EUR',
 				)
-				expense = await client.create_account(expense_store)
+				expense = await account_service.create_account(expense_store)
 				_created_account_ids.append(expense.id)
 
 			_cached_test_accounts.append(expense)
 
 			# Create revenue account for deposit tests
-			revenue_accounts = await client.list_accounts(page=1, type=AccountTypeFilter.revenue)
-			existing_revenue = [
-				Account.from_account_read(account_read) for account_read in revenue_accounts.data
-			]
+			existing_revenue = await account_service.list_accounts(
+				ListAccountRequest(type=AccountTypeFilter.revenue)
+			)
 
 			revenue = None
 			for account in existing_revenue:
@@ -159,7 +156,7 @@ async def _setup_test_data():
 					type=ShortAccountTypeProperty.revenue,
 					currency_code='EUR',
 				)
-				revenue = await client.create_account(revenue_store)
+				revenue = await account_service.create_account(revenue_store)
 				_created_account_ids.append(revenue.id)
 
 			_cached_test_accounts.append(revenue)
@@ -168,20 +165,17 @@ async def _setup_test_data():
 		if _cached_test_budgets is None:
 			_cached_test_budgets = []
 
-			budget_array = await client.list_budgets(ListBudgetsRequest(active=True))
-			existing_budgets = [
-				Budget.from_budget_read(budget_read) for budget_read in budget_array.data
-			]
+			budget_array = await budget_service.list_budgets(ListBudgetsRequest(active=True))
 
 			test_budget = None
-			for budget in existing_budgets:
+			for budget in budget_array:
 				if 'test budget' in budget.name.lower():
 					test_budget = budget
 					break
 
 			if test_budget is None:
 				budget_store = BudgetStore(name='Test Budget', active=True)
-				test_budget = await client.create_budget(budget_store)
+				test_budget = await budget_service.create_budget(budget_store)
 				_created_budget_ids.append(test_budget.id)
 
 			_cached_test_budgets.append(test_budget)
@@ -192,14 +186,12 @@ async def _setup_test_data():
 
 @pytest.fixture(scope='function')
 async def firefly_client():
-	"""
-	Create a FireflyClient instance for testing.
+	"""Create a FireflyClient instance for testing.
 
 	This fixture is function-scoped to avoid event loop conflicts.
 	The client reads configuration from the global settings object which
 	loads from environment variables (.env.test file).
 	"""
-
 	# Validate that required settings are present
 	if not settings.firefly_base_url or not settings.firefly_token:
 		raise RuntimeError(
@@ -219,8 +211,7 @@ async def firefly_client():
 
 @pytest.fixture(scope='function')
 async def mcp_client(firefly_client: FireflyClient):
-	"""
-	Create a FastMCP Client for testing tools.
+	"""Create a FastMCP Client for testing tools.
 
 	This fixture uses in-memory transport to test the full MCP stack:
 	MCP Protocol -> Tool Functions -> FireflyClient -> Firefly III API
@@ -229,7 +220,6 @@ async def mcp_client(firefly_client: FireflyClient):
 	All domain-specific tools (accounts, transactions, budgets) are composed
 	into the server.
 	"""
-
 	# Create a new FastMCP server for testing
 	mcp = FastMCP('lampyrid-test')
 
@@ -243,8 +233,7 @@ async def mcp_client(firefly_client: FireflyClient):
 
 @pytest.fixture(scope='session')
 def test_asset_account() -> Account:
-	"""
-	Get the first test asset account (Test Checking).
+	"""Get the first test asset account (Test Checking).
 	The account is created by the autouse _setup_test_data fixture.
 	"""
 	if _cached_test_accounts is None or len(_cached_test_accounts) == 0:
@@ -254,8 +243,7 @@ def test_asset_account() -> Account:
 
 @pytest.fixture(scope='session')
 def test_second_asset_account() -> Account:
-	"""
-	Get the second test asset account (Test Savings) for transfer testing.
+	"""Get the second test asset account (Test Savings) for transfer testing.
 	The account is created by the autouse _setup_test_data fixture.
 	"""
 	if _cached_test_accounts is None or len(_cached_test_accounts) < 2:
@@ -265,8 +253,7 @@ def test_second_asset_account() -> Account:
 
 @pytest.fixture(scope='session')
 def test_expense_account() -> str:
-	"""
-	Get expense account name for withdrawal testing.
+	"""Get expense account name for withdrawal testing.
 	For withdrawals, we only need the destination name (expense account),
 	not the full account object.
 	"""
@@ -276,8 +263,7 @@ def test_expense_account() -> str:
 
 @pytest.fixture(scope='session')
 def test_revenue_account() -> str:
-	"""
-	Get revenue account name for deposit testing.
+	"""Get revenue account name for deposit testing.
 	For deposits, we only need the source name (revenue account),
 	not the full account object.
 	"""
@@ -287,8 +273,7 @@ def test_revenue_account() -> str:
 
 @pytest.fixture(scope='session')
 def test_budget() -> Budget:
-	"""
-	Get the test budget.
+	"""Get the test budget.
 	The budget is created by the autouse _setup_test_data fixture.
 	"""
 	if _cached_test_budgets is None or len(_cached_test_budgets) == 0:
@@ -298,8 +283,7 @@ def test_budget() -> Budget:
 
 @pytest.fixture
 async def transaction_cleanup(firefly_client: FireflyClient):
-	"""
-	Fixture to track and cleanup transactions created during tests.
+	"""Fixture to track and cleanup transactions created during tests.
 
 	Usage:
 		@pytest.mark.asyncio
@@ -318,7 +302,7 @@ async def transaction_cleanup(firefly_client: FireflyClient):
 
 	for transaction_id in created_transaction_ids:
 		try:
-			await firefly_client.delete_transaction(DeleteTransactionRequest(id=transaction_id))
+			await firefly_client.delete_transaction(transaction_id)
 			print(f'Cleaned up transaction: {transaction_id}')
 		except Exception as e:
 			print(f'Failed to cleanup transaction {transaction_id}: {e}')
