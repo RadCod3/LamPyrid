@@ -6,7 +6,7 @@ import pytest
 from fastmcp import Client
 from inline_snapshot import snapshot
 
-from lampyrid.models.lampyrid_models import Budget, BudgetSpending, BudgetSummary
+from lampyrid.models.lampyrid_models import AvailableBudget, Budget, BudgetSpending, BudgetSummary
 
 
 @pytest.mark.asyncio
@@ -149,9 +149,6 @@ async def test_get_budget_summary(mcp_client: Client):
 @pytest.mark.asyncio
 @pytest.mark.budgets
 @pytest.mark.integration
-@pytest.mark.xfail(
-    reason='Firefly III API bug - currency_id returned as int instead of string (issue #43)'
-)
 async def test_get_available_budget(mcp_client: Client):
     """Test getting available budget for a period."""
     # Use current month
@@ -162,13 +159,14 @@ async def test_get_available_budget(mcp_client: Client):
     end = next_month.replace(day=1) - timedelta(days=1)
 
     result = await mcp_client.call_tool(
-        'get_available_budget', {'req': {'start': start.isoformat(), 'end': end.isoformat()}}
+        'get_available_budget',
+        {'req': {'start_date': start.isoformat(), 'end_date': end.isoformat()}},
     )
-    available = result.data
+    available = AvailableBudget.model_validate(result.structured_content)
 
     # Should return available budget information
     # amount may be 0 if no available budget is set
-    assert available['amount'] >= 0
-    assert available['currency_code'] is not None
-    assert available['start_date'] == start.isoformat()
-    assert available['end_date'] == end.isoformat()
+    assert available.amount >= 0
+    assert available.currency_code is not None
+    assert available.start_date.isoformat() == start.isoformat()
+    assert available.end_date.isoformat() == end.isoformat()
