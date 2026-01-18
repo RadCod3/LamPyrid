@@ -13,192 +13,43 @@ A Model Context Protocol (MCP) server providing comprehensive tools for interact
 - **Docker Support**: Production-ready Docker images with multi-platform support (amd64/arm64)
 - **Type Safety**: Full type hints and Pydantic validation throughout the codebase
 - **Async Operations**: Non-blocking HTTP operations for optimal performance
-- **Robust Error Handling**: Comprehensive error handling across all API interactions
 
 ## Quick Start
 
+### Prerequisites
+
+- Access to a Firefly III instance with a [Personal Access Token](https://docs.firefly-iii.org/how-to/firefly-iii/features/api/#personal-access-token)
+- For local installation: Python 3.14+ and [uv](https://github.com/astral-sh/uv) package manager
+- For Docker: Docker installed on your system
+
 ### Option 1: Docker (Recommended)
 
-The fastest way to get started is using the published Docker image:
-
 ```bash
-# Pull the latest image
 docker pull ghcr.io/radcod3/lampyrid:latest
-
-# Run with stdio mode (for Claude Desktop)
-docker run --rm -i \
-  -e MCP_TRANSPORT=stdio \
-  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
-  -e FIREFLY_TOKEN=your-api-token \
-  ghcr.io/radcod3/lampyrid:latest
-
-# Or use docker-compose
-cat > docker-compose.yml <<EOF
-services:
-  lampyrid:
-    image: ghcr.io/radcod3/lampyrid:latest
-    ports:
-      - "3000:3000"
-    environment:
-      FIREFLY_BASE_URL: https://your-firefly-instance.com
-      FIREFLY_TOKEN: your-api-token
-    volumes:
-      # Persist OAuth tokens if authentication is enabled
-      - ./data/oauth:/app/data/oauth
-    restart: unless-stopped
-EOF
-docker-compose up -d
 ```
-
-**Note on Volume Permissions**: If you encounter permission errors like `sqlite3.OperationalError: unable to open database file` when the container tries to write to the OAuth storage directory, you may need to set the correct ownership:
-
-```bash
-sudo chown -R 65532:65532 ./data/oauth
-```
-
-This ensures the nonroot user (UID 65532) in the container can write to the mounted volume. This is environment-dependent and may not be needed on all systems.
 
 ### Option 2: Local Installation
 
-#### Prerequisites
-
-- Python 3.14+
-- [uv](https://github.com/astral-sh/uv) package manager
-- Access to a Firefly III instance with API token
-
-#### Installation Steps
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/RadCod3/LamPyrid.git
 cd LamPyrid
-```
-
-2. Install dependencies:
-```bash
 uv sync
 ```
 
-3. Configure environment variables:
-```bash
-# Create a .env file or set environment variables
-FIREFLY_BASE_URL=https://your-firefly-instance.com
-FIREFLY_TOKEN=your-api-token
-```
+## Adding to Claude
 
-4. Run the MCP server:
-```bash
-uv run lampyrid
-```
+LamPyrid can be used with Claude in two ways:
 
-## Configuration
+### Local Setup (Claude Desktop)
 
-LamPyrid uses environment variables for configuration:
+For running LamPyrid locally on your machine with Claude Desktop.
 
-### Required Configuration
+**Using Docker:**
 
-- `FIREFLY_BASE_URL`: URL of your Firefly III instance
-- `FIREFLY_TOKEN`: Personal access token for API authentication
+Add to your Claude Desktop configuration file:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
-### Server Configuration (Optional)
-
-- `MCP_TRANSPORT`: Transport protocol (stdio/http/sse, default: stdio)
-- `MCP_HOST`: Host binding for HTTP/SSE transports (default: 0.0.0.0)
-- `MCP_PORT`: Port binding for HTTP/SSE transports (default: 3000)
-- `LOGGING_LEVEL`: Logging verbosity (DEBUG/INFO/WARNING/ERROR/CRITICAL, default: INFO)
-
-### Google OAuth Authentication (Optional)
-
-For remote server deployments requiring authentication, you can enable Google OAuth:
-
-- `GOOGLE_CLIENT_ID`: Google OAuth 2.0 client ID
-- `GOOGLE_CLIENT_SECRET`: Google OAuth 2.0 client secret
-- `SERVER_BASE_URL`: Your server's public URL (e.g., `http://localhost:8000`)
-
-**Note**: Authentication is optional and only needed for remote server deployments. All three OAuth variables must be provided together to enable authentication.
-
-### OAuth Token Persistence (Optional)
-
-By default, OAuth tokens are stored in memory and lost on server restarts. To enable persistent authentication across restarts, configure encrypted token storage:
-
-- `JWT_SIGNING_KEY`: JWT signing key for OAuth tokens
-- `OAUTH_STORAGE_ENCRYPTION_KEY`: Fernet encryption key for token storage
-- `OAUTH_STORAGE_PATH`: Storage path (default: `~/.local/share/lampyrid/oauth` for local, `/app/data/oauth` for Docker)
-
-**Generate encryption keys:**
-```bash
-# Generate JWT signing key
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-
-# Generate Fernet encryption key
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-
-**IMPORTANT**: Keep these keys secure and consistent across deployments. Changing keys will invalidate existing tokens and require users to re-authenticate.
-
-Configuration can be provided via a `.env` file in the project root or as environment variables.
-
-### Setting Up Google OAuth
-
-If you need authentication for remote server deployment:
-
-1. **Go to Google Cloud Console**: Visit [console.cloud.google.com](https://console.cloud.google.com)
-2. **Create or select a project**: Choose an existing project or create a new one
-3. **Enable APIs**:
-   - Navigate to "APIs & Services" → "Library"
-   - Search for and enable "Google+ API"
-4. **Configure OAuth Consent Screen**:
-   - Go to "APIs & Services" → "OAuth consent screen"
-   - Choose "External" user type (unless you have Google Workspace)
-   - Fill in required fields: app name, user support email, developer contact
-   - Add scopes: `openid`, `email`, `profile`
-   - Save and continue
-5. **Create OAuth 2.0 Credentials**:
-   - Go to "APIs & Services" → "Credentials"
-   - Click "Create Credentials" → "OAuth client ID"
-   - Application type: "Web application"
-   - Name: "LamPyrid MCP Server"
-   - Add authorized redirect URI: `{SERVER_BASE_URL}/auth/callback`
-     - For local development: `http://localhost:8000/auth/callback`
-     - For production: `https://your-domain.com/auth/callback`
-   - Click "Create"
-   - Copy the Client ID and Client Secret
-6. **Configure Environment**: Add to your `.env` file:
-   ```bash
-   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-   GOOGLE_CLIENT_SECRET=your-client-secret
-   SERVER_BASE_URL=http://localhost:8000
-   ```
-
-## Claude Desktop Integration
-
-To use LamPyrid with Claude Desktop, add the following configuration to your Claude Desktop MCP settings:
-
-### Configuration Steps
-
-1. **Install LamPyrid**: Ensure LamPyrid is installed and configured with your Firefly III credentials
-2. **Configure Claude Desktop**: Add the server configuration to your Claude Desktop settings file
-
-### Claude Desktop Settings
-
-**Option 1: Local Installation (stdio mode)**
-```json
-{
-  "mcpServers": {
-    "lampyrid": {
-      "command": "uv",
-      "args": ["run", "lampyrid"],
-      "cwd": "/path/to/your/LamPyrid",
-      "env": {
-        "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
-        "FIREFLY_TOKEN": "your-personal-access-token"
-      }
-    }
-  }
-}
-```
-
-**Option 2: Docker Container (HTTP mode)**
 ```json
 {
   "mcpServers": {
@@ -216,61 +67,203 @@ To use LamPyrid with Claude Desktop, add the following configuration to your Cla
 }
 ```
 
-**Option 3: HTTP Connection to Running Container**
-If you have LamPyrid running in HTTP mode (e.g., via docker-compose), you can connect directly:
+**Using Local Installation:**
+
 ```json
 {
   "mcpServers": {
     "lampyrid": {
-      "url": "http://localhost:3000"
+      "command": "uv",
+      "args": ["run", "lampyrid"],
+      "cwd": "/path/to/LamPyrid",
+      "env": {
+        "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
+        "FIREFLY_TOKEN": "your-personal-access-token"
+      }
     }
   }
 }
 ```
 
-### Environment Variables
+After adding the configuration, restart Claude Desktop. LamPyrid tools will be available for account management, transaction operations, and budget analysis.
 
-You can also use a `.env` file in your LamPyrid directory instead of inline environment variables:
+### Remote Setup (Claude Connector)
 
-```bash
-# .env file in LamPyrid directory
-FIREFLY_BASE_URL=https://your-firefly-instance.com
-FIREFLY_TOKEN=your-personal-access-token
+When hosted on a remote server, LamPyrid can be added as a **Claude Connector**, allowing you to use it across all Claude interfaces including **Claude mobile apps** (iOS/Android), Claude web, and Claude Desktop.
+
+**1. Deploy LamPyrid to a remote server:**
+
+```yaml
+# docker-compose.yml
+services:
+  lampyrid:
+    image: ghcr.io/radcod3/lampyrid:latest
+    ports:
+      - "3000:3000"
+    environment:
+      FIREFLY_BASE_URL: https://your-firefly-instance.com
+      FIREFLY_TOKEN: your-api-token
+      MCP_TRANSPORT: http
+    restart: unless-stopped
 ```
 
-After configuration, restart Claude Desktop. LamPyrid tools will be available for account management, transaction operations, and budget analysis.
+**2. Add as Claude Connector:**
+
+1. Go to [Claude Settings](https://claude.ai/settings/integrations)
+2. Navigate to **Integrations** > **Add More**
+3. Enter your server URL: `https://your-server-url.com`
+4. LamPyrid is now available on all your Claude devices!
+
+> **Security Note**: If hosting on a public server, it is strongly recommended to enable authentication. LamPyrid currently supports Google OAuth - see the [Authentication Setup](#google-oauth-authentication-optional) section for configuration.
+
+## Configuration
+
+LamPyrid uses environment variables for configuration:
+
+### Required
+
+| Variable | Description |
+|----------|-------------|
+| `FIREFLY_BASE_URL` | URL of your Firefly III instance |
+| `FIREFLY_TOKEN` | Personal access token for API authentication |
+
+### Server Options
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MCP_TRANSPORT` | `stdio` | Transport protocol: `stdio`, `http`, or `sse` |
+| `MCP_HOST` | `0.0.0.0` | Host binding for HTTP/SSE transports |
+| `MCP_PORT` | `3000` | Port binding for HTTP/SSE transports |
+| `LOGGING_LEVEL` | `INFO` | Logging verbosity: DEBUG/INFO/WARNING/ERROR/CRITICAL |
+
+### Google OAuth Authentication (Optional)
+
+Recommended for remote server deployments to secure access to your financial data. Currently, Google OAuth is the only supported authentication provider.
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 client secret |
+| `SERVER_BASE_URL` | Your server's public URL (e.g., `https://lampyrid.example.com`) |
+
+**Setting up Google OAuth:**
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create or select a project
+3. Navigate to **APIs & Services** > **OAuth consent screen** and configure
+4. Go to **Credentials** > **Create Credentials** > **OAuth client ID**
+5. Application type: **Web application**
+6. Add authorized redirect URI: `{SERVER_BASE_URL}/auth/callback`
+7. Copy the Client ID and Client Secret to your environment
+
+### OAuth Token Persistence (Optional)
+
+Enable persistent authentication across server restarts:
+
+| Variable | Description |
+|----------|-------------|
+| `JWT_SIGNING_KEY` | JWT signing key (generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"`) |
+| `OAUTH_STORAGE_ENCRYPTION_KEY` | Fernet key (generate: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`) |
+| `OAUTH_STORAGE_PATH` | Storage path (default: `/app/data/oauth` for Docker) |
 
 ## Available MCP Tools
 
 ### Account Management (3 tools)
-- `list_accounts` - List accounts by type (asset, expense, revenue, etc.)
-- `search_accounts` - Search accounts by name with optional type filtering
-- `get_account` - Get detailed information for a single account
+| Tool | Description |
+|------|-------------|
+| `list_accounts` | List accounts by type (asset, expense, revenue, etc.) |
+| `search_accounts` | Search accounts by name with optional type filtering |
+| `get_account` | Get detailed information for a single account |
 
 ### Transaction Management (10 tools)
-- `get_transactions` - Retrieve transactions with time range and type filtering
-- `search_transactions` - Search transactions by description or text fields
-- `get_transaction` - Get detailed information for a single transaction
-- `create_withdrawal` - Create withdrawal transactions with budget allocation
-- `create_deposit` - Create deposit transactions
-- `create_transfer` - Create transfer transactions between accounts
-- `create_bulk_transactions` - Create multiple transactions efficiently in a single operation
-- `update_transaction` - Update existing transaction details (amount, description, accounts, budget, etc.)
-- `bulk_update_transactions` - Update multiple transactions efficiently in a single operation
-- `delete_transaction` - Delete transactions by ID
+| Tool | Description |
+|------|-------------|
+| `get_transactions` | Retrieve transactions with time range and type filtering |
+| `search_transactions` | Search transactions by description or text fields |
+| `get_transaction` | Get detailed information for a single transaction |
+| `create_withdrawal` | Create withdrawal transactions with budget allocation |
+| `create_deposit` | Create deposit transactions |
+| `create_transfer` | Create transfer transactions between accounts |
+| `create_bulk_transactions` | Create multiple transactions in a single operation |
+| `update_transaction` | Update existing transaction details |
+| `bulk_update_transactions` | Update multiple transactions in a single operation |
+| `delete_transaction` | Delete transactions by ID |
 
 ### Budget Management (5 tools)
-- `list_budgets` - List all budgets with optional filtering
-- `get_budget` - Get detailed budget information
-- `get_budget_spending` - Analyze spending for specific budgets and periods
-- `get_budget_summary` - Comprehensive summary of all budgets with spending
-- `get_available_budget` - Check available budget amounts for periods
+| Tool | Description |
+|------|-------------|
+| `list_budgets` | List all budgets with optional filtering |
+| `get_budget` | Get detailed budget information |
+| `get_budget_spending` | Analyze spending for specific budgets and periods |
+| `get_budget_summary` | Comprehensive summary of all budgets with spending |
+| `get_available_budget` | Check available budget amounts for periods |
 
-All tools include comprehensive error handling and return structured data optimized for MCP integration.
+## Docker Deployment
+
+### Available Images
+
+| Tag | Description |
+|-----|-------------|
+| `latest` | Latest stable release (recommended) |
+| `edge` | Main branch (latest features, may be unstable) |
+| `0.3.0`, `0.3`, `0` | Specific versions |
+
+All images support `linux/amd64` and `linux/arm64` platforms.
+
+### Using Docker Compose
+
+The repository includes a `docker-compose.yml` for easy deployment:
+
+```yaml
+services:
+  lampyrid:
+    image: ghcr.io/radcod3/lampyrid:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      # Persist OAuth tokens across container restarts
+      - ./data/oauth:/app/data/oauth
+    restart: unless-stopped
+```
+
+Create a `.env` file with your configuration:
+
+```bash
+# Required
+FIREFLY_BASE_URL=https://your-firefly-instance.com
+FIREFLY_TOKEN=your-api-token
+
+# Optional - Server settings
+MCP_TRANSPORT=http
+LOGGING_LEVEL=INFO
+
+# Optional - For remote authentication
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+SERVER_BASE_URL=https://your-domain.com
+
+# Optional - For persistent OAuth tokens
+JWT_SIGNING_KEY=your-jwt-key
+OAUTH_STORAGE_ENCRYPTION_KEY=your-encryption-key
+OAUTH_STORAGE_PATH=/app/data/oauth
+```
+
+Then start the server:
+
+```bash
+docker compose up -d
+```
+
+**Note on Volume Permissions**: If you encounter permission errors with OAuth storage, set the correct ownership:
+
+```bash
+mkdir -p ./data/oauth
+sudo chown -R 65532:65532 ./data/oauth
+```
 
 ## Development
-
-### Setup Development Environment
 
 ```bash
 # Install dependencies
@@ -282,232 +275,37 @@ uv run ruff format
 # Lint code
 uv run ruff check --fix
 
-# Build Docker image locally
-docker build -t lampyrid:dev .
-
-# Run local development server
+# Run the server
 uv run lampyrid
+
+# Run tests
+uv run pytest
 ```
 
 ### Project Structure
 
-```text
+```
 LamPyrid/
 ├── src/lampyrid/
-│   ├── __init__.py           # Package initialization
-│   ├── __main__.py           # Main entry point for MCP server
-│   ├── server.py             # FastMCP server initialization and tool composition
+│   ├── server.py             # FastMCP server initialization
 │   ├── config.py             # Environment configuration
-│   ├── utils.py              # Custom HTTP routes (favicon, etc.)
-│   ├── clients/
-│   │   └── firefly.py        # HTTP client for Firefly III API
-│   ├── models/
-│   │   ├── firefly_models.py # Auto-generated Firefly III API models
-│   │   └── lampyrid_models.py# Simplified MCP interface models
-│   ├── services/
-│   │   ├── __init__.py       # Services layer exports
-│   │   ├── accounts.py       # AccountService - account business logic
-│   │   ├── transactions.py   # TransactionService - transaction business logic
-│   │   └── budgets.py        # BudgetService - budget business logic
-│   └── tools/
-│       ├── __init__.py       # Tool server composition coordinator
-│       ├── accounts.py       # Account management tools (3 tools)
-│       ├── transactions.py   # Transaction management tools (10 tools)
-│       └── budgets.py        # Budget management tools (5 tools)
+│   ├── clients/firefly.py    # HTTP client for Firefly III API
+│   ├── models/               # Pydantic models
+│   ├── services/             # Business logic layer
+│   └── tools/                # MCP tool definitions
 ├── tests/                    # Unit and integration tests
-├── .github/workflows/        # CI/CD workflows
-├── assets/                   # Project assets
 ├── Dockerfile                # Docker image definition
-├── docker-compose.yml        # Docker Compose configuration
-├── pyproject.toml            # Project configuration and dependencies
-└── README.md                 # Project documentation
+└── docker-compose.yml        # Docker Compose configuration
 ```
-
-## Architecture
-
-LamPyrid follows a clean layered architecture with modular tool organization:
-
-- **Server Layer** (`server.py`): FastMCP server initialization, authentication setup, and tool registration orchestration
-- **Tools Layer** (`tools/`): Thin MCP tool wrappers organized by domain that delegate to services
-  - `accounts.py`: Account management tools (3 tools)
-  - `transactions.py`: Transaction management tools (10 tools)
-  - `budgets.py`: Budget management tools (5 tools)
-- **Services Layer** (`services/`): Business logic services that orchestrate operations between tools and the client
-  - `accounts.py`: `AccountService` - account operations and model conversion
-  - `transactions.py`: `TransactionService` - transaction CRUD, bulk operations, search query building
-  - `budgets.py`: `BudgetService` - budget operations, spending calculations, multi-call aggregations
-- **Client Layer** (`clients/firefly.py`): HTTP client for Firefly III API with full CRUD support
-- **Models Layer**:
-  - `firefly_models.py`: Auto-generated Pydantic models from Firefly III OpenAPI spec
-  - `lampyrid_models.py`: Simplified models for MCP tool interfaces
-- **Configuration** (`config.py`): Environment-based settings using pydantic-settings
-
-### Tool Registration Pattern
-Tools are registered using FastMCP's native static composition pattern:
-- Each tool module exports a `create_*_server(client)` function that returns a standalone FastMCP instance
-- Tool functions are thin wrappers that delegate to corresponding service classes
-- The `tools/__init__.py` module provides `compose_all_servers()` to coordinate composition
-- The `server.py` uses `mcp.import_server()` to compose all domain servers into the main server
-- This leverages FastMCP's built-in server composition while keeping modular organization
-
-### Services Layer Pattern
-The services layer separates business logic from tool definitions:
-- Each service class takes a `FireflyClient` instance via constructor injection
-- Services handle model conversion (Firefly API models to LamPyrid models)
-- Complex operations (bulk transactions, spending calculations) are encapsulated in services
-- This enables easier unit testing with mocked clients
-
-The architecture enables easy extension and modification while maintaining type safety and comprehensive error handling throughout.
-
-## Docker Deployment
-
-LamPyrid provides production-ready Docker images published to GitHub Container Registry.
-
-### Available Images
-
-- **Latest Stable**: `ghcr.io/radcod3/lampyrid:latest` (latest release - recommended for production)
-- **Development**: `ghcr.io/radcod3/lampyrid:edge` (main branch - latest features, may be unstable)
-- **Versioned**: `ghcr.io/radcod3/lampyrid:0.2.0`, `ghcr.io/radcod3/lampyrid:0.2`, `ghcr.io/radcod3/lampyrid:0`
-- **Platforms**: linux/amd64, linux/arm64
-
-### Running with Docker
-
-```bash
-# Run in stdio mode (for Claude Desktop integration)
-docker run --rm -i \
-  -e MCP_TRANSPORT=stdio \
-  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
-  -e FIREFLY_TOKEN=your-api-token \
-  ghcr.io/radcod3/lampyrid:latest
-
-# Run in HTTP mode
-docker run -d \
-  -p 3000:3000 \
-  -e FIREFLY_BASE_URL=https://your-firefly-instance.com \
-  -e FIREFLY_TOKEN=your-api-token \
-  --name lampyrid \
-  ghcr.io/radcod3/lampyrid:latest
-```
-
-### Using Docker Compose
-
-```yaml
-services:
-  lampyrid:
-    image: ghcr.io/radcod3/lampyrid:latest
-    ports:
-      - "3000:3000"
-    environment:
-      FIREFLY_BASE_URL: https://your-firefly-instance.com
-      FIREFLY_TOKEN: your-api-token
-      # Optional: Configure transport and logging
-      MCP_TRANSPORT: http
-      LOGGING_LEVEL: INFO
-      # Optional: Enable OAuth token persistence
-      # JWT_SIGNING_KEY: your-jwt-signing-key
-      # OAUTH_STORAGE_ENCRYPTION_KEY: your-fernet-encryption-key
-      # OAUTH_STORAGE_PATH: /app/data/oauth
-    volumes:
-      # Persist OAuth tokens across container restarts (if OAuth is enabled)
-      - ./data/oauth:/app/data/oauth
-    restart: unless-stopped
-```
-
-### Volume Permissions for OAuth Storage
-
-When using Docker with OAuth token persistence, you may encounter permission issues where the container cannot write to the mounted volume at `./data/oauth`.
-
-**The Issue**: The container runs as the `nonroot` user (UID 65532) for security. When Docker creates the volume mount from the host (typically when the host directory doesn't exist before the container starts), it may have root:root ownership, preventing the nonroot user from writing to the directory.
-
-**Symptoms**: If you see errors like `sqlite3.OperationalError: unable to open database file` or other permission-related errors in the container logs, this is likely the cause.
-
-**Solution**: Set the correct ownership on the host directory before starting the container:
-
-```bash
-# Create the directory if it doesn't exist
-mkdir -p ./data/oauth
-
-# Set ownership to UID 65532 (nonroot user)
-sudo chown -R 65532:65532 ./data/oauth
-```
-
-**Note**: This is environment-dependent and may not be required on all systems. Some Docker configurations handle volume permissions automatically. If you encounter permission errors, apply this fix.
-
-### Building Custom Images
-
-```bash
-# Build locally
-docker build -t lampyrid:custom .
-
-# Build for specific platform
-docker buildx build --platform linux/amd64 -t lampyrid:custom .
-```
-
-## CI/CD and Releases
-
-LamPyrid uses GitHub Actions for continuous integration and deployment:
-
-### Automated Workflows
-
-- **CI Workflow**: Runs on all pull requests
-  - Code linting and formatting validation
-  - Package build verification
-  - Docker image build test
-
-- **Docker Publish Workflow**: Runs on main branch and version tags
-  - Multi-platform image builds (amd64/arm64)
-  - Security scanning with Trivy
-  - Publishes to ghcr.io with appropriate tags
-
-- **Release Workflow**: Runs on version tags (e.g., `v0.2.0`)
-  - Generates changelog from git commits
-  - Creates GitHub release with installation instructions
-  - Links to published Docker images
-
-### Creating a Release
-
-To create a new release:
-
-1. Merge all features to main via pull requests
-2. Create a release branch and update version in `pyproject.toml`
-3. Merge the version bump PR
-4. Create and push a version tag (e.g., `v0.2.0`)
-5. GitHub Actions automatically builds and publishes the release
 
 ## Contributing
 
-Contributions are welcome! Please follow this workflow:
+Contributions are welcome! Please:
 
-1. **Fork the repository**
-2. **Create a feature branch** from `main`:
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
-3. **Make your changes** following the code style guidelines below
-4. **Test locally**:
-   ```bash
-   uv run ruff format
-   uv run ruff check --fix
-   uv run lampyrid  # Verify the server starts
-   ```
-5. **Commit your changes** with clear, descriptive messages
-6. **Push to your fork** and create a pull request
-
-### Code Style Guidelines
-
-- **Indentation**: Use spaces for indentation
-- **Quotes**: Single quotes for strings
-- **Line Length**: 100 character line limit
-- **Type Safety**: Type hints required for all functions and methods
-- **Async Operations**: Use async/await pattern for HTTP operations
-- **Documentation**: Include docstrings for all MCP tools and complex functions
-
-### CI/CD Process
-
-The main branch is protected with the following requirements:
-- All pull requests must pass CI checks (linting, formatting, Docker build)
-- GitHub Actions automatically run on all PRs
-- Docker images are published on version tags and main branch pushes
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Make changes following the code style (run `uv run ruff format && uv run ruff check --fix`)
+4. Submit a pull request
 
 ## License
 
@@ -515,4 +313,4 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 ## Support
 
-For issues and feature requests, please use the GitHub issue tracker.
+For issues and feature requests, please use the [GitHub issue tracker](https://github.com/RadCod3/LamPyrid/issues).
