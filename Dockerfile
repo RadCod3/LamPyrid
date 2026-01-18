@@ -38,7 +38,7 @@ RUN mkdir -p /app/data/oauth
 # ============================================================================
 # Runtime Stage: Minimal distroless image
 # ============================================================================
-FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+FROM gcr.io/distroless/cc-debian13:nonroot AS runtime
 
 # Copy the Python installation from builder
 COPY --from=builder --chown=nonroot:nonroot /python /python
