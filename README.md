@@ -6,45 +6,29 @@ A Model Context Protocol (MCP) server providing comprehensive tools for interact
 
 ## Features
 
-- **Comprehensive Account Management**: List, search, and retrieve account information across all Firefly III account types
-- **Transaction Operations**: Full CRUD operations for transactions with support for withdrawals, deposits, and transfers
-- **Bulk Operations**: Efficient bulk transaction creation and updates for high-volume workflows
-- **Budget Management**: Complete budget analysis with spending tracking, allocation, and summary reporting
-- **Docker Support**: Production-ready Docker images with multi-platform support (amd64/arm64)
-- **Type Safety**: Full type hints and Pydantic validation throughout the codebase
-- **Async Operations**: Non-blocking HTTP operations for optimal performance
+- **Account Management**: List, search, and retrieve account information across all Firefly III account types
+- **Transaction Operations**: Full CRUD operations for withdrawals, deposits, and transfers
+- **Bulk Operations**: Efficient bulk transaction creation and updates
+- **Budget Management**: Budget analysis with spending tracking and allocation
+- **Docker Support**: Production-ready multi-platform images (amd64/arm64)
 
-## Quick Start
-
-### Prerequisites
+## Prerequisites
 
 - Access to a Firefly III instance with a [Personal Access Token](https://docs.firefly-iii.org/how-to/firefly-iii/features/api/#personal-access-token)
-- For local installation: Python 3.14+ and [uv](https://github.com/astral-sh/uv) package manager
+- For local installation: Python 3.14+ and [uv](https://github.com/astral-sh/uv)
 - For Docker: Docker installed on your system
 
-### Option 1: Docker (Recommended)
+## Adding to Claude
 
-```bash
-docker pull ghcr.io/radcod3/lampyrid:latest
-```
+### Option 1: Local Setup (Claude Desktop)
 
-### Option 2: Local Installation
+Clone and install LamPyrid:
 
 ```bash
 git clone https://github.com/RadCod3/LamPyrid.git
 cd LamPyrid
 uv sync
 ```
-
-## Adding to Claude
-
-LamPyrid can be used with Claude in two ways:
-
-### Local Setup (Claude Desktop)
-
-For running LamPyrid locally on your machine with Claude Desktop.
-
-**Using Docker:**
 
 Add to your Claude Desktop configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -54,28 +38,8 @@ Add to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "lampyrid": {
-      "command": "docker",
-      "args": [
-        "run", "--rm", "-i",
-        "-e", "MCP_TRANSPORT=stdio",
-        "-e", "FIREFLY_BASE_URL=https://your-firefly-instance.com",
-        "-e", "FIREFLY_TOKEN=your-personal-access-token",
-        "ghcr.io/radcod3/lampyrid:latest"
-      ]
-    }
-  }
-}
-```
-
-**Using Local Installation:**
-
-```json
-{
-  "mcpServers": {
-    "lampyrid": {
       "command": "uv",
-      "args": ["run", "lampyrid"],
-      "cwd": "/path/to/LamPyrid",
+      "args": ["run", "--project", "/path/to/LamPyrid", "lampyrid"],
       "env": {
         "FIREFLY_BASE_URL": "https://your-firefly-instance.com",
         "FIREFLY_TOKEN": "your-personal-access-token"
@@ -85,9 +49,9 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-After adding the configuration, restart Claude Desktop. LamPyrid tools will be available for account management, transaction operations, and budget analysis.
+Restart Claude Desktop to enable LamPyrid tools.
 
-### Remote Setup (Claude Connector)
+### Option 2: Remote Setup (Claude Connector)
 
 When hosted on a remote server, LamPyrid can be added as a **Claude Connector**, allowing you to use it across all Claude interfaces including **Claude mobile apps** (iOS/Android), Claude web, and Claude Desktop.
 
@@ -100,25 +64,31 @@ services:
     image: ghcr.io/radcod3/lampyrid:latest
     ports:
       - "3000:3000"
-    environment:
-      FIREFLY_BASE_URL: https://your-firefly-instance.com
-      FIREFLY_TOKEN: your-api-token
-      MCP_TRANSPORT: http
+    env_file:
+      - .env
     restart: unless-stopped
+```
+
+```bash
+# .env
+FIREFLY_BASE_URL=https://your-firefly-instance.com
+FIREFLY_TOKEN=your-api-token
+MCP_TRANSPORT=http
+```
+
+```bash
+docker compose up -d
 ```
 
 **2. Add as Claude Connector:**
 
-1. Go to [Claude Settings](https://claude.ai/settings/integrations)
-2. Navigate to **Integrations** > **Add More**
-3. Enter your server URL: `https://your-server-url.com`
-4. LamPyrid is now available on all your Claude devices!
+1. Go to Claude **Settings** > **Connectors** > **Add connector**
+2. Enter your server URL: `https://your-server-url.com/mcp`
+3. LamPyrid is now available on all your Claude devices!
 
-> **Security Note**: If hosting on a public server, it is strongly recommended to enable authentication. LamPyrid currently supports Google OAuth - see the [Authentication Setup](#google-oauth-authentication-optional) section for configuration.
+> **Security Note**: If hosting on a public server, it is strongly recommended to enable authentication. LamPyrid currently supports Google OAuth - see the [Authentication](#authentication-optional) section below.
 
 ## Configuration
-
-LamPyrid uses environment variables for configuration:
 
 ### Required
 
@@ -136,9 +106,9 @@ LamPyrid uses environment variables for configuration:
 | `MCP_PORT` | `3000` | Port binding for HTTP/SSE transports |
 | `LOGGING_LEVEL` | `INFO` | Logging verbosity: DEBUG/INFO/WARNING/ERROR/CRITICAL |
 
-### Google OAuth Authentication (Optional)
+### Authentication (Optional)
 
-Recommended for remote server deployments to secure access to your financial data. Currently, Google OAuth is the only supported authentication provider.
+Recommended for remote deployments. Currently supports Google OAuth.
 
 | Variable | Description |
 |----------|-------------|
@@ -156,7 +126,7 @@ Recommended for remote server deployments to secure access to your financial dat
 6. Add authorized redirect URI: `{SERVER_BASE_URL}/auth/callback`
 7. Copy the Client ID and Client Secret to your environment
 
-### OAuth Token Persistence (Optional)
+### Token Persistence (Optional)
 
 Enable persistent authentication across server restarts:
 
@@ -166,7 +136,7 @@ Enable persistent authentication across server restarts:
 | `OAUTH_STORAGE_ENCRYPTION_KEY` | Fernet key (generate: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`) |
 | `OAUTH_STORAGE_PATH` | Storage path (default: `/app/data/oauth` for Docker) |
 
-## Available MCP Tools
+## Available Tools
 
 ### Account Management (3 tools)
 | Tool | Description |
@@ -198,7 +168,7 @@ Enable persistent authentication across server restarts:
 | `get_budget_summary` | Comprehensive summary of all budgets with spending |
 | `get_available_budget` | Check available budget amounts for periods |
 
-## Docker Deployment
+## Docker
 
 ### Available Images
 
@@ -210,53 +180,13 @@ Enable persistent authentication across server restarts:
 
 All images support `linux/amd64` and `linux/arm64` platforms.
 
-### Using Docker Compose
-
-The repository includes a `docker-compose.yml` for easy deployment:
-
-```yaml
-services:
-  lampyrid:
-    image: ghcr.io/radcod3/lampyrid:latest
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    volumes:
-      # Persist OAuth tokens across container restarts
-      - ./data/oauth:/app/data/oauth
-    restart: unless-stopped
-```
-
-Create a `.env` file with your configuration:
-
 ```bash
-# Required
-FIREFLY_BASE_URL=https://your-firefly-instance.com
-FIREFLY_TOKEN=your-api-token
-
-# Optional - Server settings
-MCP_TRANSPORT=http
-LOGGING_LEVEL=INFO
-
-# Optional - For remote authentication
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-SERVER_BASE_URL=https://your-domain.com
-
-# Optional - For persistent OAuth tokens
-JWT_SIGNING_KEY=your-jwt-key
-OAUTH_STORAGE_ENCRYPTION_KEY=your-encryption-key
-OAUTH_STORAGE_PATH=/app/data/oauth
+docker pull ghcr.io/radcod3/lampyrid:latest
 ```
 
-Then start the server:
+### Volume Permissions
 
-```bash
-docker compose up -d
-```
-
-**Note on Volume Permissions**: If you encounter permission errors with OAuth storage, set the correct ownership:
+If you encounter permission errors with OAuth storage, set the correct ownership:
 
 ```bash
 mkdir -p ./data/oauth
@@ -269,10 +199,8 @@ sudo chown -R 65532:65532 ./data/oauth
 # Install dependencies
 uv sync
 
-# Format code
+# Format and lint
 uv run ruff format
-
-# Lint code
 uv run ruff check --fix
 
 # Run the server
@@ -280,22 +208,6 @@ uv run lampyrid
 
 # Run tests
 uv run pytest
-```
-
-### Project Structure
-
-```
-LamPyrid/
-├── src/lampyrid/
-│   ├── server.py             # FastMCP server initialization
-│   ├── config.py             # Environment configuration
-│   ├── clients/firefly.py    # HTTP client for Firefly III API
-│   ├── models/               # Pydantic models
-│   ├── services/             # Business logic layer
-│   └── tools/                # MCP tool definitions
-├── tests/                    # Unit and integration tests
-├── Dockerfile                # Docker image definition
-└── docker-compose.yml        # Docker Compose configuration
 ```
 
 ## Contributing
@@ -309,8 +221,8 @@ Contributions are welcome! Please:
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the [LICENSE](LICENSE) file for details.
+GNU Affero General Public License v3.0 (AGPL-3.0) - see [LICENSE](LICENSE).
 
 ## Support
 
-For issues and feature requests, please use the [GitHub issue tracker](https://github.com/RadCod3/LamPyrid/issues).
+For issues and feature requests, use the [GitHub issue tracker](https://github.com/RadCod3/LamPyrid/issues).
