@@ -110,7 +110,8 @@ async def test_get_budget_summary(mcp_client: Client):
     end = next_month.replace(day=1) - timedelta(days=1)
 
     result = await mcp_client.call_tool(
-        'get_budget_summary', {'req': {'start': start.isoformat(), 'end': end.isoformat()}}
+        'get_budget_summary',
+        {'req': {'start_date': start.isoformat(), 'end_date': end.isoformat()}},
     )
     summary = BudgetSummary.model_validate(result.structured_content)
 

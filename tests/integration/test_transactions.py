@@ -119,6 +119,40 @@ async def test_create_withdrawal_with_budget(
 @pytest.mark.asyncio
 @pytest.mark.transactions
 @pytest.mark.integration
+async def test_create_withdrawal_with_destination_id(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account_obj: Account,
+    transaction_cleanup: List[str],
+):
+    """Test creating a withdrawal using destination_id instead of destination_name."""
+    result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 15.00,
+                'description': 'Test withdrawal with destination_id',
+                'source_id': test_asset_account.id,
+                'destination_id': test_expense_account_obj.id,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(result.structured_content)
+    assert transaction is not None
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+
+    # Verify transaction was created with the correct destination account
+    assert transaction.destination_id == test_expense_account_obj.id
+    assert transaction.destination_name == test_expense_account_obj.name
+    assert transaction.amount == 15.00
+    assert transaction.description == 'Test withdrawal with destination_id'
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
 async def test_create_deposit_basic(
     mcp_client: Client,
     test_asset_account: Account,
@@ -160,6 +194,40 @@ async def test_create_deposit_basic(
             'budget_name': None,
         }
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_deposit_with_source_id(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_revenue_account_obj: Account,
+    transaction_cleanup: List[str],
+):
+    """Test creating a deposit using source_id instead of source_name."""
+    result = await mcp_client.call_tool(
+        'create_deposit',
+        {
+            'req': {
+                'amount': 250.00,
+                'description': 'Test deposit with source_id',
+                'destination_id': test_asset_account.id,
+                'source_id': test_revenue_account_obj.id,
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(result.structured_content)
+    assert transaction is not None
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+
+    # Verify transaction was created with the correct source account
+    assert transaction.source_id == test_revenue_account_obj.id
+    assert transaction.source_name == test_revenue_account_obj.name
+    assert transaction.amount == 250.00
+    assert transaction.description == 'Test deposit with source_id'
 
 
 @pytest.mark.asyncio

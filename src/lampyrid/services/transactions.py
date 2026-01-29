@@ -61,6 +61,7 @@ class TransactionService:
             type=TransactionTypeProperty.withdrawal,
             date=req.date,
             source_id=req.source_id,
+            destination_id=req.destination_id,
             destination_name=req.destination_name,
             budget_id=req.budget_id,
             budget_name=req.budget_name,
@@ -90,6 +91,7 @@ class TransactionService:
             description=req.description,
             type=TransactionTypeProperty.deposit,
             date=req.date,
+            source_id=req.source_id,
             source_name=req.source_name,
             destination_id=req.destination_id,
         )
