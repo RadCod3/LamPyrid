@@ -13,6 +13,8 @@ version = "0.3.0"
 
 [project.scripts]
 lampyrid = "lampyrid.__main__:main"
+update-schema = "lampyrid.scripts.update_schema:main"
+lint = "lampyrid.scripts.format:main"
 
 [dependency-groups]
 dev = [
