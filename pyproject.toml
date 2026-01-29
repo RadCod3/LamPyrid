@@ -5,7 +5,7 @@ dependencies = [
   "pydantic>=2.11.7",
   "pydantic-settings>=2.10.1",
 ]
-description = "Add your description here"
+description = "A simple MCP server for Firefly III"
 name = "lampyrid"
 readme = "README.md"
 requires-python = ">=3.14"
