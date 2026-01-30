@@ -333,6 +333,11 @@ def test_revenue_account_obj() -> Account:
         None,
     )
     if account is None:
+        account = next(
+            (acct for acct in _cached_test_accounts if 'test revenue' in acct.name.lower()),
+            None,
+        )
+    if account is None:
         raise RuntimeError('Test Revenue account not found in cached test accounts.')
     return account
 
