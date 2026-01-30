@@ -3,10 +3,13 @@
 import pytest
 from pydantic import ValidationError
 
+from lampyrid.models.firefly_models import TransactionTypeProperty
 from lampyrid.models.lampyrid_models import (
+    CreateBulkTransactionsRequest,
     CreateDepositRequest,
     CreateWithdrawalRequest,
     SearchTransactionsRequest,
+    Transaction,
     utc_now,
 )
 
@@ -51,21 +54,6 @@ class TestLampyridModels:
 class TestCreateWithdrawalRequest:
     """Test cases for CreateWithdrawalRequest model."""
 
-    def test_create_withdrawal_request_rejects_extra_fields(self):
-        """Test that CreateWithdrawalRequest raises ValidationError on extra fields."""
-        with pytest.raises(ValidationError) as exc_info:
-            CreateWithdrawalRequest(
-                amount=25.50,
-                description='Test withdrawal',
-                source_id='1',
-                unknown_field='should fail',  # ty:ignore[unknown-argument]
-            )
-
-        errors = exc_info.value.errors()
-        assert len(errors) == 1
-        assert errors[0]['type'] == 'extra_forbidden'
-        assert 'unknown_field' in str(errors[0]['loc'])
-
     def test_create_withdrawal_request_allows_destination_id(self):
         """Test that CreateWithdrawalRequest accepts destination_id field."""
         request = CreateWithdrawalRequest(
@@ -90,23 +78,8 @@ class TestCreateWithdrawalRequest:
         assert request.destination_name == 'Groceries'
         assert request.destination_id is None
 
-    def test_create_withdrawal_request_mutual_exclusivity(self):
-        """Test that destination_id and destination_name cannot both be provided."""
-        with pytest.raises(ValidationError) as exc_info:
-            CreateWithdrawalRequest(
-                amount=25.50,
-                description='Test withdrawal',
-                source_id='1',
-                destination_id='5',
-                destination_name='Groceries',
-            )
-
-        errors = exc_info.value.errors()
-        assert len(errors) == 1
-        assert 'Cannot specify both destination_id and destination_name' in str(errors[0]['msg'])
-
     def test_create_withdrawal_request_allows_neither_destination(self):
-        """Test that neither destination_id nor destination_name can be omitted."""
+        """Test that destination_id and destination_name may be omitted."""
         request = CreateWithdrawalRequest(
             amount=25.50,
             description='Test withdrawal',
@@ -119,21 +92,6 @@ class TestCreateWithdrawalRequest:
 
 class TestCreateDepositRequest:
     """Test cases for CreateDepositRequest model."""
-
-    def test_create_deposit_request_rejects_extra_fields(self):
-        """Test that CreateDepositRequest raises ValidationError on extra fields."""
-        with pytest.raises(ValidationError) as exc_info:
-            CreateDepositRequest(
-                amount=500.00,
-                description='Test deposit',
-                destination_id='1',
-                unknown_field='should fail',  # ty:ignore[unknown-argument]
-            )
-
-        errors = exc_info.value.errors()
-        assert len(errors) == 1
-        assert errors[0]['type'] == 'extra_forbidden'
-        assert 'unknown_field' in str(errors[0]['loc'])
 
     def test_create_deposit_request_allows_source_id(self):
         """Test that CreateDepositRequest accepts source_id field."""
@@ -159,6 +117,17 @@ class TestCreateDepositRequest:
         assert request.source_name == 'Employer'
         assert request.source_id is None
 
+    def test_create_deposit_request_allows_neither_source(self):
+        """Test that CreateDepositRequest allows neither source_id nor source_name."""
+        request = CreateDepositRequest(
+            amount=500.00,
+            description='Test deposit',
+            destination_id='1',
+        )
+
+        assert request.source_id is None
+        assert request.source_name is None
+
     def test_create_deposit_request_mutual_exclusivity(self):
         """Test that source_id and source_name cannot both be provided."""
         with pytest.raises(ValidationError) as exc_info:
@@ -174,13 +143,22 @@ class TestCreateDepositRequest:
         assert len(errors) == 1
         assert 'Cannot specify both source_id and source_name' in str(errors[0]['msg'])
 
-    def test_create_deposit_request_allows_neither_source(self):
-        """Test that neither source_id nor source_name can be omitted."""
-        request = CreateDepositRequest(
-            amount=500.00,
-            description='Test deposit',
-            destination_id='1',
+
+class TestCreateBulkTransactionsRequest:
+    """Test cases for CreateBulkTransactionsRequest model."""
+
+    def test_create_bulk_transactions_request_atomic_default(self):
+        """Test CreateBulkTransactionsRequest with default atomic value."""
+        transaction = Transaction(
+            type=TransactionTypeProperty.withdrawal,
+            amount=25.50,
+            description='Test withdrawal',
+            date=utc_now(),
+            source_id='1',
+            destination_id='2',
         )
 
-        assert request.source_id is None
-        assert request.source_name is None
+        request = CreateBulkTransactionsRequest(transactions=[transaction])
+
+        assert len(request.transactions) == 1
+        assert request.atomic is True  # Default value

@@ -2,15 +2,19 @@
 
 import subprocess
 import sys
+from pathlib import Path
 
 
 def main() -> int:
     """Run code formatting and linting fix."""
+    root_dir = Path(__file__).parent.parent.parent.parent.resolve()
+
+    print(f'Running formatting in {root_dir}...')
     print('Running ruff format...')
     try:
-        subprocess.run(['ruff', 'format', '.'], check=True)
+        subprocess.run(['ruff', 'format', '.'], cwd=root_dir, check=True)
         print('Running ruff check --fix...')
-        subprocess.run(['ruff', 'check', '--fix', '.'], check=True)
+        subprocess.run(['ruff', 'check', '--fix', '.'], cwd=root_dir, check=True)
     except subprocess.CalledProcessError as e:
         print(f'Error during formatting: {e}')
         return 1

@@ -125,15 +125,19 @@ def download_schema(version: str) -> bytes:
     return response.content
 
 
-def update_pyproject_toml(old_version: str | None, new_version: str) -> None:
+def update_pyproject_toml(old_version: str | None, new_version: str) -> bool:
     """Update the schema path in pyproject.toml.
 
     Args:
         old_version: Previous version string (or None)
         new_version: New version string
 
+    Returns:
+        True if the file was updated, False otherwise
+
     """
     content = PYPROJECT_PATH.read_text()
+    original_content = content
 
     old_filename = f'firefly-iii-{old_version}-v1.yaml' if old_version else None
     new_filename = f'firefly-iii-{new_version}-v1.yaml'
@@ -148,7 +152,11 @@ def update_pyproject_toml(old_version: str | None, new_version: str) -> None:
             content,
         )
 
-    PYPROJECT_PATH.write_text(content)
+    if content != original_content:
+        PYPROJECT_PATH.write_text(content)
+        return True
+
+    return False
 
 
 def regenerate_models() -> bool:
@@ -247,8 +255,10 @@ def main() -> int:
 
     # Step 5: Update pyproject.toml
     print('\nUpdating pyproject.toml...')
-    update_pyproject_toml(current_version, latest_version)
-    print('Updated [tool.datamodel-codegen] input')
+    if update_pyproject_toml(current_version, latest_version):
+        print('Updated [tool.datamodel-codegen] input')
+    else:
+        print('No changes needed in pyproject.toml')
 
     # Step 6: Regenerate models
     print('\nRegenerating Pydantic models...')
