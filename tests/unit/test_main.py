@@ -113,3 +113,35 @@ class TestMainModule:
                 # But main() should NOT have been called during import
                 # (since __name__ was not '__main__')
                 mock_mcp.run.assert_not_called()
+
+    def test_main_sse_transport_with_different_config(self):
+        """Test main() with SSE transport using different host/port."""
+        with (
+            patch('lampyrid.__main__.settings') as mock_settings,
+            patch('lampyrid.__main__.mcp') as mock_mcp,
+        ):
+            # Mock settings for SSE with different values
+            mock_settings.mcp_transport = 'sse'
+            mock_settings.mcp_host = 'example.com'
+            mock_settings.mcp_port = 9000
+
+            # Call main
+            main()
+
+            # Verify mcp.run was called with correct SSE parameters
+            mock_mcp.run.assert_called_once_with(transport='sse', host='example.com', port=9000)
+
+    def test_main_edge_case_empty_transport_string(self):
+        """Test main() with empty transport string defaults to stdio."""
+        with (
+            patch('lampyrid.__main__.settings') as mock_settings,
+            patch('lampyrid.__main__.mcp') as mock_mcp,
+        ):
+            # Mock settings with empty transport
+            mock_settings.mcp_transport = ''
+
+            # Call main
+            main()
+
+            # Verify mcp.run was called with default stdio
+            mock_mcp.run.assert_called_once_with(transport='stdio')

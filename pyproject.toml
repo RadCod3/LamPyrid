@@ -5,7 +5,7 @@ dependencies = [
   "pydantic>=2.11.7",
   "pydantic-settings>=2.10.1",
 ]
-description = "Add your description here"
+description = "A simple MCP server for Firefly III"
 name = "lampyrid"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -13,6 +13,8 @@ version = "0.3.0"
 
 [project.scripts]
 lampyrid = "lampyrid.__main__:main"
+update-schema = "lampyrid.scripts.update_schema:main"
+lint = "lampyrid.scripts.format:main"
 
 [dependency-groups]
 dev = [
@@ -65,6 +67,6 @@ markers = [
 ]
 
 [tool.datamodel-codegen]
-input = "firefly-iii-6.4.14-v1.yaml"
+input = "firefly-iii-6.4.16-v1.yaml"
 output = "src/lampyrid/models/firefly_models.py"
 output-model-type = "pydantic_v2.BaseModel"

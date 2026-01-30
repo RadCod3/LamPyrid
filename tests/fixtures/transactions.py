@@ -23,11 +23,24 @@ def make_create_withdrawal_request(
     amount: float,
     description: str,
     source_id: str,
-    destination_name: str,
+    *,
+    destination_name: str | None = None,
+    destination_id: str | None = None,
     budget_id: str | None = None,
     date: datetime | None = None,
 ) -> CreateWithdrawalRequest:
-    """Create a CreateWithdrawalRequest for testing."""
+    """Create a CreateWithdrawalRequest for testing.
+
+    Args:
+        amount: Amount to withdraw
+        description: Transaction description
+        source_id: ID of the source asset account
+        destination_name: Name of expense account (optional, exclusive with destination_id)
+        destination_id: ID of expense account (optional, exclusive with destination_name)
+        budget_id: Optional budget ID
+        date: Transaction date (defaults to now)
+
+    """
     if date is None:
         date = datetime.now(timezone.utc)
 
@@ -36,6 +49,7 @@ def make_create_withdrawal_request(
         description=description,
         date=date,
         source_id=source_id,
+        destination_id=destination_id,
         destination_name=destination_name,
         budget_id=budget_id,
     )
@@ -45,10 +59,22 @@ def make_create_deposit_request(
     amount: float,
     description: str,
     destination_id: str,
-    source_name: str,
+    *,
+    source_name: str | None = None,
+    source_id: str | None = None,
     date: datetime | None = None,
 ) -> CreateDepositRequest:
-    """Create a CreateDepositRequest for testing."""
+    """Create a CreateDepositRequest for testing.
+
+    Args:
+        amount: Amount to deposit
+        description: Transaction description
+        destination_id: ID of the destination asset account
+        source_name: Name of the revenue account (optional, mutually exclusive with source_id)
+        source_id: ID of the revenue account (optional, mutually exclusive with source_name)
+        date: Transaction date (defaults to now)
+
+    """
     if date is None:
         date = datetime.now(timezone.utc)
 
@@ -56,6 +82,7 @@ def make_create_deposit_request(
         amount=amount,
         description=description,
         date=date,
+        source_id=source_id,
         source_name=source_name,
         destination_id=destination_id,
     )

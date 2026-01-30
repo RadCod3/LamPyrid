@@ -279,6 +279,25 @@ def test_expense_account() -> str:
 
 
 @pytest.fixture(scope='session')
+def test_expense_account_obj() -> Account:
+    """Get the test expense account object with ID.
+
+    Use this when you need the expense account ID (e.g., for destination_id
+    in create_withdrawal with ID instead of name).
+    """
+    if not _cached_test_accounts:
+        raise RuntimeError('Test accounts not initialized. Check if _setup_test_data ran.')
+
+    account = next(
+        (acct for acct in _cached_test_accounts if acct.name == 'Test Expense'),
+        None,
+    )
+    if account is None:
+        raise RuntimeError('Test Expense account not found in cached test accounts.')
+    return account
+
+
+@pytest.fixture(scope='session')
 def test_second_expense_account() -> str:
     """Get second expense account name for testing.
 
@@ -297,6 +316,30 @@ def test_revenue_account() -> str:
     """
     # Return a default name - Firefly III will create it automatically
     return 'Test Revenue'
+
+
+@pytest.fixture(scope='session')
+def test_revenue_account_obj() -> Account:
+    """Get the test revenue account object with ID.
+
+    Use this when you need the revenue account ID (e.g., for source_id
+    in create_deposit with ID instead of name).
+    """
+    if not _cached_test_accounts:
+        raise RuntimeError('Test accounts not initialized. Check if _setup_test_data ran.')
+
+    account = next(
+        (acct for acct in _cached_test_accounts if acct.name == 'Test Revenue'),
+        None,
+    )
+    if account is None:
+        account = next(
+            (acct for acct in _cached_test_accounts if 'test revenue' in acct.name.lower()),
+            None,
+        )
+    if account is None:
+        raise RuntimeError('Test Revenue account not found in cached test accounts.')
+    return account
 
 
 @pytest.fixture(scope='session')

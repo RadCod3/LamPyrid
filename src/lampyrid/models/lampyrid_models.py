@@ -3,7 +3,7 @@
 from datetime import date, datetime, timezone
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .firefly_models import (
     AccountRead,
@@ -171,6 +171,8 @@ class Transaction(BaseModel):
 class ListAccountRequest(BaseModel):
     """Request model for listing accounts."""
 
+    model_config = ConfigDict(extra='forbid')
+
     type: AccountTypeFilter = Field(
         ...,
         description=(
@@ -182,6 +184,8 @@ class ListAccountRequest(BaseModel):
 
 class SearchAccountRequest(BaseModel):
     """Request model for searching accounts."""
+
+    model_config = ConfigDict(extra='forbid')
 
     query: str = Field(
         ...,
@@ -199,6 +203,8 @@ class SearchAccountRequest(BaseModel):
 class GetAccountRequest(BaseModel):
     """Request model for getting a single account."""
 
+    model_config = ConfigDict(extra='forbid')
+
     id: str = Field(
         ..., description='Unique identifier of the account (from list_accounts or search_accounts)'
     )
@@ -206,6 +212,8 @@ class GetAccountRequest(BaseModel):
 
 class CreateWithdrawalRequest(BaseModel):
     """Request model for creating a withdrawal transaction."""
+
+    model_config = ConfigDict(extra='forbid')
 
     amount: float = Field(
         ..., description='Amount to withdraw as positive number (e.g., 25.50 for $25.50 expense)'
@@ -224,11 +232,20 @@ class CreateWithdrawalRequest(BaseModel):
             'Must be an asset account you own.'
         ),
     )
+    destination_id: Optional[str] = Field(
+        default=None,
+        description=(
+            'ID of the expense account receiving the money (from list_accounts type=expense). '
+            'Use destination_id OR destination_name, not both. '
+            'If neither provided, defaults to Cash.'
+        ),
+    )
     destination_name: Optional[str] = Field(
         default=None,
         description=(
             'Where the money went ("Groceries", "Gas Station", "ATM"). '
-            'Creates expense account if new. Leave blank for cash withdrawals.'
+            'Creates expense account if new. Use destination_id OR destination_name, not both. '
+            'If neither provided, defaults to Cash.'
         ),
     )
     budget_id: Optional[str] = Field(
@@ -239,9 +256,20 @@ class CreateWithdrawalRequest(BaseModel):
         description='Name of budget if ID is unknown. Will use ID if both provided.',
     )
 
+    @model_validator(mode='after')
+    def validate_destination_mutual_exclusivity(self):
+        """Ensure destination_id and destination_name are not both provided."""
+        if self.destination_id is not None and self.destination_name is not None:
+            raise ValueError(
+                'Cannot specify both destination_id and destination_name. Use one or the other.'
+            )
+        return self
+
 
 class CreateDepositRequest(BaseModel):
     """Request model for creating a deposit transaction."""
+
+    model_config = ConfigDict(extra='forbid')
 
     amount: float = Field(
         ..., description='Amount received as positive number (e.g., 2500.00 for $2500 salary)'
@@ -253,11 +281,20 @@ class CreateDepositRequest(BaseModel):
         default_factory=utc_now,
         description='When the income was received (defaults to current time if not specified)',
     )
+    source_id: Optional[str] = Field(
+        default=None,
+        description=(
+            'ID of the revenue account the money comes from (from list_accounts type=revenue). '
+            'Use source_id OR source_name, not both. '
+            'If neither provided, defaults to Cash.'
+        ),
+    )
     source_name: Optional[str] = Field(
         default=None,
         description=(
             'Where the money came from ("Employer", "Client Name", "Gift"). '
-            'Creates revenue account if new.'
+            'Creates revenue account if new. Use source_id OR source_name, not both. '
+            'If neither provided, defaults to Cash.'
         ),
     )
     destination_id: str = Field(
@@ -268,9 +305,18 @@ class CreateDepositRequest(BaseModel):
         ),
     )
 
+    @model_validator(mode='after')
+    def validate_source_mutual_exclusivity(self):
+        """Ensure source_id and source_name are not both provided."""
+        if self.source_id is not None and self.source_name is not None:
+            raise ValueError('Cannot specify both source_id and source_name. Use one or the other.')
+        return self
+
 
 class CreateTransferRequest(BaseModel):
     """Request model for creating a transfer transaction."""
+
+    model_config = ConfigDict(extra='forbid')
 
     amount: float = Field(
         ..., description='Amount to move as positive number (e.g., 500.00 to move $500)'
@@ -295,6 +341,8 @@ class CreateTransferRequest(BaseModel):
 
 class GetTransactionsRequest(BaseModel):
     """Request model for retrieving transactions."""
+
+    model_config = ConfigDict(extra='forbid')
 
     account_id: Optional[str] = Field(
         None,
@@ -331,6 +379,8 @@ class GetTransactionsRequest(BaseModel):
 
 class SearchTransactionsRequest(BaseModel):
     """Request model for searching transactions."""
+
+    model_config = ConfigDict(extra='forbid')
 
     query: str | None = Field(
         None,
@@ -453,11 +503,15 @@ class SearchTransactionsRequest(BaseModel):
 class DeleteTransactionRequest(BaseModel):
     """Request model for deleting a transaction."""
 
+    model_config = ConfigDict(extra='forbid')
+
     id: str = Field(..., description='Unique identifier of the transaction to permanently remove')
 
 
 class GetTransactionRequest(BaseModel):
     """Request model for getting a single transaction."""
+
+    model_config = ConfigDict(extra='forbid')
 
     id: str = Field(..., description='Unique identifier of the transaction to get details for')
 
@@ -536,6 +590,8 @@ class TransactionListResponse(BaseModel):
 class ListBudgetsRequest(BaseModel):
     """Request for listing budgets."""
 
+    model_config = ConfigDict(extra='forbid')
+
     active: Optional[bool] = Field(
         None,
         description='Show only active budgets (true), inactive (false), or all budgets '
@@ -545,6 +601,8 @@ class ListBudgetsRequest(BaseModel):
 
 class GetBudgetRequest(BaseModel):
     """Request for getting a single budget by ID."""
+
+    model_config = ConfigDict(extra='forbid')
 
     id: str = Field(..., description='Unique identifier of the budget to get details for')
 
@@ -571,6 +629,8 @@ class BudgetSpending(BaseModel):
 
 class GetBudgetSpendingRequest(BaseModel):
     """Request for getting budget spending data."""
+
+    model_config = ConfigDict(extra='forbid')
 
     budget_id: str = Field(
         ..., description='Unique identifier of the budget to analyze spending for'
@@ -601,6 +661,8 @@ class BudgetSummary(BaseModel):
 class GetBudgetSummaryRequest(BaseModel):
     """Request for getting budget summary."""
 
+    model_config = ConfigDict(extra='forbid')
+
     start_date: Optional[date] = Field(
         None, description='Start date for summary period (YYYY-MM-DD), inclusive'
     )
@@ -621,6 +683,8 @@ class AvailableBudget(BaseModel):
 class GetAvailableBudgetRequest(BaseModel):
     """Request for getting available budget."""
 
+    model_config = ConfigDict(extra='forbid')
+
     start_date: Optional[date] = Field(
         None,
         description='Start date for budget analysis (YYYY-MM-DD). Defaults to '
@@ -636,6 +700,8 @@ class GetAvailableBudgetRequest(BaseModel):
 
 class CreateBulkTransactionsRequest(BaseModel):
     """Create multiple transactions in one operation."""
+
+    model_config = ConfigDict(extra='forbid')
 
     transactions: List[Transaction] = Field(
         ...,
@@ -672,6 +738,8 @@ class CreateBulkTransactionsRequest(BaseModel):
 class UpdateTransactionRequest(BaseModel):
     """Update an existing transaction."""
 
+    model_config = ConfigDict(extra='forbid')
+
     transaction_id: str = Field(..., description='Unique identifier of the transaction to modify')
     amount: Optional[float] = Field(None, description='New transaction amount (positive number)')
     description: Optional[str] = Field(
@@ -696,6 +764,8 @@ class UpdateTransactionRequest(BaseModel):
 
 class BulkUpdateTransactionsRequest(BaseModel):
     """Update multiple transactions in one operation."""
+
+    model_config = ConfigDict(extra='forbid')
 
     updates: List[UpdateTransactionRequest] = Field(
         ...,
