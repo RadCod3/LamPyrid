@@ -9,7 +9,7 @@ description = "A simple MCP server for Firefly III"
 name = "lampyrid"
 readme = "README.md"
 requires-python = ">=3.14"
-version = "0.3.0"
+version = "0.4.0"
 
 [project.scripts]
 lampyrid = "lampyrid.__main__:main"
