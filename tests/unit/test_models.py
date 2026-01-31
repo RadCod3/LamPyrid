@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from lampyrid.models.firefly_models import TransactionTypeProperty
 from lampyrid.models.lampyrid_models import (
+    CreateBudgetRequest,
     CreateBulkTransactionsRequest,
     CreateDepositRequest,
     CreateWithdrawalRequest,
@@ -14,6 +15,7 @@ from lampyrid.models.lampyrid_models import (
 )
 
 
+@pytest.mark.unit
 class TestLampyridModels:
     """Test cases for lampyrid models."""
 
@@ -51,6 +53,7 @@ class TestLampyridModels:
         assert request.query == 'valid query'
 
 
+@pytest.mark.unit
 class TestCreateWithdrawalRequest:
     """Test cases for CreateWithdrawalRequest model."""
 
@@ -90,6 +93,7 @@ class TestCreateWithdrawalRequest:
         assert request.destination_name is None
 
 
+@pytest.mark.unit
 class TestCreateDepositRequest:
     """Test cases for CreateDepositRequest model."""
 
@@ -144,6 +148,7 @@ class TestCreateDepositRequest:
         assert 'Cannot specify both source_id and source_name' in str(errors[0]['msg'])
 
 
+@pytest.mark.unit
 class TestCreateBulkTransactionsRequest:
     """Test cases for CreateBulkTransactionsRequest model."""
 
@@ -162,3 +167,53 @@ class TestCreateBulkTransactionsRequest:
 
         assert len(request.transactions) == 1
         assert request.atomic is True  # Default value
+
+
+@pytest.mark.unit
+class TestCreateBudgetRequest:
+    """Test cases for CreateBudgetRequest model."""
+
+    def test_create_budget_request_valid_no_auto(self):
+        """Test valid budget request without auto-budget."""
+        request = CreateBudgetRequest(name='Groceries')
+        assert request.name == 'Groceries'
+        assert request.auto_budget_type is None
+
+    def test_create_budget_request_valid_with_auto(self):
+        """Test valid budget request with auto-budget."""
+        request = CreateBudgetRequest(
+            name='Groceries',
+            auto_budget_type='reset',
+            auto_budget_amount=100.0,
+            auto_budget_period='monthly',
+        )
+        assert request.auto_budget_type == 'reset'
+        assert request.auto_budget_amount == 100.0
+        assert request.auto_budget_period == 'monthly'
+
+    def test_create_budget_request_missing_amount(self):
+        """Test budget request with type but missing amount."""
+        with pytest.raises(ValidationError) as exc_info:
+            CreateBudgetRequest(
+                name='Groceries',
+                auto_budget_type='reset',
+                auto_budget_period='monthly',
+            )
+        assert 'auto_budget_amount is required when auto_budget_type is set' in str(exc_info.value)
+
+    def test_create_budget_request_missing_period(self):
+        """Test budget request with type but missing period."""
+        with pytest.raises(ValidationError) as exc_info:
+            CreateBudgetRequest(
+                name='Groceries',
+                auto_budget_type='rollover',
+                auto_budget_amount=100.0,
+            )
+        assert 'auto_budget_period is required when auto_budget_type is set' in str(exc_info.value)
+
+    def test_create_budget_request_none_type(self):
+        """Test budget request with auto_budget_type='none'."""
+        request = CreateBudgetRequest(name='Groceries', auto_budget_type='none')
+        assert request.auto_budget_type == 'none'
+        assert request.auto_budget_amount is None
+        assert request.auto_budget_period is None

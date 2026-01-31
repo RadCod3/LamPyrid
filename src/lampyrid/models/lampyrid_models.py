@@ -739,6 +739,16 @@ class CreateBudgetRequest(BaseModel):
         description='Optional notes or description about this budget',
     )
 
+    @model_validator(mode='after')
+    def validate_auto_budget(self) -> 'CreateBudgetRequest':
+        """Ensure auto-budget fields are provided when auto_budget_type is set."""
+        if self.auto_budget_type and self.auto_budget_type != 'none':
+            if self.auto_budget_amount is None:
+                raise ValueError('auto_budget_amount is required when auto_budget_type is set')
+            if self.auto_budget_period is None:
+                raise ValueError('auto_budget_period is required when auto_budget_type is set')
+        return self
+
 
 class CreateBulkTransactionsRequest(BaseModel):
     """Create multiple transactions in one operation."""
