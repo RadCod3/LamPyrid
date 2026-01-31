@@ -9,6 +9,7 @@ from fastmcp import FastMCP
 from ..clients.firefly import FireflyClient
 from .accounts import create_accounts_server
 from .budgets import create_budgets_server
+from .insights import create_insights_server
 from .transactions import create_transactions_server
 
 
@@ -24,8 +25,10 @@ async def compose_all_servers(mcp: FastMCP, client: FireflyClient) -> None:
     accounts_server = create_accounts_server(client)
     transactions_server = create_transactions_server(client)
     budgets_server = create_budgets_server(client)
+    insights_server = create_insights_server(client)
 
     # Import all servers into the main server without prefixes (static composition)
     await mcp.import_server(accounts_server)
     await mcp.import_server(transactions_server)
     await mcp.import_server(budgets_server)
+    await mcp.import_server(insights_server)

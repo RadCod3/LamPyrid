@@ -17,6 +17,9 @@ from ..models.firefly_models import (
     BudgetLimitArray,
     BudgetSingle,
     BudgetStore,
+    InsightGroup,
+    InsightTotal,
+    InsightTransfer,
     TransactionArray,
     TransactionSingle,
     TransactionStore,
@@ -302,3 +305,161 @@ class FireflyClient:
         self._handle_api_error(r)
         r.raise_for_status()
         return AvailableBudgetArray.model_validate(r.json())
+
+    # =========================================================================
+    # Insight API Methods
+    # =========================================================================
+
+    def _build_insight_params(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> Dict[str, Any]:
+        """Build common parameters for insight API calls."""
+        params: Dict[str, Any] = {
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': end_date.strftime('%Y-%m-%d'),
+        }
+        if account_ids:
+            params['accounts[]'] = account_ids
+        return params
+
+    # Expense Insight Methods
+
+    async def get_expense_total(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightTotal:
+        """Get total expenses for a period."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/expense/total', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightTotal.model_validate(r.json())
+
+    async def get_expense_by_expense_account(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightGroup:
+        """Get expenses grouped by expense account (vendor/payee)."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/expense/expense', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightGroup.model_validate(r.json())
+
+    async def get_expense_by_asset_account(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightGroup:
+        """Get expenses grouped by asset account (source)."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/expense/asset', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightGroup.model_validate(r.json())
+
+    async def get_expense_by_budget(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+        budget_ids: Optional[list[int]] = None,
+    ) -> InsightGroup:
+        """Get expenses grouped by budget."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        if budget_ids:
+            params['budgets[]'] = budget_ids
+        r = await self._client.get('/api/v1/insight/expense/budget', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightGroup.model_validate(r.json())
+
+    async def get_expense_no_budget(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightTotal:
+        """Get expenses without any budget assigned."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/expense/no-budget', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightTotal.model_validate(r.json())
+
+    # Income Insight Methods
+
+    async def get_income_total(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightTotal:
+        """Get total income for a period."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/income/total', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightTotal.model_validate(r.json())
+
+    async def get_income_by_revenue_account(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightGroup:
+        """Get income grouped by revenue account (income source)."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/income/revenue', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightGroup.model_validate(r.json())
+
+    async def get_income_by_asset_account(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightGroup:
+        """Get income grouped by asset account (receiving account)."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/income/asset', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightGroup.model_validate(r.json())
+
+    # Transfer Insight Methods
+
+    async def get_transfer_total(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightTotal:
+        """Get total transfers for a period."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/transfer/total', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightTotal.model_validate(r.json())
+
+    async def get_transfer_by_asset_account(
+        self,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[int]] = None,
+    ) -> InsightTransfer:
+        """Get transfers grouped by asset account with in/out breakdown."""
+        params = self._build_insight_params(start_date, end_date, account_ids)
+        r = await self._client.get('/api/v1/insight/transfer/asset', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return InsightTransfer.model_validate(r.json())

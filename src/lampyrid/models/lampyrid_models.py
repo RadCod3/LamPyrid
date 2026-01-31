@@ -773,3 +773,227 @@ class BulkUpdateTransactionsRequest(BaseModel):
         min_length=1,
         max_length=50,
     )
+
+
+# =============================================================================
+# Insight Models - Request and Response models for financial insights
+# =============================================================================
+
+
+class GetExpenseInsightRequest(BaseModel):
+    """Request for expense insight analysis."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    start_date: date = Field(..., description='Start date for the analysis period (YYYY-MM-DD)')
+    end_date: date = Field(..., description='End date for the analysis period (YYYY-MM-DD)')
+    group_by: Optional[Literal['expense_account', 'asset_account', 'budget']] = Field(
+        None,
+        description=(
+            'How to group expenses: expense_account (by vendor/payee), '
+            'asset_account (by source account), budget (by budget category). '
+            'If not specified, returns total only.'
+        ),
+    )
+    account_ids: Optional[List[int]] = Field(
+        None,
+        description=(
+            'Filter to specific account IDs. For expense_account grouping, these are expense '
+            'accounts. For asset_account grouping, these are asset accounts.'
+        ),
+    )
+    budget_ids: Optional[List[int]] = Field(
+        None,
+        description='Filter to specific budget IDs. Only used when group_by is "budget".',
+    )
+    include_unbudgeted: bool = Field(
+        True,
+        description=(
+            'When group_by is "budget", include expenses not assigned to any budget '
+            'as a separate entry.'
+        ),
+    )
+
+
+class GetIncomeInsightRequest(BaseModel):
+    """Request for income insight analysis."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    start_date: date = Field(..., description='Start date for the analysis period (YYYY-MM-DD)')
+    end_date: date = Field(..., description='End date for the analysis period (YYYY-MM-DD)')
+    group_by: Optional[Literal['revenue_account', 'asset_account']] = Field(
+        None,
+        description=(
+            'How to group income: revenue_account (by income source), '
+            'asset_account (by receiving account). '
+            'If not specified, returns total only.'
+        ),
+    )
+    account_ids: Optional[List[int]] = Field(
+        None,
+        description='Filter to specific account IDs.',
+    )
+
+
+class GetTransferInsightRequest(BaseModel):
+    """Request for transfer insight analysis."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    start_date: date = Field(..., description='Start date for the analysis period (YYYY-MM-DD)')
+    end_date: date = Field(..., description='End date for the analysis period (YYYY-MM-DD)')
+    group_by: Optional[Literal['asset_account']] = Field(
+        None,
+        description=(
+            'Group transfers by asset_account to see in/out breakdown per account. '
+            'If not specified, returns total only.'
+        ),
+    )
+    account_ids: Optional[List[int]] = Field(
+        None,
+        description='Filter to specific asset account IDs.',
+    )
+
+
+class GetFinancialSummaryRequest(BaseModel):
+    """Request for complete financial summary."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    start_date: date = Field(..., description='Start date for the analysis period (YYYY-MM-DD)')
+    end_date: date = Field(..., description='End date for the analysis period (YYYY-MM-DD)')
+    account_ids: Optional[List[int]] = Field(
+        None,
+        description='Filter to specific account IDs for all calculations.',
+    )
+
+
+class InsightEntry(BaseModel):
+    """Single insight data point representing grouped financial data."""
+
+    id: Optional[str] = Field(
+        None,
+        description='Reference ID of the grouped entity (account ID, budget ID, etc.)',
+    )
+    name: Optional[str] = Field(
+        None,
+        description='Display name of the grouped entity',
+    )
+    amount: float = Field(
+        ...,
+        description='Total amount for this entry (negative for expenses, positive for income)',
+    )
+    currency_code: str = Field(
+        ...,
+        description='Currency code (ISO 4217) for the amount',
+    )
+
+
+class TransferInsightEntry(InsightEntry):
+    """Transfer-specific insight with in/out breakdown per account."""
+
+    amount_in: float = Field(
+        ...,
+        description='Total amount transferred INTO this account',
+    )
+    amount_out: float = Field(
+        ...,
+        description='Total amount transferred OUT OF this account',
+    )
+
+
+class ExpenseInsightResult(BaseModel):
+    """Result of expense insight analysis."""
+
+    entries: List[InsightEntry] = Field(
+        ...,
+        description='List of expense entries, grouped as requested',
+    )
+    total_expenses: float = Field(
+        ...,
+        description='Total expenses for the period (as positive number)',
+    )
+    currency_code: str = Field(
+        ...,
+        description='Primary currency code for the totals',
+    )
+    start_date: date = Field(..., description='Start of the analysis period')
+    end_date: date = Field(..., description='End of the analysis period')
+    group_by: Optional[str] = Field(
+        None,
+        description='The grouping method used, if any',
+    )
+
+
+class IncomeInsightResult(BaseModel):
+    """Result of income insight analysis."""
+
+    entries: List[InsightEntry] = Field(
+        ...,
+        description='List of income entries, grouped as requested',
+    )
+    total_income: float = Field(
+        ...,
+        description='Total income for the period (as positive number)',
+    )
+    currency_code: str = Field(
+        ...,
+        description='Primary currency code for the totals',
+    )
+    start_date: date = Field(..., description='Start of the analysis period')
+    end_date: date = Field(..., description='End of the analysis period')
+    group_by: Optional[str] = Field(
+        None,
+        description='The grouping method used, if any',
+    )
+
+
+class TransferInsightResult(BaseModel):
+    """Result of transfer insight analysis."""
+
+    entries: list[TransferInsightEntry] | list[InsightEntry] = Field(
+        ...,
+        description='List of transfer entries. When grouped by account, includes in/out breakdown.',
+    )
+    total_transfers: float = Field(
+        ...,
+        description='Total transfer amount for the period',
+    )
+    currency_code: str = Field(
+        ...,
+        description='Primary currency code for the totals',
+    )
+    start_date: date = Field(..., description='Start of the analysis period')
+    end_date: date = Field(..., description='End of the analysis period')
+    group_by: Optional[str] = Field(
+        None,
+        description='The grouping method used, if any',
+    )
+
+
+class FinancialSummary(BaseModel):
+    """Complete financial summary with expense, income, and transfer totals."""
+
+    total_expenses: float = Field(
+        ...,
+        description='Total expenses for the period (as positive number)',
+    )
+    total_income: float = Field(
+        ...,
+        description='Total income for the period (as positive number)',
+    )
+    total_transfers: float = Field(
+        ...,
+        description='Total transfer amount for the period',
+    )
+    net_position: float = Field(
+        ...,
+        description='Net financial position (income - expenses). Positive means net gain.',
+    )
+    currency_code: str = Field(
+        ...,
+        description='Primary currency code for all amounts',
+    )
+    start_date: date = Field(..., description='Start of the analysis period')
+    end_date: date = Field(..., description='End of the analysis period')
