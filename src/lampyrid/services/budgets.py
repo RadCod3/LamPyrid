@@ -9,6 +9,10 @@ from typing import List
 
 from ..clients.firefly import FireflyClient
 from ..models.firefly_models import (
+    AutoBudgetPeriod,
+    AutoBudgetPeriodEnum,
+    AutoBudgetType,
+    AutoBudgetTypeEnum,
     BudgetStore,
 )
 from ..models.lampyrid_models import (
@@ -16,6 +20,7 @@ from ..models.lampyrid_models import (
     Budget,
     BudgetSpending,
     BudgetSummary,
+    CreateBudgetRequest,
     GetAvailableBudgetRequest,
     GetBudgetRequest,
     GetBudgetSpendingRequest,
@@ -194,15 +199,36 @@ class BudgetService:
                 end_date=req.end_date or today,
             )
 
-    async def create_budget(self, budget_store: BudgetStore) -> Budget:
+    async def create_budget(self, req: CreateBudgetRequest) -> Budget:
         """Create a new budget.
 
         Args:
-                budget_store: Budget data for creation
+                req: Request containing budget creation parameters
 
         Returns:
                 Created budget details
 
         """
+        budget_store = BudgetStore(
+            name=req.name,
+            active=req.active,
+            notes=req.notes,
+        )
+
+        # Handle auto-budget settings if provided
+        if req.auto_budget_type is not None:
+            budget_store.auto_budget_type = AutoBudgetType(AutoBudgetTypeEnum(req.auto_budget_type))
+
+        if req.auto_budget_amount is not None:
+            budget_store.auto_budget_amount = str(req.auto_budget_amount)
+
+        if req.auto_budget_period is not None:
+            budget_store.auto_budget_period = AutoBudgetPeriod(
+                AutoBudgetPeriodEnum(req.auto_budget_period)
+            )
+
+        if req.auto_budget_currency_code is not None:
+            budget_store.auto_budget_currency_code = req.auto_budget_currency_code
+
         budget_single = await self._client.create_budget(budget_store)
         return Budget.from_budget_read(budget_single.data)

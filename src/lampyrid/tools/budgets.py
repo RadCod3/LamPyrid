@@ -14,6 +14,7 @@ from ..models.lampyrid_models import (
     Budget,
     BudgetSpending,
     BudgetSummary,
+    CreateBudgetRequest,
     GetAvailableBudgetRequest,
     GetBudgetRequest,
     GetBudgetSpendingRequest,
@@ -77,5 +78,14 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         Shows money set aside but not assigned to specific budgets.
         """
         return await budget_service.get_available_budget(req)
+
+    @budgets_mcp.tool(tags={'budgets', 'create'})
+    async def create_budget(req: CreateBudgetRequest) -> Budget:
+        """Create a new budget for expense tracking and financial planning.
+
+        Budgets help organize spending by category. Use auto-budget options for
+        automatic allocation each period (daily/weekly/monthly/etc).
+        """
+        return await budget_service.create_budget(req)
 
     return budgets_mcp

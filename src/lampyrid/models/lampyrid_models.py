@@ -698,6 +698,48 @@ class GetAvailableBudgetRequest(BaseModel):
     )
 
 
+class CreateBudgetRequest(BaseModel):
+    """Request model for creating a new budget."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    name: str = Field(
+        ...,
+        description='Name of the budget (e.g., "Groceries", "Entertainment")',
+        min_length=1,
+    )
+    auto_budget_type: Optional[Literal['none', 'reset', 'rollover']] = Field(
+        None,
+        description=(
+            'Auto-budget behavior: none (manual), reset (fixed amount each period), '
+            'rollover (unused balance carries forward)'
+        ),
+    )
+    auto_budget_amount: Optional[float] = Field(
+        None,
+        description='Amount to auto-allocate each period (required if auto_budget_type is set)',
+        gt=0,
+    )
+    auto_budget_period: Optional[
+        Literal['daily', 'weekly', 'monthly', 'quarterly', 'half-year', 'yearly']
+    ] = Field(
+        None,
+        description='How often to reset/add to the budget (required if auto_budget_type is set)',
+    )
+    auto_budget_currency_code: Optional[str] = Field(
+        None,
+        description='Currency code for auto-budget amount (ISO 4217, e.g., "USD", "EUR")',
+    )
+    active: bool = Field(
+        True,
+        description='Whether the budget is active for new transactions',
+    )
+    notes: Optional[str] = Field(
+        None,
+        description='Optional notes or description about this budget',
+    )
+
+
 class CreateBulkTransactionsRequest(BaseModel):
     """Create multiple transactions in one operation."""
 
