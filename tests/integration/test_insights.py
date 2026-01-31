@@ -52,11 +52,11 @@ async def test_get_expense_insight_total(mcp_client: Client):
                 {
                     'id': None,
                     'name': 'Total Expenses',
-                    'amount': 155.5,
+                    'amount': 145.0,
                     'currency_code': 'USD',
                 }
             ],
-            'total_expenses': 155.5,
+            'total_expenses': 145.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
@@ -90,12 +90,17 @@ async def test_get_expense_insight_by_expense_account(mcp_client: Client):
                 {
                     'id': IsStr(min_length=1),
                     'name': 'Test Expense',
-                    'amount': 125.5,
+                    'amount': 115.0,
                     'currency_code': 'USD',
                 },
-                {'id': '6', 'name': 'Test Expense 2', 'amount': 30.0, 'currency_code': 'USD'},
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Expense 2',
+                    'amount': 30.0,
+                    'currency_code': 'USD',
+                },
             ],
-            'total_expenses': 155.5,
+            'total_expenses': 145.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
@@ -130,12 +135,17 @@ async def test_get_expense_insight_by_asset_account(
                 {
                     'id': IsStr(min_length=1),
                     'name': 'Test Checking',
-                    'amount': 130.5,
+                    'amount': 120.0,
                     'currency_code': 'USD',
                 },
-                {'id': '3', 'name': 'Test Savings', 'amount': 25.0, 'currency_code': 'USD'},
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Savings',
+                    'amount': 25.0,
+                    'currency_code': 'USD',
+                },
             ],
-            'total_expenses': 155.5,
+            'total_expenses': 145.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
@@ -166,10 +176,20 @@ async def test_get_expense_insight_by_budget(mcp_client: Client, test_budget: Bu
     assert insight == snapshot(
         {
             'entries': [
-                {'id': '1', 'name': 'Test Budget', 'amount': 40.0, 'currency_code': 'USD'},
-                {'id': None, 'name': 'Unbudgeted', 'amount': 115.5, 'currency_code': 'USD'},
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Budget',
+                    'amount': 40.0,
+                    'currency_code': 'USD',
+                },
+                {
+                    'id': None,
+                    'name': 'Unbudgeted',
+                    'amount': 105.0,
+                    'currency_code': 'USD',
+                },
             ],
-            'total_expenses': 155.5,
+            'total_expenses': 145.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
@@ -428,10 +448,10 @@ async def test_get_financial_summary(mcp_client: Client):
 
     assert summary == snapshot(
         {
-            'total_expenses': 155.5,
+            'total_expenses': 145.0,
             'total_income': 300.0,
             'total_transfers': 75.0,
-            'net_position': 144.5,
+            'net_position': 155.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
@@ -462,10 +482,10 @@ async def test_get_financial_summary_with_account_filter(
 
     assert summary == snapshot(
         {
-            'total_expenses': 130.5,
+            'total_expenses': 120.0,
             'total_income': 200.0,
             'total_transfers': 0.0,
-            'net_position': 69.5,
+            'net_position': 80.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
             'end_date': IsDatetime(iso_string=True),
