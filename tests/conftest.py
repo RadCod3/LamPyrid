@@ -4,10 +4,11 @@ This module provides pytest fixtures for:
 - FireflyClient instance configured for testing
 - Test accounts (asset, expense, revenue)
 - Test budgets
+- Seed transactions for insight tests
 - Transaction cleanup utilities
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import List
 
@@ -26,6 +27,9 @@ from lampyrid.models.firefly_models import (
 from lampyrid.models.lampyrid_models import (
     Account,
     Budget,
+    CreateDepositRequest,
+    CreateTransferRequest,
+    CreateWithdrawalRequest,
     ListAccountRequest,
     ListBudgetsRequest,
 )
@@ -44,7 +48,7 @@ else:
 
 from lampyrid.clients.firefly import FireflyClient  # noqa: E402
 from lampyrid.config import settings  # noqa: E402
-from lampyrid.services import AccountService, BudgetService  # noqa: E402
+from lampyrid.services import AccountService, BudgetService, TransactionService  # noqa: E402
 from lampyrid.tools import compose_all_servers  # noqa: E402
 
 # Global cache for test data created programmatically
@@ -52,6 +56,7 @@ _cached_test_accounts: List[Account] | None = None
 _cached_test_budgets: List[Budget] | None = None
 _created_account_ids: List[str] = []  # Track created accounts for cleanup
 _created_budget_ids: List[str] = []  # Track created budgets for cleanup
+_seed_transaction_ids: List[str] = []  # Track seed transactions for cleanup
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -135,7 +140,7 @@ async def _setup_test_data():
                 expense_store = AccountStore(
                     name='Test Expense',
                     type=ShortAccountTypeProperty.expense,
-                    currency_code='EUR',
+                    currency_code='USD',
                 )
                 expense = await account_service.create_account(expense_store)
                 _created_account_ids.append(expense.id)
@@ -146,7 +151,7 @@ async def _setup_test_data():
                 expense2_store = AccountStore(
                     name='Test Expense 2',
                     type=ShortAccountTypeProperty.expense,
-                    currency_code='EUR',
+                    currency_code='USD',
                 )
                 expense2 = await account_service.create_account(expense2_store)
                 _created_account_ids.append(expense2.id)
@@ -168,7 +173,7 @@ async def _setup_test_data():
                 revenue_store = AccountStore(
                     name='Test Revenue',
                     type=ShortAccountTypeProperty.revenue,
-                    currency_code='EUR',
+                    currency_code='USD',
                 )
                 revenue = await account_service.create_account(revenue_store)
                 _created_account_ids.append(revenue.id)
@@ -193,6 +198,115 @@ async def _setup_test_data():
                 _created_budget_ids.append(test_budget.id)
 
             _cached_test_budgets.append(test_budget)
+
+        # Create seed transactions for insight tests
+        # These provide meaningful data for expense, income, and transfer analysis
+        if not _seed_transaction_ids:
+            transaction_service = TransactionService(client)
+
+            # Use first day of current month for consistent date
+            today = date.today()
+            seed_date = datetime(today.year, today.month, 1, 12, 0, 0, tzinfo=timezone.utc)
+
+            # Get account references
+            checking = _cached_test_accounts[0]  # Test Checking
+            savings = _cached_test_accounts[1]  # Test Savings
+            expense_account = _cached_test_accounts[2]  # Test Expense
+            expense_account2 = _cached_test_accounts[3]  # Test Expense 2
+            revenue_account = _cached_test_accounts[4]  # Test Revenue
+            budget = _cached_test_budgets[0]  # Test Budget
+
+            # Withdrawal 1: $50 from Checking to Test Expense (unbudgeted)
+            txn1 = await transaction_service.create_withdrawal(
+                CreateWithdrawalRequest(
+                    amount=50.0,
+                    description='Seed: Unbudgeted expense 1',
+                    source_id=checking.id,
+                    destination_id=expense_account.id,
+                    date=seed_date,
+                )
+            )
+            assert txn1.id is not None
+            _seed_transaction_ids.append(txn1.id)
+
+            # Withdrawal 2: $30 from Checking to Test Expense 2 (unbudgeted)
+            txn2 = await transaction_service.create_withdrawal(
+                CreateWithdrawalRequest(
+                    amount=30.0,
+                    description='Seed: Unbudgeted expense 2',
+                    source_id=checking.id,
+                    destination_id=expense_account2.id,
+                    date=seed_date,
+                )
+            )
+            assert txn2.id is not None
+            _seed_transaction_ids.append(txn2.id)
+
+            # Withdrawal 3: $25 from Savings to Test Expense (unbudgeted)
+            txn3 = await transaction_service.create_withdrawal(
+                CreateWithdrawalRequest(
+                    amount=25.0,
+                    description='Seed: Unbudgeted expense from savings',
+                    source_id=savings.id,
+                    destination_id=expense_account.id,
+                    date=seed_date,
+                )
+            )
+            assert txn3.id is not None
+            _seed_transaction_ids.append(txn3.id)
+
+            # Withdrawal 4: $40 from Checking to Test Expense (budgeted)
+            txn4 = await transaction_service.create_withdrawal(
+                CreateWithdrawalRequest(
+                    amount=40.0,
+                    description='Seed: Budgeted expense',
+                    source_id=checking.id,
+                    destination_id=expense_account.id,
+                    budget_id=budget.id,
+                    date=seed_date,
+                )
+            )
+            assert txn4.id is not None
+            _seed_transaction_ids.append(txn4.id)
+
+            # Deposit 1: $200 from Test Revenue to Checking
+            txn5 = await transaction_service.create_deposit(
+                CreateDepositRequest(
+                    amount=200.0,
+                    description='Seed: Income to checking',
+                    source_id=revenue_account.id,
+                    destination_id=checking.id,
+                    date=seed_date,
+                )
+            )
+            assert txn5.id is not None
+            _seed_transaction_ids.append(txn5.id)
+
+            # Deposit 2: $100 from Test Revenue to Savings
+            txn6 = await transaction_service.create_deposit(
+                CreateDepositRequest(
+                    amount=100.0,
+                    description='Seed: Income to savings',
+                    source_id=revenue_account.id,
+                    destination_id=savings.id,
+                    date=seed_date,
+                )
+            )
+            assert txn6.id is not None
+            _seed_transaction_ids.append(txn6.id)
+
+            # Transfer: $75 from Checking to Savings
+            txn7 = await transaction_service.create_transfer(
+                CreateTransferRequest(
+                    amount=75.0,
+                    description='Seed: Transfer to savings',
+                    source_id=checking.id,
+                    destination_id=savings.id,
+                    date=seed_date,
+                )
+            )
+            assert txn7.id is not None
+            _seed_transaction_ids.append(txn7.id)
 
     finally:
         await client.aclose()
@@ -378,3 +492,32 @@ async def transaction_cleanup(firefly_client: FireflyClient):
             print(f'Cleaned up transaction: {transaction_id}')
         except Exception as e:
             print(f'Failed to cleanup transaction {transaction_id}: {e}')
+
+
+@pytest.fixture(scope='session', autouse=True)
+async def _cleanup_seed_transactions():
+    """Cleanup seed transactions at session end.
+
+    This fixture runs after all tests complete and removes the seed
+    transactions created for insight tests.
+    """
+    # Yield control to let tests run
+    yield
+
+    # Cleanup after all tests complete
+    if not _seed_transaction_ids:
+        return
+
+    if not settings.firefly_base_url or not settings.firefly_token:
+        return
+
+    client = FireflyClient()
+    try:
+        for transaction_id in _seed_transaction_ids:
+            try:
+                await client.delete_transaction(transaction_id)
+                print(f'Cleaned up seed transaction: {transaction_id}')
+            except Exception as e:
+                print(f'Failed to cleanup seed transaction {transaction_id}: {e}')
+    finally:
+        await client.aclose()
