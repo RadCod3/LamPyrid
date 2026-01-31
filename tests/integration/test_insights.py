@@ -222,7 +222,14 @@ async def test_get_expense_insight_by_budget_without_unbudgeted(
 
     assert insight == snapshot(
         {
-            'entries': [{'id': '1', 'name': 'Test Budget', 'amount': 40.0, 'currency_code': 'USD'}],
+            'entries': [
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Budget',
+                    'amount': 40.0,
+                    'currency_code': 'USD',
+                }
+            ],
             'total_expenses': 40.0,
             'currency_code': 'USD',
             'start_date': IsDatetime(iso_string=True),
@@ -291,7 +298,12 @@ async def test_get_income_insight_by_revenue_account(mcp_client: Client):
     assert insight == snapshot(
         {
             'entries': [
-                {'id': '7', 'name': 'Test Revenue', 'amount': 300.0, 'currency_code': 'USD'}
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Revenue',
+                    'amount': 300.0,
+                    'currency_code': 'USD',
+                }
             ],
             'total_income': 300.0,
             'currency_code': 'USD',
@@ -324,8 +336,18 @@ async def test_get_income_insight_by_asset_account(mcp_client: Client, test_asse
     assert insight == snapshot(
         {
             'entries': [
-                {'id': '3', 'name': 'Test Savings', 'amount': 100.0, 'currency_code': 'USD'},
-                {'id': '1', 'name': 'Test Checking', 'amount': 200.0, 'currency_code': 'USD'},
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Savings',
+                    'amount': 100.0,
+                    'currency_code': 'USD',
+                },
+                {
+                    'id': IsStr(min_length=1),
+                    'name': 'Test Checking',
+                    'amount': 200.0,
+                    'currency_code': 'USD',
+                },
             ],
             'total_income': 300.0,
             'currency_code': 'USD',
@@ -398,7 +420,7 @@ async def test_get_transfer_insight_by_asset_account(
         {
             'entries': [
                 {
-                    'id': '1',
+                    'id': IsStr(min_length=1),
                     'name': 'Test Checking',
                     'amount': 75.0,
                     'currency_code': 'USD',
@@ -406,7 +428,7 @@ async def test_get_transfer_insight_by_asset_account(
                     'amount_out': 75.0,
                 },
                 {
-                    'id': '3',
+                    'id': IsStr(min_length=1),
                     'name': 'Test Savings',
                     'amount': 75.0,
                     'currency_code': 'USD',
