@@ -290,6 +290,13 @@ class FireflyClient:
         r.raise_for_status()
         return BudgetSingle.model_validate(r.json())
 
+    async def delete_budget(self, budget_id: str) -> bool:
+        """Delete a budget by ID."""
+        r = await self._client.delete(f'/api/v1/budgets/{budget_id}')
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return r.status_code == 204
+
     async def get_available_budgets(
         self, start_date: Optional[date] = None, end_date: Optional[date] = None
     ) -> AvailableBudgetArray:

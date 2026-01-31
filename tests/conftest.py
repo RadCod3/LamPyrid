@@ -21,12 +21,12 @@ from lampyrid.models.firefly_models import (
     AccountRolePropertyEnum,
     AccountStore,
     AccountTypeFilter,
-    BudgetStore,
     ShortAccountTypeProperty,
 )
 from lampyrid.models.lampyrid_models import (
     Account,
     Budget,
+    CreateBudgetRequest,
     CreateDepositRequest,
     CreateTransferRequest,
     CreateWithdrawalRequest,
@@ -193,7 +193,7 @@ async def _setup_test_data():
                     break
 
             if test_budget is None:
-                budget_store = BudgetStore(name='Test Budget', active=True)
+                budget_store = CreateBudgetRequest(name='Test Budget', active=True)
                 test_budget = await budget_service.create_budget(budget_store)
                 _created_budget_ids.append(test_budget.id)
 
@@ -492,6 +492,32 @@ async def transaction_cleanup(firefly_client: FireflyClient):
             print(f'Cleaned up transaction: {transaction_id}')
         except Exception as e:
             print(f'Failed to cleanup transaction {transaction_id}: {e}')
+
+
+@pytest.fixture
+async def budget_cleanup(firefly_client: FireflyClient):
+    """Fixture to track and cleanup budgets created during tests.
+
+    Usage:
+            @pytest.mark.asyncio
+            async def test_create_budget(mcp_client, budget_cleanup):
+                    result = await mcp_client.call_tool('create_budget', {...})
+                    budget_cleanup.append(result.structured_content['id'])
+                    # Test code here
+                    # Budget will be deleted after test completes
+    """
+    created_budget_ids: List[str] = []
+
+    # Provide the list to the test
+    yield created_budget_ids
+
+    # Cleanup after test
+    for budget_id in created_budget_ids:
+        try:
+            await firefly_client.delete_budget(budget_id)
+            print(f'Cleaned up budget: {budget_id}')
+        except Exception as e:
+            print(f'Failed to cleanup budget {budget_id}: {e}')
 
 
 @pytest.fixture(scope='session', autouse=True)

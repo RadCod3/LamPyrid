@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from lampyrid.models.lampyrid_models import (
+    CreateBudgetRequest,
     GetAvailableBudgetRequest,
     GetBudgetSpendingRequest,
     GetBudgetSummaryRequest,
@@ -314,13 +315,17 @@ class TestBudgetService:
 
         mock_client.create_budget.return_value = mock_budget_single
 
-        # Mock BudgetStore to avoid complex required fields
-        budget_store = MagicMock()
+        budget_req = CreateBudgetRequest(name='New Budget', active=True, notes='Test notes')
 
-        result = await service.create_budget(budget_store)
+        result = await service.create_budget(budget_req)
 
         # Verify the client was called
-        mock_client.create_budget.assert_called_once_with(budget_store)
+        # The service creates a BudgetStore internal to create_budgets
+        mock_client.create_budget.assert_called_once()
+        args, _ = mock_client.create_budget.call_args
+        assert args[0].name == 'New Budget'
+        assert args[0].active is True
+        assert args[0].notes == 'Test notes'
 
         # Verify the result is converted correctly
         assert result.id == '123'

@@ -1,8 +1,10 @@
 """Integration tests for budget management tools."""
 
 from datetime import date, timedelta
+from typing import List
 
 import pytest
+from dirty_equals import IsInt, IsStr
 from fastmcp import Client
 from inline_snapshot import snapshot
 
@@ -171,3 +173,119 @@ async def test_get_available_budget(mcp_client: Client):
     assert available.currency_code is not None
     assert available.start_date.isoformat() == start.isoformat()
     assert available.end_date.isoformat() == end.isoformat()
+
+
+# =============================================================================
+# create_budget Tests
+# =============================================================================
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_create_budget_simple(mcp_client: Client, budget_cleanup: List[str]):
+    """Test creating a basic budget with just a name."""
+    result = await mcp_client.call_tool('create_budget', {'req': {'name': 'Test Created Budget'}})
+    budget = Budget.model_validate(result.structured_content)
+    budget_cleanup.append(budget.id)
+
+    assert budget.model_dump() == snapshot(
+        {
+            'id': IsStr(min_length=1),
+            'name': 'Test Created Budget',
+            'active': True,
+            'notes': None,
+            'order': IsInt(ge=1),
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_create_budget_with_auto_budget(mcp_client: Client, budget_cleanup: List[str]):
+    """Test creating a budget with auto-budget settings."""
+    result = await mcp_client.call_tool(
+        'create_budget',
+        {
+            'req': {
+                'name': 'Test Auto Budget',
+                'auto_budget_type': 'reset',
+                'auto_budget_amount': 500.0,
+                'auto_budget_period': 'monthly',
+                'auto_budget_currency_code': 'USD',
+            }
+        },
+    )
+    budget = Budget.model_validate(result.structured_content)
+    budget_cleanup.append(budget.id)
+
+    assert budget.model_dump() == snapshot(
+        {
+            'id': IsStr(min_length=1),
+            'name': 'Test Auto Budget',
+            'active': True,
+            'notes': None,
+            'order': IsInt(ge=1),
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_create_budget_with_notes_inactive(mcp_client: Client, budget_cleanup: List[str]):
+    """Test creating an inactive budget with notes."""
+    result = await mcp_client.call_tool(
+        'create_budget',
+        {
+            'req': {
+                'name': 'Test Inactive Budget',
+                'notes': 'This is a test budget with notes',
+                'active': False,
+            }
+        },
+    )
+    budget = Budget.model_validate(result.structured_content)
+    budget_cleanup.append(budget.id)
+
+    assert budget.model_dump() == snapshot(
+        {
+            'id': IsStr(min_length=1),
+            'name': 'Test Inactive Budget',
+            'active': False,
+            'notes': 'This is a test budget with notes',
+            'order': IsInt(ge=1),
+        }
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_create_budget_rollover(mcp_client: Client, budget_cleanup: List[str]):
+    """Test creating a budget with rollover auto-budget type."""
+    result = await mcp_client.call_tool(
+        'create_budget',
+        {
+            'req': {
+                'name': 'Test Rollover Budget',
+                'auto_budget_type': 'rollover',
+                'auto_budget_amount': 300.0,
+                'auto_budget_period': 'monthly',
+                'notes': 'Rollover unused balance to next month',
+            }
+        },
+    )
+    budget = Budget.model_validate(result.structured_content)
+    budget_cleanup.append(budget.id)
+
+    assert budget.model_dump() == snapshot(
+        {
+            'id': IsStr(min_length=1),
+            'name': 'Test Rollover Budget',
+            'active': True,
+            'notes': 'Rollover unused balance to next month',
+            'order': IsInt(ge=1),
+        }
+    )
