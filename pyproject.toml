@@ -65,6 +65,7 @@ markers = [
   "transactions: transaction-related tests",
   "budgets: budget-related tests",
   "insights: insight analysis tests",
+  "unit: marks tests as unit tests",
 ]
 
 [tool.datamodel-codegen]

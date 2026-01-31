@@ -1,8 +1,10 @@
 """Test data factories for budget-related tests."""
 
 from datetime import date, timedelta
+from typing import Literal
 
 from lampyrid.models.lampyrid_models import (
+    CreateBudgetRequest,
     GetAvailableBudgetRequest,
     GetBudgetRequest,
     GetBudgetSpendingRequest,
@@ -64,3 +66,25 @@ def make_get_available_budget_request(
         end = next_month.replace(day=1) - timedelta(days=1)
 
     return GetAvailableBudgetRequest(start_date=start, end_date=end)
+
+
+def make_create_budget_request(
+    name: str,
+    auto_budget_type: Literal['none', 'reset', 'rollover'] | None = None,
+    auto_budget_amount: float | None = None,
+    auto_budget_period: Literal['daily', 'weekly', 'monthly', 'quarterly', 'half-year', 'yearly']
+    | None = None,
+    auto_budget_currency_code: str | None = None,
+    active: bool = True,
+    notes: str | None = None,
+) -> CreateBudgetRequest:
+    """Create a CreateBudgetRequest for testing."""
+    return CreateBudgetRequest(
+        name=name,
+        auto_budget_type=auto_budget_type,
+        auto_budget_amount=auto_budget_amount,
+        auto_budget_period=auto_budget_period,
+        auto_budget_currency_code=auto_budget_currency_code,
+        active=active,
+        notes=notes,
+    )

@@ -1,6 +1,6 @@
 # LamPyrid
 
-A Model Context Protocol (MCP) server providing comprehensive tools for interacting with [Firefly III](https://github.com/firefly-iii/firefly-iii) personal finance software. LamPyrid enables automated personal finance workflows and analysis through 18 MCP tools with support for account management, transaction operations, and budget management.
+A Model Context Protocol (MCP) server providing comprehensive tools for interacting with [Firefly III](https://github.com/firefly-iii/firefly-iii) personal finance software. LamPyrid enables automated personal finance workflows and analysis through 22 MCP tools with support for account management, transaction operations, budget management, and financial insights.
 
 > **What is Firefly III?** [Firefly III](https://www.firefly-iii.org/) is a free and open-source personal finance manager that helps you track expenses, income, budgets, and more. LamPyrid provides an MCP interface to automate interactions with your Firefly III instance.
 
@@ -159,7 +159,7 @@ Enable persistent authentication across server restarts:
 | `bulk_update_transactions` | Update multiple transactions in a single operation |
 | `delete_transaction` | Delete transactions by ID |
 
-### Budget Management (5 tools)
+### Budget Management (6 tools)
 | Tool | Description |
 |------|-------------|
 | `list_budgets` | List all budgets with optional filtering |
@@ -167,6 +167,7 @@ Enable persistent authentication across server restarts:
 | `get_budget_spending` | Analyze spending for specific budgets and periods |
 | `get_budget_summary` | Comprehensive summary of all budgets with spending |
 | `get_available_budget` | Check available budget amounts for periods |
+| `create_budget` | Create new budgets with auto-budget options |
 
 ## Docker
 
