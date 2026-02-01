@@ -1,7 +1,7 @@
 """Simplified models for MCP tool interfaces with budget support."""
 
 from datetime import date, datetime, timezone
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -9,6 +9,8 @@ from .firefly_models import (
     AccountRead,
     AccountTypeFilter,
     BudgetRead,
+    RuleActionKeyword,
+    RuleTriggerKeyword,
     ShortAccountTypeProperty,
     TransactionArray,
     TransactionRead,
@@ -1049,3 +1051,257 @@ class FinancialSummary(BaseModel):
     )
     start_date: date = Field(..., description='Start of the analysis period')
     end_date: date = Field(..., description='End of the analysis period')
+
+
+# =============================================================================
+# Rule Models - Request and Response models for rule management
+# =============================================================================
+
+
+class RuleTriggerSimple(BaseModel):
+    """Simplified trigger model for rule display."""
+
+    type: RuleTriggerKeyword = Field(..., description='Type of trigger')
+    value: Optional[str] = Field(None, description='Value for the trigger (if applicable)')
+    prohibited: bool = Field(
+        False,
+        description='Whether this trigger is negated (read-only from API)',
+    )
+
+
+class RuleActionSimple(BaseModel):
+    """Simplified action model for rule display."""
+
+    type: RuleActionKeyword = Field(..., description='Type of action')
+    value: Optional[str] = Field(None, description='Value for the action (if applicable)')
+
+
+class Rule(BaseModel):
+    """Simplified rule model for MCP responses."""
+
+    id: str = Field(..., description='Unique identifier for the rule')
+    title: str = Field(..., description='Display name of the rule')
+    description: Optional[str] = Field(None, description='Optional description of the rule')
+    active: bool = Field(True, description='Whether the rule is active')
+    strict: Optional[bool] = Field(
+        None,
+        description='If True, ALL triggers must match (AND). If False, any trigger can match (OR).',
+    )
+    stop_processing: bool = Field(
+        False, description='Whether to stop processing other rules after this one'
+    )
+    trigger: Optional[str] = Field(None, description='Deprecated: single trigger type')
+    triggers: List[RuleTriggerSimple] = Field(
+        default_factory=list, description='List of triggers for this rule'
+    )
+    actions: List[RuleActionSimple] = Field(
+        default_factory=list, description='List of actions for this rule'
+    )
+
+
+class SearchRulesRequest(BaseModel):
+    """Request model for searching rules."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    trigger_type: Optional[str] = Field(
+        None,
+        description=(
+            'Filter by trigger type keyword (substring match, case-insensitive). '
+            'Examples: "description", "amount", "account"'
+        ),
+    )
+    action_type: Optional[str] = Field(
+        None,
+        description=(
+            'Filter by action type keyword (substring match, case-insensitive). '
+            'Examples: "set_budget", "set_category", "delete"'
+        ),
+    )
+    trigger_value_pattern: Optional[str] = Field(
+        None,
+        description=(
+            'Filter by trigger value using regex pattern (case-insensitive). '
+            'Example: ".*groceries.*" matches any trigger value containing "groceries"'
+        ),
+    )
+    action_value_pattern: Optional[str] = Field(
+        None,
+        description=(
+            'Filter by action value using regex pattern (case-insensitive). '
+            'Example: "^[0-9]+$" matches numeric values'
+        ),
+    )
+    title_contains: Optional[str] = Field(
+        None,
+        description=(
+            'Filter by rule title (substring match, case-insensitive). '
+            'Example: "auto" matches "Auto-categorize" and "automatic"'
+        ),
+    )
+    active: Optional[bool] = Field(
+        None,
+        description='Filter by active status (True for active, False for inactive, None for all)',
+    )
+
+    @model_validator(mode='after')
+    def validate_search_criteria(self):
+        """Ensure at least one search criterion is provided."""
+        has_criteria = any(
+            [
+                self.trigger_type,
+                self.action_type,
+                self.trigger_value_pattern,
+                self.action_value_pattern,
+                self.title_contains,
+                self.active is not None,
+            ]
+        )
+        if not has_criteria:
+            raise ValueError('At least one search criterion must be provided')
+        return self
+
+
+class GetRuleRequest(BaseModel):
+    """Request model for getting a single rule by ID."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    id: str = Field(..., description='Unique identifier of the rule to retrieve')
+
+
+class UpdateRuleRequest(BaseModel):
+    """Request model for updating a rule."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    rule_id: str = Field(..., description='Unique identifier of the rule to update')
+    title: Optional[str] = Field(None, description='New title for the rule')
+    description: Optional[str] = Field(None, description='New description for the rule')
+    rule_group_id: Optional[str] = Field(None, description='Rule group ID to move the rule to')
+    active: Optional[bool] = Field(None, description='Whether the rule is active')
+    strict: Optional[bool] = Field(
+        None,
+        description='If True, ALL triggers must match. If False, any trigger can match.',
+    )
+    stop_processing: Optional[bool] = Field(
+        None, description='Whether to stop processing other rules after this one'
+    )
+    triggers: Optional[List[dict[str, Any]]] = Field(
+        None,
+        description=(
+            'Array of trigger objects to update. Each object should have: '
+            'type (required), value (optional), active (optional), '
+            'order (optional), stop_processing (optional). '
+            'Note: prohibited field cannot be modified through the API.'
+        ),
+    )
+    actions: Optional[List[dict[str, Any]]] = Field(
+        None,
+        description=(
+            'Array of action objects to update. Each object should have: '
+            'type (required), value (optional), active (optional), '
+            'order (optional), stop_processing (optional).'
+        ),
+    )
+
+
+class TestRuleRequest(BaseModel):
+    """Request model for testing a rule (preview matches)."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    rule_id: str = Field(..., description='Unique identifier of the rule to test')
+    start_date: date = Field(
+        ...,
+        description=(
+            'Start date for matching (YYYY-MM-DD). '
+            'Only transactions on or after this date will be checked.'
+        ),
+    )
+    end_date: date = Field(
+        ...,
+        description=(
+            'End date for matching (YYYY-MM-DD). '
+            'Only transactions on or before this date will be checked.'
+        ),
+    )
+    account_ids: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Optional list of account IDs to limit the test to specific accounts. '
+            'When provided, only transactions involving these accounts are tested.'
+        ),
+    )
+
+
+class ExecuteRuleRequest(BaseModel):
+    """Request model for executing a rule (apply changes)."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    rule_id: str = Field(..., description='Unique identifier of the rule to execute')
+    start_date: date = Field(
+        ...,
+        description=(
+            'Start date for execution (YYYY-MM-DD). '
+            'Only transactions on or after this date will be modified.'
+        ),
+    )
+    end_date: date = Field(
+        ...,
+        description=(
+            'End date for execution (YYYY-MM-DD). '
+            'Only transactions on or before this date will be modified.'
+        ),
+    )
+    account_ids: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Optional list of account IDs to limit execution to specific accounts. '
+            'When provided, only transactions involving these accounts are modified.'
+        ),
+    )
+    confirm: bool = Field(
+        False,
+        description=(
+            'REQUIRED: Must be set to True to actually execute the rule. '
+            'This is a safety measure to prevent accidental modifications. '
+            'Always preview with test_rule first!'
+        ),
+    )
+
+
+class RuleTestResult(BaseModel):
+    """Result of testing a rule (preview mode)."""
+
+    rule_id: str = Field(..., description='ID of the rule that was tested')
+    rule_title: str = Field(..., description='Title of the rule that was tested')
+    matched_transaction_count: int = Field(
+        ..., description='Number of transactions that would be affected by this rule'
+    )
+    matched_transactions: List[Transaction] = Field(
+        ...,
+        description=(
+            'List of transactions that match the rule criteria. '
+            'NOTE: These are the transactions that would be modified if the rule is executed, '
+            'but they are shown here WITHOUT any modifications applied (preview mode).'
+        ),
+    )
+
+
+class RuleExecuteResult(BaseModel):
+    """Result of executing a rule."""
+
+    rule_id: str = Field(..., description='ID of the rule that was executed')
+    rule_title: str = Field(..., description='Title of the rule that was executed')
+    success: bool = Field(..., description='Whether the rule execution was accepted by the server')
+    message: str = Field(
+        ...,
+        description=(
+            'Status message. '
+            'NOTE: Firefly III processes rule execution asynchronously. '
+            'The rule is queued but may still be processing. Check the rule '
+            'later to confirm changes.'
+        ),
+    )

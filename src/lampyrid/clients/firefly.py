@@ -20,6 +20,9 @@ from ..models.firefly_models import (
     InsightGroup,
     InsightTotal,
     InsightTransfer,
+    RuleArray,
+    RuleSingle,
+    RuleUpdate,
     TransactionArray,
     TransactionSingle,
     TransactionStore,
@@ -470,3 +473,91 @@ class FireflyClient:
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTransfer.model_validate(r.json())
+
+    # =========================================================================
+    # Rule Management Methods
+    # =========================================================================
+
+    async def get_rules(self, page: int = 1) -> RuleArray:
+        """Get all rules with pagination."""
+        r = await self._client.get('/api/v1/rules', params={'page': page})
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return RuleArray.model_validate(r.json())
+
+    async def get_rule(self, rule_id: str) -> RuleSingle:
+        """Get a single rule by ID."""
+        r = await self._client.get(f'/api/v1/rules/{rule_id}')
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return RuleSingle.model_validate(r.json())
+
+    async def update_rule(self, rule_id: str, rule_update: RuleUpdate) -> RuleSingle:
+        """Update an existing rule."""
+        payload = self._serialize_model(rule_update, exclude_unset=True)
+        r = await self._client.put(f'/api/v1/rules/{rule_id}', json=payload)
+        self._handle_api_error(r, payload)
+        r.raise_for_status()
+        return RuleSingle.model_validate(r.json())
+
+    async def test_rule(
+        self,
+        rule_id: str,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[str]] = None,
+    ) -> TransactionArray:
+        """Test a rule in preview mode (shows matches without changes).
+
+        Args:
+            rule_id: ID of the rule to test
+            start_date: Start date for matching transactions
+            end_date: End date for matching transactions
+            account_ids: Optional list of account IDs to filter
+
+        Returns:
+            TransactionArray with matching transactions
+
+        """
+        params: Dict[str, Any] = {
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': end_date.strftime('%Y-%m-%d'),
+        }
+        if account_ids:
+            params['accounts[]'] = account_ids
+
+        r = await self._client.get(f'/api/v1/rules/{rule_id}/test', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return TransactionArray.model_validate(r.json())
+
+    async def trigger_rule(
+        self,
+        rule_id: str,
+        start_date: date,
+        end_date: date,
+        account_ids: Optional[list[str]] = None,
+    ) -> bool:
+        """Execute a rule (applies changes to matching transactions).
+
+        Args:
+            rule_id: ID of the rule to execute
+            start_date: Start date for matching transactions
+            end_date: End date for matching transactions
+            account_ids: Optional list of account IDs to filter
+
+        Returns:
+            True if the rule execution was accepted (processing is async)
+
+        """
+        params: Dict[str, Any] = {
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': end_date.strftime('%Y-%m-%d'),
+        }
+        if account_ids:
+            params['accounts[]'] = account_ids
+
+        r = await self._client.post(f'/api/v1/rules/{rule_id}/trigger', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return r.status_code == 204
