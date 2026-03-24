@@ -1,7 +1,7 @@
 [project]
 dependencies = [
   "cryptography>=46.0.0",
-  "fastmcp>=2.14",
+  "fastmcp>=3.0",
   "pydantic>=2.11.7",
   "pydantic-settings>=2.10.1",
 ]
@@ -18,7 +18,7 @@ lint = "lampyrid.scripts.format:main"
 
 [dependency-groups]
 dev = [
-  "datamodel-code-generator>=0.52.0",
+  "datamodel-code-generator[ruff]>=0.52.0",
   "dirty-equals>=0.11",
   "inline-snapshot>=0.31.1",
   "pytest>=9.0.2",
@@ -31,7 +31,7 @@ dev = [
 
 [build-system]
 build-backend = "uv_build"
-requires = ["uv_build"]
+requires = ["uv_build<0.12"]
 
 [tool.ruff]
 line-length = 100
@@ -69,6 +69,8 @@ markers = [
 ]
 
 [tool.datamodel-codegen]
-input = "firefly-iii-6.4.16-v1.yaml"
+input = "firefly-iii-6.5.5-v1.yaml"
+input-file-type = "openapi"
 output = "src/lampyrid/models/firefly_models.py"
 output-model-type = "pydantic_v2.BaseModel"
+formatters = ["ruff-check", "ruff-format"]

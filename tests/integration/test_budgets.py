@@ -17,7 +17,8 @@ from lampyrid.models.lampyrid_models import AvailableBudget, Budget, BudgetSpend
 async def test_list_budgets_all(mcp_client: Client):
     """Test listing all budgets regardless of active status."""
     result = await mcp_client.call_tool('list_budgets', {'req': {}})
-    budgets = result.data
+    assert result.structured_content is not None
+    budgets = result.structured_content['result']
 
     # Should have at least one budget for testing
     assert len(budgets) > 0
@@ -33,7 +34,8 @@ async def test_list_budgets_all(mcp_client: Client):
 async def test_list_budgets_active_only(mcp_client: Client):
     """Test filtering budgets by active status."""
     result = await mcp_client.call_tool('list_budgets', {'req': {'active': True}})
-    budgets = result.data
+    assert result.structured_content is not None
+    budgets = result.structured_content['result']
 
     # Should have at least one active budget
     assert len(budgets) > 0

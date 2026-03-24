@@ -352,7 +352,7 @@ async def mcp_client(firefly_client: FireflyClient):
     mcp = FastMCP('lampyrid-test')
 
     # Compose all domain servers (accounts, transactions, budgets)
-    await compose_all_servers(mcp, firefly_client)
+    compose_all_servers(mcp, firefly_client)
 
     # Create a FastMCP Client using in-memory transport
     async with Client(transport=mcp) as client:

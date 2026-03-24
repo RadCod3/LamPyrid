@@ -1,7 +1,7 @@
 # ============================================================================
 # Builder Stage: Install dependencies and build the project
 # ============================================================================
-FROM ghcr.io/astral-sh/uv:bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:0.11-trixie-slim AS builder
 
 # Set environment variables for UV optimizations
 ENV UV_COMPILE_BYTECODE=1
