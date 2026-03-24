@@ -68,7 +68,7 @@ class TransactionService:
         )
         trx_store = TransactionStore(
             transactions=[trx],
-            apply_rules=False,
+            apply_rules=True,
             fire_webhooks=True,
             group_title=None,
             error_if_duplicate_hash=False,
@@ -97,7 +97,7 @@ class TransactionService:
         )
         trx_store = TransactionStore(
             transactions=[trx],
-            apply_rules=False,
+            apply_rules=True,
             fire_webhooks=True,
             group_title=None,
             error_if_duplicate_hash=False,
@@ -125,7 +125,7 @@ class TransactionService:
         )
         trx_store = TransactionStore(
             transactions=[trx],
-            apply_rules=False,
+            apply_rules=True,
             fire_webhooks=True,
             group_title=None,
             error_if_duplicate_hash=False,
@@ -168,7 +168,7 @@ class TransactionService:
                 trx_split = transaction.to_transaction_split_store()
                 trx_store = TransactionStore(
                     transactions=[trx_split],
-                    apply_rules=False,
+                    apply_rules=True,
                     fire_webhooks=True,
                     group_title=None,
                     error_if_duplicate_hash=False,
@@ -213,7 +213,7 @@ class TransactionService:
                 trx_split = transaction.to_transaction_split_store()
                 trx_store = TransactionStore(
                     transactions=[trx_split],
-                    apply_rules=False,
+                    apply_rules=True,
                     fire_webhooks=True,
                     group_title=None,
                     error_if_duplicate_hash=False,
@@ -376,7 +376,7 @@ class TransactionService:
         trx_split_update = TransactionSplitUpdate(**update_kwargs)
 
         transaction_update = TransactionUpdate(
-            apply_rules=False, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
+            apply_rules=True, fire_webhooks=True, group_title=None, transactions=[trx_split_update]
         )
 
         transaction_single = await self._client.update_transaction(
