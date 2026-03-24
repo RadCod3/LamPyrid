@@ -316,6 +316,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/be/c6/2abc9d11adbbf689b6b4dfb7a136d57b9ccaa3b3f1ba83504462109e8dbb/datamodel_code_generator-0.55.0-py3-none-any.whl", hash = "sha256:efa5a925288ca2a135fdc3361c7d774ae5b24b4fd632868363e249d55ea2f137", size = 256860, upload-time = "2026-03-10T20:41:13.488Z" },
 ]
 
+[package.optional-dependencies]
+ruff = [
+    { name = "ruff" },
+]
+
 [[package]]
 name = "dirty-equals"
 version = "0.11"
@@ -672,7 +677,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "datamodel-code-generator" },
+    { name = "datamodel-code-generator", extra = ["ruff"] },
     { name = "dirty-equals" },
     { name = "inline-snapshot" },
     { name = "pytest" },
@@ -693,7 +698,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "datamodel-code-generator", specifier = ">=0.52.0" },
+    { name = "datamodel-code-generator", extras = ["ruff"], specifier = ">=0.52.0" },
     { name = "dirty-equals", specifier = ">=0.11" },
     { name = "inline-snapshot", specifier = ">=0.31.1" },
     { name = "pytest", specifier = ">=9.0.2" },
