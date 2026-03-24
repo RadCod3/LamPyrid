@@ -183,11 +183,14 @@ class BudgetService:
         # Parse the available budget data
         if available_array.data:
             first_budget = available_array.data[0]
+            attrs = first_budget.attributes
+            today = date.today()
             return AvailableBudget(
-                amount=float(first_budget.attributes.amount),
-                currency_code=first_budget.attributes.currency_code or 'USD',
-                start_date=req.start_date or first_budget.attributes.start.date(),
-                end_date=req.end_date or first_budget.attributes.end.date(),
+                amount=float(attrs.amount) if attrs.amount is not None else 0.0,
+                currency_code=attrs.currency_code or 'USD',
+                start_date=req.start_date
+                or (attrs.start.date() if attrs.start is not None else today.replace(day=1)),
+                end_date=req.end_date or (attrs.end.date() if attrs.end is not None else today),
             )
         else:
             # Return default if no data available

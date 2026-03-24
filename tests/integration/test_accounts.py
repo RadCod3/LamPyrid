@@ -15,7 +15,7 @@ from lampyrid.models.lampyrid_models import Account
 async def test_list_accounts_all(mcp_client):
     """Test listing all account types."""
     result = await mcp_client.call_tool('list_accounts', {'req': {'type': 'all'}})
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should have at least one account
     assert len(accounts) > 0
@@ -88,7 +88,7 @@ async def test_list_accounts_all(mcp_client):
 async def test_list_accounts_by_type_asset(mcp_client):
     """Test filtering accounts by asset type."""
     result = await mcp_client.call_tool('list_accounts', {'req': {'type': 'asset'}})
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should have at least one asset account for tests to work
     assert len(accounts) > 0
@@ -123,7 +123,7 @@ async def test_list_accounts_by_type_asset(mcp_client):
 async def test_list_accounts_by_type_expense(mcp_client):
     """Test filtering accounts by expense type."""
     result = await mcp_client.call_tool('list_accounts', {'req': {'type': 'expense'}})
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # May or may not have expense accounts
     # If we have any, they should all be expense type
@@ -156,7 +156,8 @@ async def test_list_accounts_by_type_expense(mcp_client):
 async def test_list_accounts_by_type_revenue(mcp_client: Client):
     """Test filtering accounts by revenue type."""
     result = await mcp_client.call_tool('list_accounts', {'req': {'type': 'revenue'}})
-    accounts = result.data
+    assert result.structured_content is not None
+    accounts = result.structured_content['result']
 
     assert len(accounts) > 0
     assert accounts == snapshot(
@@ -217,7 +218,7 @@ async def test_search_accounts_exact(mcp_client, test_asset_account: Account):
     result = await mcp_client.call_tool(
         'search_accounts', {'req': {'query': test_asset_account.name}}
     )
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should find at least the test account
     assert len(accounts) > 0
@@ -235,7 +236,7 @@ async def test_search_accounts_partial(mcp_client, test_asset_account: Account):
     # Use first 3 characters of account name
     partial_name = test_asset_account.name[:3]
     result = await mcp_client.call_tool('search_accounts', {'req': {'query': partial_name}})
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should find at least one account
     assert len(accounts) > 0
@@ -253,7 +254,7 @@ async def test_search_accounts_with_type(mcp_client, test_asset_account: Account
     result = await mcp_client.call_tool(
         'search_accounts', {'req': {'query': test_asset_account.name, 'type': 'asset'}}
     )
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should find at least the test account
     assert len(accounts) > 0
@@ -276,7 +277,7 @@ async def test_search_accounts_no_results(mcp_client):
     result = await mcp_client.call_tool(
         'search_accounts', {'req': {'query': 'xyzabc123nonexistent'}}
     )
-    accounts = result.data
+    accounts = result.structured_content['result']
 
     # Should return empty list
     assert len(accounts) == 0

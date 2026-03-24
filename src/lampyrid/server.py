@@ -50,7 +50,7 @@ def _create_auth_provider() -> Optional[AuthProvider]:
                 'openid',
                 'https://www.googleapis.com/auth/userinfo.email',
             ],
-            jwt_signing_key=settings.jwt_signing_key,  # ty:ignore[invalid-argument-type]
+            jwt_signing_key=settings.jwt_signing_key,
             client_storage=client_storage,
         )
     return None
