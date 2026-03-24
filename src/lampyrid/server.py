@@ -1,6 +1,5 @@
 """MCP server initialization and configuration."""
 
-import asyncio
 from typing import Optional
 
 from cryptography.fernet import Fernet
@@ -9,7 +8,7 @@ from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
 from fastmcp.utilities.types import Image
-from key_value.aio.stores.disk import DiskStore
+from key_value.aio.stores.filetree import FileTreeStore
 from key_value.aio.wrappers.encryption import FernetEncryptionWrapper
 from mcp.types import Icon
 
@@ -36,10 +35,10 @@ def _create_auth_provider() -> Optional[AuthProvider]:
             # Create storage directory if it doesn't exist
             settings.oauth_storage_path.mkdir(parents=True, exist_ok=True)
 
-            # Initialize disk storage with Fernet encryption
-            disk_store = DiskStore(directory=settings.oauth_storage_path)
+            # Initialize file-tree storage with Fernet encryption
+            file_tree_store = FileTreeStore(data_directory=settings.oauth_storage_path)
             client_storage = FernetEncryptionWrapper(
-                key_value=disk_store,
+                key_value=file_tree_store,
                 fernet=Fernet(settings.oauth_storage_encryption_key),  # ty:ignore[invalid-argument-type]
             )
 
@@ -81,8 +80,8 @@ def _initialize_server() -> FastMCP:
     # Configure logging
     configure_logging(level=settings.logging_level)
 
-    # Compose all domain servers using static composition (import_server)
-    asyncio.run(compose_all_servers(server, client))
+    # Compose all domain servers using static composition (mount)
+    compose_all_servers(server, client)
 
     # Register custom HTTP routes
     register_custom_routes(server)

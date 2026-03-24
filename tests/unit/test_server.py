@@ -62,11 +62,11 @@ class TestServer:
 
             with (
                 patch('lampyrid.server.GoogleProvider') as mock_google_provider,
-                patch('lampyrid.server.DiskStore') as mock_disk_store,
+                patch('lampyrid.server.FileTreeStore') as mock_file_tree_store,
                 patch('lampyrid.server.FernetEncryptionWrapper') as mock_encryption_wrapper,
             ):
                 mock_google_provider.return_value = MagicMock()
-                mock_disk_store.return_value = MagicMock()
+                mock_file_tree_store.return_value = MagicMock()
                 mock_encryption_wrapper.return_value = MagicMock()
 
                 result = _create_auth_provider()
@@ -76,8 +76,10 @@ class TestServer:
                 mock_settings.oauth_storage_path.mkdir.assert_called_once_with(
                     parents=True, exist_ok=True
                 )
-                # Verify disk store and encryption wrapper were initialized
-                mock_disk_store.assert_called_once_with(directory=mock_settings.oauth_storage_path)
+                # Verify file tree store and encryption wrapper were initialized
+                mock_file_tree_store.assert_called_once_with(
+                    data_directory=mock_settings.oauth_storage_path
+                )
                 mock_encryption_wrapper.assert_called_once()
                 # Verify GoogleProvider was called with client_storage
                 args, kwargs = mock_google_provider.call_args
@@ -94,7 +96,6 @@ class TestServer:
             patch('lampyrid.server.FastMCP') as mock_fastmcp,
             patch('lampyrid.server.configure_logging') as mock_configure_logging,
             patch('lampyrid.server.get_assets_path') as mock_get_assets_path,
-            patch('lampyrid.server.asyncio.run') as mock_asyncio_run,
             patch('lampyrid.server._create_auth_provider') as mock_create_auth,
         ):
             # Mock settings
@@ -134,7 +135,6 @@ class TestServer:
                 mock_configure_logging.assert_called_once_with(level='INFO')
 
                 # Verify servers were composed
-                mock_asyncio_run.assert_called_once()
                 mock_compose_servers.assert_called_once()
 
                 # Verify custom routes were registered
@@ -153,7 +153,6 @@ class TestServer:
             patch('lampyrid.server.FastMCP') as mock_fastmcp,
             patch('lampyrid.server.configure_logging') as mock_configure_logging,
             patch('lampyrid.server.get_assets_path') as mock_get_assets_path,
-            patch('lampyrid.server.asyncio.run'),
             patch('lampyrid.server._create_auth_provider') as mock_create_auth,
         ):
             # Mock settings with auth enabled
