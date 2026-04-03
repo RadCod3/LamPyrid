@@ -10,6 +10,7 @@ from .firefly_models import (
     AccountTypeFilter,
     BudgetRead,
     RuleActionKeyword,
+    RuleRead,
     RuleTriggerKeyword,
     ShortAccountTypeProperty,
     TransactionArray,
@@ -1090,13 +1091,48 @@ class Rule(BaseModel):
     stop_processing: bool = Field(
         False, description='Whether to stop processing other rules after this one'
     )
-    trigger: Optional[str] = Field(None, description='Deprecated: single trigger type')
+    trigger: Optional[str] = Field(
+        None, deprecated='Use triggers list instead', description='Single trigger type'
+    )
     triggers: List[RuleTriggerSimple] = Field(
         default_factory=list, description='List of triggers for this rule'
     )
     actions: List[RuleActionSimple] = Field(
         default_factory=list, description='List of actions for this rule'
     )
+
+    @classmethod
+    def from_rule_read(cls, rule_read: RuleRead) -> 'Rule':
+        """Create a Rule instance from a Firefly RuleRead object."""
+        rule_attrs = rule_read.attributes
+        return cls(
+            id=rule_read.id,
+            title=rule_attrs.title,
+            description=rule_attrs.description,
+            active=rule_attrs.active if rule_attrs.active is not None else True,
+            strict=rule_attrs.strict,
+            stop_processing=(
+                rule_attrs.stop_processing
+                if rule_attrs.stop_processing is not None
+                else False
+            ),
+            trigger=rule_attrs.trigger.value,
+            triggers=[
+                RuleTriggerSimple(
+                    type=t.type,
+                    value=t.value,
+                    prohibited=t.prohibited if t.prohibited is not None else False,
+                )
+                for t in rule_attrs.triggers
+            ],
+            actions=[
+                RuleActionSimple(
+                    type=a.type,
+                    value=a.value,
+                )
+                for a in rule_attrs.actions
+            ],
+        )
 
 
 class SearchRulesRequest(BaseModel):

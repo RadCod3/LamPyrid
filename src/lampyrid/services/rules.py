@@ -10,15 +10,13 @@ from typing import List
 from pydantic import ValidationError
 
 from ..clients.firefly import FireflyClient
-from ..models.firefly_models import RuleTriggerUpdate, RuleUpdate
+from ..models.firefly_models import RuleActionUpdate, RuleTriggerUpdate, RuleUpdate
 from ..models.lampyrid_models import (
     ExecuteRuleRequest,
     GetRuleRequest,
     Rule,
-    RuleActionSimple,
     RuleExecuteResult,
     RuleTestResult,
-    RuleTriggerSimple,
     SearchRulesRequest,
     TestRuleRequest,
     Transaction,
@@ -127,33 +125,7 @@ class RuleService:
             filtered_rules.append(rule_read)
 
         # Convert to simplified models
-        return [
-            Rule(
-                id=rule_read.id,
-                title=rule_read.attributes.title,
-                description=rule_read.attributes.description,
-                active=rule_read.attributes.active or True,
-                strict=rule_read.attributes.strict,
-                stop_processing=rule_read.attributes.stop_processing or False,
-                trigger=rule_read.attributes.trigger.value,
-                triggers=[
-                    RuleTriggerSimple(
-                        type=t.type,
-                        value=t.value,
-                        prohibited=t.prohibited or False,
-                    )
-                    for t in rule_read.attributes.triggers
-                ],
-                actions=[
-                    RuleActionSimple(
-                        type=a.type,
-                        value=a.value,
-                    )
-                    for a in rule_read.attributes.actions
-                ],
-            )
-            for rule_read in filtered_rules
-        ]
+        return [Rule.from_rule_read(rule_read) for rule_read in filtered_rules]
 
     async def get_rule(self, req: GetRuleRequest) -> Rule:
         """Get detailed information for a single rule.
@@ -166,32 +138,7 @@ class RuleService:
 
         """
         rule_single = await self._client.get_rule(req.id)
-        rule_attrs = rule_single.data.attributes
-
-        return Rule(
-            id=rule_single.data.id,
-            title=rule_attrs.title,
-            description=rule_attrs.description,
-            active=rule_attrs.active or True,
-            strict=rule_attrs.strict,
-            stop_processing=rule_attrs.stop_processing or False,
-            trigger=rule_attrs.trigger.value,
-            triggers=[
-                RuleTriggerSimple(
-                    type=t.type,
-                    value=t.value,
-                    prohibited=t.prohibited or False,
-                )
-                for t in rule_attrs.triggers
-            ],
-            actions=[
-                RuleActionSimple(
-                    type=a.type,
-                    value=a.value,
-                )
-                for a in rule_attrs.actions
-            ],
-        )
+        return Rule.from_rule_read(rule_single.data)
 
     async def update_rule(self, req: UpdateRuleRequest) -> Rule:
         """Update an existing rule.
@@ -226,40 +173,13 @@ class RuleService:
         # Convert actions array to RuleActionUpdate objects if provided
         if req.actions is not None:
             try:
-                from ..models.firefly_models import RuleActionUpdate
-
                 rule_update.actions = [RuleActionUpdate(**a) for a in req.actions]
             except ValidationError as e:
                 raise ValueError(f'Invalid action format: {e}')
 
         # Call the client to update the rule
         rule_single = await self._client.update_rule(req.rule_id, rule_update)
-        rule_attrs = rule_single.data.attributes
-
-        return Rule(
-            id=rule_single.data.id,
-            title=rule_attrs.title,
-            description=rule_attrs.description,
-            active=rule_attrs.active or True,
-            strict=rule_attrs.strict,
-            stop_processing=rule_attrs.stop_processing or False,
-            trigger=rule_attrs.trigger.value,
-            triggers=[
-                RuleTriggerSimple(
-                    type=t.type,
-                    value=t.value,
-                    prohibited=t.prohibited or False,
-                )
-                for t in rule_attrs.triggers
-            ],
-            actions=[
-                RuleActionSimple(
-                    type=a.type,
-                    value=a.value,
-                )
-                for a in rule_attrs.actions
-            ],
-        )
+        return Rule.from_rule_read(rule_single.data)
 
     async def test_rule(self, req: TestRuleRequest) -> RuleTestResult:
         """Test a rule in preview mode (show matches without changes).

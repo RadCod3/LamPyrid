@@ -52,7 +52,7 @@ def _make_rule_attrs(
         active=active,
         strict=strict,
         stop_processing=stop_processing,
-        trigger=RuleTriggerType(trigger_type),
+        trigger=RuleTriggerType('store-journal'),
         triggers=[
             RuleTrigger(
                 type=RuleTriggerKeyword(trigger_type),
