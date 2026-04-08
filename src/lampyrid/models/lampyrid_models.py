@@ -1112,9 +1112,7 @@ class Rule(BaseModel):
             active=rule_attrs.active if rule_attrs.active is not None else True,
             strict=rule_attrs.strict,
             stop_processing=(
-                rule_attrs.stop_processing
-                if rule_attrs.stop_processing is not None
-                else False
+                rule_attrs.stop_processing if rule_attrs.stop_processing is not None else False
             ),
             trigger=rule_attrs.trigger.value,
             triggers=[
