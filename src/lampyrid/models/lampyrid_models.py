@@ -1268,6 +1268,13 @@ class TestRuleRequest(BaseModel):
         ),
     )
 
+    @model_validator(mode='after')
+    def validate_date_range(self) -> 'TestRuleRequest':
+        """Validate that start_date is not after end_date."""
+        if self.start_date > self.end_date:
+            raise ValueError('start_date must be on or before end_date')
+        return self
+
 
 class ExecuteRuleRequest(BaseModel):
     """Request model for executing a rule (apply changes)."""
@@ -1304,6 +1311,13 @@ class ExecuteRuleRequest(BaseModel):
             'Always preview with test_rule first!'
         ),
     )
+
+    @model_validator(mode='after')
+    def validate_date_range(self) -> 'ExecuteRuleRequest':
+        """Validate that start_date is not after end_date."""
+        if self.start_date > self.end_date:
+            raise ValueError('start_date must be on or before end_date')
+        return self
 
 
 class RuleTestResult(BaseModel):

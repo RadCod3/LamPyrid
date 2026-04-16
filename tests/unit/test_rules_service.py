@@ -153,7 +153,7 @@ class TestRuleService:
             'Description Trigger',
             trigger_type='description_contains',
         )
-        rule2 = _make_rule_read('2', 'Amount Trigger', trigger_type='amount_greater_than')
+        rule2 = _make_rule_read('2', 'Amount Trigger', trigger_type='amount_more')
         mock_client.get_rules.return_value = _make_rule_array([rule1, rule2])
 
         req = SearchRulesRequest(trigger_type='description')
@@ -369,7 +369,7 @@ class TestRuleService:
         req = UpdateRuleRequest(
             rule_id='42',
             triggers=[
-                {'invalid_field': 'value'},  # Missing 'type'
+                {'type': 'not_a_valid_keyword'},  # Invalid enum value
             ],
         )
         with pytest.raises(ValueError, match='Invalid trigger format'):
@@ -381,7 +381,7 @@ class TestRuleService:
         req = UpdateRuleRequest(
             rule_id='42',
             actions=[
-                {'invalid_field': 'value'},  # Missing 'type'
+                {'type': 'not_a_valid_keyword'},  # Invalid enum value
             ],
         )
         with pytest.raises(ValueError, match='Invalid action format'):
@@ -465,3 +465,22 @@ class TestRuleService:
         """Test that search_rules without any criteria raises ValueError."""
         with pytest.raises(ValueError, match='At least one search criterion'):
             SearchRulesRequest()
+
+    def test_test_rule_request_rejects_inverted_dates(self):
+        """Test that TestRuleRequest rejects start_date after end_date."""
+        with pytest.raises(ValueError, match='start_date must be on or before end_date'):
+            TestRuleRequest(
+                rule_id='1',
+                start_date=date(2024, 12, 31),
+                end_date=date(2024, 1, 1),
+            )
+
+    def test_execute_rule_request_rejects_inverted_dates(self):
+        """Test that ExecuteRuleRequest rejects start_date after end_date."""
+        with pytest.raises(ValueError, match='start_date must be on or before end_date'):
+            ExecuteRuleRequest(
+                rule_id='1',
+                start_date=date(2024, 12, 31),
+                end_date=date(2024, 1, 1),
+                confirm=True,
+            )

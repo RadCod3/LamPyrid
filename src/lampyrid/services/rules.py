@@ -105,7 +105,7 @@ class RuleService:
 
             # Filter by trigger value pattern if specified
             if trigger_pattern:
-                trigger_values = [t.value for t in rule_attrs.triggers if t.value]
+                trigger_values = [t.value for t in rule_attrs.triggers if t.value is not None]
                 if not any(trigger_pattern.search(v) for v in trigger_values):
                     continue
 
@@ -117,7 +117,7 @@ class RuleService:
 
             # Filter by action value pattern if specified
             if action_pattern:
-                action_values = [a.value for a in rule_attrs.actions if a.value]
+                action_values = [a.value for a in rule_attrs.actions if a.value is not None]
                 if not any(action_pattern.search(v) for v in action_values):
                     continue
 
