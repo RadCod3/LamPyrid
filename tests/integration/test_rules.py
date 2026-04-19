@@ -11,6 +11,33 @@ from lampyrid.clients.firefly import FireflyClient
 
 # ==================== Helpers ====================
 
+# Cached rule group ID for test rule creation
+_test_rule_group_id: str | None = None
+
+
+async def _ensure_rule_group(firefly_client: FireflyClient) -> str:
+    """Get or create a rule group for integration tests. Caches the ID."""
+    global _test_rule_group_id
+    if _test_rule_group_id is not None:
+        return _test_rule_group_id
+
+    # Check for existing rule groups
+    r = await firefly_client._client.get('/api/v1/rule-groups')
+    r.raise_for_status()
+    groups = r.json().get('data', [])
+    if groups:
+        _test_rule_group_id = groups[0]['id']
+        return _test_rule_group_id
+
+    # Create one if none exist
+    r = await firefly_client._client.post(
+        '/api/v1/rule-groups',
+        json={'title': 'Test Rules', 'order': 1},
+    )
+    r.raise_for_status()
+    _test_rule_group_id = r.json()['data']['id']
+    return _test_rule_group_id
+
 
 async def _create_rule_via_api(
     firefly_client: FireflyClient,
@@ -22,11 +49,12 @@ async def _create_rule_via_api(
     active: bool = True,
 ) -> str:
     """Create a rule directly via Firefly III API and return its ID."""
+    rule_group_id = await _ensure_rule_group(firefly_client)
     r = await firefly_client._client.post(
         '/api/v1/rules',
         json={
             'title': title,
-            'rule_group_title': 'Test Rules',
+            'rule_group_id': rule_group_id,
             'trigger': 'store-journal',
             'active': active,
             'strict': True,
@@ -38,7 +66,8 @@ async def _create_rule_via_api(
             ],
         },
     )
-    r.raise_for_status()
+    if r.status_code >= 400:
+        raise RuntimeError(f'Failed to create rule ({r.status_code}): {r.text}')
     return r.json()['data']['id']
 
 
