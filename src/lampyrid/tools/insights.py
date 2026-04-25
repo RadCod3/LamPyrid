@@ -18,6 +18,7 @@ from ..models.lampyrid_models import (
     TransferInsightResult,
 )
 from ..services.insights import InsightService
+from ._annotations import readonly_annotations
 
 
 def create_insights_server(client: FireflyClient) -> FastMCP:
@@ -34,7 +35,10 @@ def create_insights_server(client: FireflyClient) -> FastMCP:
 
     insights_mcp = FastMCP('insights')
 
-    @insights_mcp.tool(tags={'insights', 'expenses', 'analysis'})
+    @insights_mcp.tool(
+        tags={'insights', 'expenses', 'analysis'},
+        annotations=readonly_annotations('Get Expense Insight'),
+    )
     async def get_expense_insight(req: GetExpenseInsightRequest) -> ExpenseInsightResult:
         """Analyze expenses for a time period with optional grouping.
 
@@ -50,7 +54,10 @@ def create_insights_server(client: FireflyClient) -> FastMCP:
         """
         return await insight_service.get_expense_insight(req)
 
-    @insights_mcp.tool(tags={'insights', 'income', 'analysis'})
+    @insights_mcp.tool(
+        tags={'insights', 'income', 'analysis'},
+        annotations=readonly_annotations('Get Income Insight'),
+    )
     async def get_income_insight(req: GetIncomeInsightRequest) -> IncomeInsightResult:
         """Analyze income for a time period with optional grouping.
 
@@ -64,7 +71,10 @@ def create_insights_server(client: FireflyClient) -> FastMCP:
         """
         return await insight_service.get_income_insight(req)
 
-    @insights_mcp.tool(tags={'insights', 'transfers', 'analysis'})
+    @insights_mcp.tool(
+        tags={'insights', 'transfers', 'analysis'},
+        annotations=readonly_annotations('Get Transfer Insight'),
+    )
     async def get_transfer_insight(req: GetTransferInsightRequest) -> TransferInsightResult:
         """Analyze transfers for a time period with optional account breakdown.
 
@@ -78,7 +88,10 @@ def create_insights_server(client: FireflyClient) -> FastMCP:
         """
         return await insight_service.get_transfer_insight(req)
 
-    @insights_mcp.tool(tags={'insights', 'summary', 'analysis'})
+    @insights_mcp.tool(
+        tags={'insights', 'summary', 'analysis'},
+        annotations=readonly_annotations('Get Financial Summary'),
+    )
     async def get_financial_summary(req: GetFinancialSummaryRequest) -> FinancialSummary:
         """Get a complete financial overview for a time period.
 

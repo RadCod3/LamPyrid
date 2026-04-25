@@ -24,6 +24,7 @@ from ..models.lampyrid_models import (
     UpdateTransactionRequest,
 )
 from ..services.transactions import TransactionService
+from ._annotations import mutating_annotations, readonly_annotations
 
 
 def create_transactions_server(client: FireflyClient) -> FastMCP:
@@ -40,7 +41,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
 
     transactions_mcp = FastMCP('transactions')
 
-    @transactions_mcp.tool(tags={'transactions', 'create'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'create'},
+        annotations=mutating_annotations('Create Withdrawal'),
+    )
     async def create_withdrawal(req: CreateWithdrawalRequest) -> Transaction:
         """Record expenses and spending.
 
@@ -50,7 +54,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         transaction = await transaction_service.create_withdrawal(req)
         return transaction
 
-    @transactions_mcp.tool(tags={'transactions', 'create'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'create'},
+        annotations=mutating_annotations('Create Deposit'),
+    )
     async def create_deposit(req: CreateDepositRequest) -> Transaction:
         """Record income and money received.
 
@@ -60,7 +67,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         transaction = await transaction_service.create_deposit(req)
         return transaction
 
-    @transactions_mcp.tool(tags={'transactions', 'create'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'create'},
+        annotations=mutating_annotations('Create Transfer'),
+    )
     async def create_transfer(req: CreateTransferRequest) -> Transaction:
         """Move money between your own accounts.
 
@@ -69,7 +79,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         transaction = await transaction_service.create_transfer(req)
         return transaction
 
-    @transactions_mcp.tool(tags={'transactions', 'create', 'bulk'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'create', 'bulk'},
+        annotations=mutating_annotations('Create Bulk Transactions'),
+    )
     async def create_bulk_transactions(req: CreateBulkTransactionsRequest) -> BulkCreateResult:
         """Efficiently create multiple transactions in one operation.
 
@@ -78,7 +91,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.create_bulk_transactions(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'query'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'query'},
+        annotations=readonly_annotations('Get Transaction'),
+    )
     async def get_transaction(req: GetTransactionRequest) -> Transaction:
         """Retrieve complete transaction details.
 
@@ -87,7 +103,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.get_transaction(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'query'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'query'},
+        annotations=readonly_annotations('Get Transactions'),
+    )
     async def get_transactions(req: GetTransactionsRequest) -> TransactionListResponse:
         """Retrieve transaction history with flexible filtering and pagination.
 
@@ -95,7 +114,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.get_transactions(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'query'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'query'},
+        annotations=readonly_annotations('Search Transactions'),
+    )
     async def search_transactions(req: SearchTransactionsRequest) -> TransactionListResponse:
         """Search transactions with powerful filtering options.
 
@@ -105,7 +127,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.search_transactions(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'manage'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'manage'},
+        annotations=mutating_annotations('Delete Transaction', destructive=True),
+    )
     async def delete_transaction(req: DeleteTransactionRequest) -> bool:
         """Permanently remove a transaction.
 
@@ -114,7 +139,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.delete_transaction(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'manage'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'manage'},
+        annotations=mutating_annotations('Update Transaction'),
+    )
     async def update_transaction(req: UpdateTransactionRequest) -> Transaction:
         """Modify transaction details such as amounts, descriptions, dates, accounts, etc.
 
@@ -122,7 +150,10 @@ def create_transactions_server(client: FireflyClient) -> FastMCP:
         """
         return await transaction_service.update_transaction(req)
 
-    @transactions_mcp.tool(tags={'transactions', 'manage', 'bulk'})
+    @transactions_mcp.tool(
+        tags={'transactions', 'manage', 'bulk'},
+        annotations=mutating_annotations('Bulk Update Transactions'),
+    )
     async def bulk_update_transactions(req: BulkUpdateTransactionsRequest) -> BulkUpdateResult:
         """Efficiently update multiple transactions in one operation.
 
