@@ -22,6 +22,7 @@ from ..models.lampyrid_models import (
     ListBudgetsRequest,
 )
 from ..services.budgets import BudgetService
+from ._annotations import mutating_annotations, readonly_annotations
 
 
 def create_budgets_server(client: FireflyClient) -> FastMCP:
@@ -38,7 +39,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
 
     budgets_mcp = FastMCP('budgets')
 
-    @budgets_mcp.tool(tags={'budgets'})
+    @budgets_mcp.tool(
+        tags={'budgets'},
+        annotations=readonly_annotations('List Budgets'),
+    )
     async def list_budgets(req: ListBudgetsRequest) -> List[Budget]:
         """Retrieve your budgets for expense tracking and financial planning.
 
@@ -46,7 +50,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         """
         return await budget_service.list_budgets(req)
 
-    @budgets_mcp.tool(tags={'budgets'})
+    @budgets_mcp.tool(
+        tags={'budgets'},
+        annotations=readonly_annotations('Get Budget'),
+    )
     async def get_budget(req: GetBudgetRequest) -> Budget:
         """Retrieve detailed budget information including name, status, and notes.
 
@@ -54,7 +61,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         """
         return await budget_service.get_budget(req)
 
-    @budgets_mcp.tool(tags={'budgets', 'analysis'})
+    @budgets_mcp.tool(
+        tags={'budgets', 'analysis'},
+        annotations=readonly_annotations('Get Budget Spending'),
+    )
     async def get_budget_spending(req: GetBudgetSpendingRequest) -> BudgetSpending:
         """Analyze spending against a budget.
 
@@ -63,7 +73,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         """
         return await budget_service.get_budget_spending(req)
 
-    @budgets_mcp.tool(tags={'budgets', 'analysis'})
+    @budgets_mcp.tool(
+        tags={'budgets', 'analysis'},
+        annotations=readonly_annotations('Get Budget Summary'),
+    )
     async def get_budget_summary(req: GetBudgetSummaryRequest) -> BudgetSummary:
         """Comprehensive overview of all budget performance with totals and spending analysis.
 
@@ -71,7 +84,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         """
         return await budget_service.get_budget_summary(req)
 
-    @budgets_mcp.tool(tags={'budgets', 'analysis'})
+    @budgets_mcp.tool(
+        tags={'budgets', 'analysis'},
+        annotations=readonly_annotations('Get Available Budget'),
+    )
     async def get_available_budget(req: GetAvailableBudgetRequest) -> AvailableBudget:
         """Check unallocated budget available for new budgets or unexpected expenses.
 
@@ -79,7 +95,10 @@ def create_budgets_server(client: FireflyClient) -> FastMCP:
         """
         return await budget_service.get_available_budget(req)
 
-    @budgets_mcp.tool(tags={'budgets', 'create'})
+    @budgets_mcp.tool(
+        tags={'budgets', 'create'},
+        annotations=mutating_annotations('Create Budget'),
+    )
     async def create_budget(req: CreateBudgetRequest) -> Budget:
         """Create a new budget for expense tracking and financial planning.
 

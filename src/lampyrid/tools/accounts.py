@@ -16,6 +16,7 @@ from ..models.lampyrid_models import (
     SearchAccountRequest,
 )
 from ..services.accounts import AccountService
+from ._annotations import readonly_annotations
 
 
 def create_accounts_server(client: FireflyClient) -> FastMCP:
@@ -32,7 +33,10 @@ def create_accounts_server(client: FireflyClient) -> FastMCP:
 
     accounts_mcp = FastMCP('accounts')
 
-    @accounts_mcp.tool(tags={'accounts'})
+    @accounts_mcp.tool(
+        tags={'accounts'},
+        annotations=readonly_annotations('List Accounts'),
+    )
     async def list_accounts(req: ListAccountRequest) -> List[Account]:
         """Retrieve accounts from Firefly III.
 
@@ -41,7 +45,10 @@ def create_accounts_server(client: FireflyClient) -> FastMCP:
         """
         return await account_service.list_accounts(req)
 
-    @accounts_mcp.tool(tags={'accounts'})
+    @accounts_mcp.tool(
+        tags={'accounts'},
+        annotations=readonly_annotations('Get Account'),
+    )
     async def get_account(req: GetAccountRequest) -> Account:
         """Retrieve detailed account information including current balance and currency.
 
@@ -49,7 +56,10 @@ def create_accounts_server(client: FireflyClient) -> FastMCP:
         """
         return await account_service.get_account(req)
 
-    @accounts_mcp.tool(tags={'accounts'})
+    @accounts_mcp.tool(
+        tags={'accounts'},
+        annotations=readonly_annotations('Search Accounts'),
+    )
     async def search_accounts(req: SearchAccountRequest) -> List[Account]:
         """Find accounts by partial name matching.
 
