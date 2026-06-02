@@ -787,8 +787,8 @@ class BudgetLimit(BaseModel):
 
         return cls(
             id=budget_limit_read.id,
-            budget_id=attrs.budget_id or '',
-            amount=float(attrs.amount) if attrs.amount is not None else 0.0,
+            budget_id=attrs.budget_id,
+            amount=float(attrs.amount),
             start_date=attrs.start.date(),
             end_date=attrs.end.date(),
             currency_code=attrs.currency_code,

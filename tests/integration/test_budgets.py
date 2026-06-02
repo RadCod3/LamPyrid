@@ -466,15 +466,19 @@ async def test_budget_spending_reflects_limit(
 @pytest.mark.asyncio
 @pytest.mark.budgets
 @pytest.mark.integration
-async def test_delete_budget_limit(mcp_client: Client, test_budget: Budget):
+async def test_delete_budget_limit(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
     """Deleting a budget limit removes it for the period."""
     start, end = _current_month()
     period = {'start_date': start.isoformat(), 'end_date': end.isoformat()}
 
-    await mcp_client.call_tool(
+    created = await mcp_client.call_tool(
         'set_budget_limit',
         {'req': {'budget_id': test_budget.id, 'amount': 200.0, **period}},
     )
+    limit = BudgetLimit.model_validate(created.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
 
     deleted = await mcp_client.call_tool(
         'delete_budget_limit', {'req': {'budget_id': test_budget.id, **period}}

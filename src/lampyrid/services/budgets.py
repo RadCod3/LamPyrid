@@ -277,7 +277,14 @@ class BudgetService:
 
     @staticmethod
     def _resolve_period(start_date: Optional[date], end_date: Optional[date]) -> Tuple[date, date]:
-        """Resolve a period, defaulting to the current calendar month when omitted."""
+        """Resolve a period, defaulting to the current calendar month when omitted.
+
+        Both dates must be provided together or neither. The request models already
+        enforce this, but the helper validates it too in case it is called directly.
+        """
+        if (start_date is None) != (end_date is None):
+            raise ValueError('Provide both start_date and end_date, or neither.')
+
         if start_date is not None and end_date is not None:
             return start_date, end_date
 
