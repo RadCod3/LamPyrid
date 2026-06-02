@@ -15,6 +15,9 @@ from ..models.firefly_models import (
     AvailableBudgetArray,
     BudgetArray,
     BudgetLimitArray,
+    BudgetLimitSingle,
+    BudgetLimitStore,
+    BudgetLimitUpdate,
     BudgetSingle,
     BudgetStore,
     InsightGroup,
@@ -281,6 +284,33 @@ class FireflyClient:
         self._handle_api_error(r)
         r.raise_for_status()
         return BudgetLimitArray.model_validate(r.json())
+
+    async def create_budget_limit(
+        self, budget_id: str, budget_limit_store: BudgetLimitStore
+    ) -> BudgetLimitSingle:
+        """Create a budget limit for a budget."""
+        payload = self._serialize_model(budget_limit_store)
+        r = await self._client.post(f'/api/v1/budgets/{budget_id}/limits', json=payload)
+        self._handle_api_error(r, payload)
+        r.raise_for_status()
+        return BudgetLimitSingle.model_validate(r.json())
+
+    async def update_budget_limit(
+        self, budget_id: str, limit_id: str, budget_limit_update: BudgetLimitUpdate
+    ) -> BudgetLimitSingle:
+        """Update an existing budget limit."""
+        payload = self._serialize_model(budget_limit_update, exclude_unset=True)
+        r = await self._client.put(f'/api/v1/budgets/{budget_id}/limits/{limit_id}', json=payload)
+        self._handle_api_error(r, payload)
+        r.raise_for_status()
+        return BudgetLimitSingle.model_validate(r.json())
+
+    async def delete_budget_limit(self, budget_id: str, limit_id: str) -> bool:
+        """Delete a budget limit by ID."""
+        r = await self._client.delete(f'/api/v1/budgets/{budget_id}/limits/{limit_id}')
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return r.status_code == 204
 
     async def create_budget(self, budget_store: BudgetStore) -> BudgetSingle:
         """Create a new budget."""

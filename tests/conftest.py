@@ -520,6 +520,30 @@ async def budget_cleanup(firefly_client: FireflyClient):
             print(f'Failed to cleanup budget {budget_id}: {e}')
 
 
+@pytest.fixture
+async def budget_limit_cleanup(firefly_client: FireflyClient):
+    """Fixture to track and cleanup budget limits created during tests.
+
+    Tests append (budget_id, limit_id) tuples; each limit is deleted after the test.
+
+    Usage:
+            async def test_set_budget_limit(mcp_client, budget_limit_cleanup):
+                    result = await mcp_client.call_tool('set_budget_limit', {...})
+                    limit = result.structured_content
+                    budget_limit_cleanup.append((limit['budget_id'], limit['id']))
+    """
+    created_limits: List[tuple[str, str]] = []
+
+    yield created_limits
+
+    for budget_id, limit_id in created_limits:
+        try:
+            await firefly_client.delete_budget_limit(budget_id, limit_id)
+            print(f'Cleaned up budget limit: {budget_id}/{limit_id}')
+        except Exception as e:
+            print(f'Failed to cleanup budget limit {budget_id}/{limit_id}: {e}')
+
+
 @pytest.fixture(scope='session', autouse=True)
 async def _cleanup_seed_transactions():
     """Cleanup seed transactions at session end.

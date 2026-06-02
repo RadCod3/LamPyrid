@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .firefly_models import (
     AccountRead,
     AccountTypeFilter,
+    BudgetLimitRead,
     BudgetRead,
     ShortAccountTypeProperty,
     TransactionArray,
@@ -748,6 +749,126 @@ class CreateBudgetRequest(BaseModel):
             if self.auto_budget_period is None:
                 raise ValueError('auto_budget_period is required when auto_budget_type is set')
         return self
+
+
+class BudgetLimit(BaseModel):
+    """A budget limit: the spendable amount set for a budget over a specific period."""
+
+    id: str = Field(..., description='Unique identifier for the budget limit', examples=['5'])
+    budget_id: str = Field(
+        ..., description='ID of the budget this limit belongs to', examples=['3']
+    )
+    amount: float = Field(
+        ..., description='Amount allocated to the budget for this period', examples=[500.0]
+    )
+    start_date: date = Field(..., description='First day this limit applies to (inclusive)')
+    end_date: date = Field(..., description='Last day this limit applies to (inclusive)')
+    currency_code: Optional[str] = Field(
+        None, description='Currency code (ISO 4217) for the amount', examples=['USD']
+    )
+    spent: Optional[float] = Field(
+        None,
+        description='Amount already spent against this limit in the period (positive number)',
+        examples=[120.0],
+    )
+    notes: Optional[str] = Field(None, description='Optional notes attached to this budget limit')
+
+    @classmethod
+    def from_budget_limit_read(cls, budget_limit_read: 'BudgetLimitRead') -> 'BudgetLimit':
+        """Create a BudgetLimit instance from a Firefly BudgetLimitRead object."""
+        attrs = budget_limit_read.attributes
+
+        spent: Optional[float] = None
+        if attrs.spent:
+            spent = 0.0
+            for spent_entry in attrs.spent:
+                if spent_entry.sum:
+                    spent += abs(float(spent_entry.sum))
+
+        return cls(
+            id=budget_limit_read.id,
+            budget_id=attrs.budget_id or '',
+            amount=float(attrs.amount) if attrs.amount is not None else 0.0,
+            start_date=attrs.start.date(),
+            end_date=attrs.end.date(),
+            currency_code=attrs.currency_code,
+            spent=spent,
+            notes=attrs.notes,
+        )
+
+
+class _BudgetLimitRequestBase(BaseModel):
+    """Shared base for budget-limit requests: identify a budget and an optional period."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    budget_id: Optional[str] = Field(
+        None,
+        description='ID of the budget (from list_budgets). Provide budget_id OR budget_name.',
+    )
+    budget_name: Optional[str] = Field(
+        None,
+        description=(
+            'Name of the budget if the ID is unknown (e.g., "Groceries"). '
+            'Provide budget_id OR budget_name. If both are given, budget_id wins.'
+        ),
+    )
+    start_date: Optional[date] = Field(
+        None,
+        description=(
+            'Start date of the period (YYYY-MM-DD), inclusive. '
+            'Defaults to the first day of the current month. '
+            'Must be provided together with end_date.'
+        ),
+    )
+    end_date: Optional[date] = Field(
+        None,
+        description=(
+            'End date of the period (YYYY-MM-DD), inclusive. '
+            'Defaults to the last day of the current month. '
+            'Must be provided together with start_date.'
+        ),
+    )
+
+    @model_validator(mode='after')
+    def _validate_budget_ref_and_period(self):
+        """Require a budget reference and ensure dates are provided together."""
+        if self.budget_id is None and self.budget_name is None:
+            raise ValueError('Provide either budget_id or budget_name.')
+        if (self.start_date is None) != (self.end_date is None):
+            raise ValueError('Provide both start_date and end_date, or neither.')
+        if (
+            self.start_date is not None
+            and self.end_date is not None
+            and self.end_date < self.start_date
+        ):
+            raise ValueError('end_date must not be before start_date.')
+        return self
+
+
+class SetBudgetLimitRequest(_BudgetLimitRequestBase):
+    """Request to set (create or update) a budget limit for a period."""
+
+    amount: float = Field(
+        ...,
+        description='Spendable amount to allocate to the budget for the period (e.g., 500.0)',
+        gt=0,
+    )
+    currency_code: Optional[str] = Field(
+        None,
+        description=(
+            "Currency code (ISO 4217, e.g., 'USD'). Defaults to the user's primary currency."
+        ),
+    )
+    notes: Optional[str] = Field(None, description='Optional notes to attach to this budget limit')
+
+
+class ListBudgetLimitsRequest(_BudgetLimitRequestBase):
+    """Request to list budget limits for a budget, optionally within a date range."""
+
+
+class DeleteBudgetLimitRequest(_BudgetLimitRequestBase):
+    """Request to delete the budget limit for a budget and period."""
 
 
 class CreateBulkTransactionsRequest(BaseModel):
