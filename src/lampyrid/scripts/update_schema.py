@@ -159,8 +159,100 @@ def update_pyproject_toml(old_version: str | None, new_version: str) -> bool:
     return False
 
 
+# Manual patches re-applied to the generated models file after every regeneration.
+# Each entry is (anchor, replacement): ``anchor`` is the exact generated snippet that
+# must be present, ``replacement`` is what it becomes. If an anchor is missing,
+# datamodel-codegen's output has drifted and apply_manual_fixes() fails loudly rather
+# than silently dropping a workaround for a known Firefly III API bug.
+_MANUAL_FIXES: list[tuple[str, str]] = [
+    # Issue #43: import the symbols the coercion validator needs and define it.
+    (
+        'from typing import Any\n',
+        'from typing import Annotated, Any\n',
+    ),
+    (
+        'from pydantic import AnyUrl, AwareDatetime, BaseModel, EmailStr, Field, RootModel\n',
+        'from pydantic import (\n'
+        '    AnyUrl,\n'
+        '    AwareDatetime,\n'
+        '    BaseModel,\n'
+        '    BeforeValidator,\n'
+        '    EmailStr,\n'
+        '    Field,\n'
+        '    RootModel,\n'
+        ')\n'
+        '\n\n'
+        '# MANUAL FIX: Firefly III API bug (Issue #43) returns currency_id as int instead of\n'
+        '# str in spent/pc_spent (ArrayEntryWithCurrencyAndSum) arrays. Coerce int to str.\n'
+        'def _coerce_to_str(v):\n'
+        '    if v is None:\n'
+        '        return None\n'
+        '    return str(v)\n',
+    ),
+    # Issue #43: wrap ArrayEntryWithCurrencyAndSum.currency_id with the coercing validator.
+    (
+        'class ArrayEntryWithCurrencyAndSum(BaseModel):\n'
+        "    currency_id: str | None = Field(None, examples=['5'])\n",
+        'class ArrayEntryWithCurrencyAndSum(BaseModel):\n'
+        '    # MANUAL FIX: coerce int to str (Issue #43)\n'
+        '    currency_id: Annotated[str | None, BeforeValidator(_coerce_to_str)] = Field(\n'
+        "        None, examples=['5']\n"
+        '    )\n',
+    ),
+]
+
+# Marker proving the patches are present, used as the idempotency guard.
+_MANUAL_FIX_MARKER = '_coerce_to_str'
+
+
+def apply_manual_fixes() -> bool:
+    """Re-apply manual patches to the freshly generated models file.
+
+    datamodel-codegen overwrites firefly_models.py from the OpenAPI spec, which
+    drops any hand-written workarounds for known Firefly III API bugs. This
+    re-injects them idempotently so they survive every regeneration.
+
+    Currently applied fixes:
+    - Issue #43: the API returns ``currency_id`` as an int in spent/pc_spent
+      (ArrayEntryWithCurrencyAndSum) arrays, but the spec types it as a string.
+      A ``BeforeValidator`` coerces int -> str so validation does not fail.
+
+    Returns:
+        True if the file was patched, False if fixes were already present.
+
+    Raises:
+        FileNotFoundError: if the generated models file does not exist.
+        RuntimeError: if a patch anchor is missing, meaning datamodel-codegen's
+            output drifted and the workaround would otherwise be silently lost.
+
+    """
+    models_path = PROJECT_ROOT / MODELS_OUTPUT
+    if not models_path.exists():
+        raise FileNotFoundError(f'{MODELS_OUTPUT} not found, cannot apply manual fixes')
+
+    content = models_path.read_text()
+
+    # Idempotency guard: if the marker is already present, the file is patched.
+    if _MANUAL_FIX_MARKER in content:
+        return False
+
+    for anchor, replacement in _MANUAL_FIXES:
+        if anchor not in content:
+            raise RuntimeError(
+                f'Manual fix anchor not found in {MODELS_OUTPUT}; datamodel-codegen '
+                f'output likely changed. Missing anchor:\n{anchor!r}'
+            )
+        content = content.replace(anchor, replacement, 1)
+
+    models_path.write_text(content)
+    return True
+
+
 def regenerate_models() -> bool:
-    """Run datamodel-codegen to regenerate Pydantic models.
+    """Run datamodel-codegen to regenerate Pydantic models, then re-apply fixes.
+
+    Manual workarounds for known Firefly III API bugs are re-applied here (not only
+    on the CLI path) so every caller of this helper gets a patched models file.
 
     Returns:
         True if successful, False otherwise
@@ -174,9 +266,14 @@ def regenerate_models() -> bool:
             text=True,
             check=True,
         )
+        if apply_manual_fixes():
+            print('   Applied manual fixes for known Firefly III API bugs')
         return True
     except subprocess.CalledProcessError as e:
         print(f'   Error running datamodel-codegen: {e.stderr}')
+        return False
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f'   Error applying manual fixes: {e}')
         return False
 
 
