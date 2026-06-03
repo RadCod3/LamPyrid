@@ -1,17 +1,54 @@
 """Unit tests for BudgetService."""
 
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from lampyrid.models.lampyrid_models import (
     CreateBudgetRequest,
+    DeleteBudgetLimitRequest,
     GetAvailableBudgetRequest,
     GetBudgetSpendingRequest,
     GetBudgetSummaryRequest,
+    ListBudgetLimitsRequest,
+    SetBudgetLimitRequest,
 )
 from lampyrid.services.budgets import BudgetService
+
+
+def _make_limit_read(
+    limit_id: str,
+    budget_id: str,
+    start: date,
+    end: date,
+    amount: str | None = '100.0',
+    spent_sums: list[str] | None = None,
+    currency_code: str | None = 'USD',
+    notes: str | None = None,
+):
+    """Build a mock BudgetLimitRead with date-returning start/end and spent entries."""
+    spent = None
+    if spent_sums is not None:
+        spent = [MagicMock(sum=value) for value in spent_sums]
+
+    start_mock = MagicMock()
+    start_mock.date.return_value = start
+    end_mock = MagicMock()
+    end_mock.date.return_value = end
+
+    return MagicMock(
+        id=limit_id,
+        attributes=MagicMock(
+            budget_id=budget_id,
+            start=start_mock,
+            end=end_mock,
+            amount=amount,
+            spent=spent,
+            currency_code=currency_code,
+            notes=notes,
+        ),
+    )
 
 
 class TestBudgetService:
@@ -331,3 +368,206 @@ class TestBudgetService:
         assert result.id == '123'
         assert result.name == 'New Budget'
         assert result.active is True
+
+    # =========================================================================
+    # Budget Limit Tests
+    # =========================================================================
+
+    @pytest.mark.asyncio
+    async def test_set_budget_limit_creates_when_none_exists(self, mock_service):
+        """set_budget_limit POSTs a new limit when none exists for the period."""
+        service, mock_client = mock_service
+
+        # No existing limit for the period
+        empty = MagicMock()
+        empty.data = []
+        mock_client.get_budget_limits.return_value = empty
+
+        created = MagicMock()
+        created.data = _make_limit_read('7', '3', date(2026, 6, 1), date(2026, 6, 30), '500.0')
+        mock_client.create_budget_limit.return_value = created
+
+        req = SetBudgetLimitRequest(
+            budget_id='3',
+            amount=500.0,
+            start_date=date(2026, 6, 1),
+            end_date=date(2026, 6, 30),
+            currency_code='USD',
+        )
+        result = await service.set_budget_limit(req)
+
+        mock_client.create_budget_limit.assert_called_once()
+        mock_client.update_budget_limit.assert_not_called()
+        budget_id_arg, store_arg = mock_client.create_budget_limit.call_args[0]
+        assert budget_id_arg == '3'
+        assert store_arg.budget_id == '3'
+        assert store_arg.amount == '500.0'
+        assert store_arg.start == date(2026, 6, 1)
+        assert store_arg.end == date(2026, 6, 30)
+        assert store_arg.currency_code == 'USD'
+
+        assert result.id == '7'
+        assert result.budget_id == '3'
+        assert result.amount == 500.0
+
+    @pytest.mark.asyncio
+    async def test_set_budget_limit_updates_when_exists(self, mock_service):
+        """set_budget_limit PUTs the existing limit when one matches the period."""
+        service, mock_client = mock_service
+
+        existing = MagicMock()
+        existing.data = [_make_limit_read('9', '3', date(2026, 6, 1), date(2026, 6, 30), '100.0')]
+        mock_client.get_budget_limits.return_value = existing
+
+        updated = MagicMock()
+        updated.data = _make_limit_read('9', '3', date(2026, 6, 1), date(2026, 6, 30), '650.0')
+        mock_client.update_budget_limit.return_value = updated
+
+        req = SetBudgetLimitRequest(
+            budget_id='3',
+            amount=650.0,
+            start_date=date(2026, 6, 1),
+            end_date=date(2026, 6, 30),
+        )
+        result = await service.set_budget_limit(req)
+
+        mock_client.update_budget_limit.assert_called_once()
+        mock_client.create_budget_limit.assert_not_called()
+        budget_id_arg, limit_id_arg, update_arg = mock_client.update_budget_limit.call_args[0]
+        assert budget_id_arg == '3'
+        assert limit_id_arg == '9'
+        assert update_arg.amount == '650.0'
+
+        assert result.amount == 650.0
+
+    @pytest.mark.asyncio
+    async def test_set_budget_limit_defaults_to_current_month(self, mock_service):
+        """set_budget_limit uses the current calendar month when dates are omitted."""
+        service, mock_client = mock_service
+
+        empty = MagicMock()
+        empty.data = []
+        mock_client.get_budget_limits.return_value = empty
+
+        today = date.today()
+        first = today.replace(day=1)
+        last = (first.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+        created = MagicMock()
+        created.data = _make_limit_read('7', '3', first, last, '300.0')
+        mock_client.create_budget_limit.return_value = created
+
+        req = SetBudgetLimitRequest(budget_id='3', amount=300.0)
+        await service.set_budget_limit(req)
+
+        # Period passed to the lookup should be the current month
+        _, lookup_start, lookup_end = mock_client.get_budget_limits.call_args[0]
+        assert lookup_start == first
+        assert lookup_end == last
+
+    @pytest.mark.asyncio
+    async def test_set_budget_limit_resolves_budget_name(self, mock_service):
+        """set_budget_limit resolves a budget_name to its ID before creating a limit."""
+        service, mock_client = mock_service
+
+        rent = MagicMock(id='1')
+        rent.attributes.name = 'Rent'
+        groceries = MagicMock(id='3')
+        groceries.attributes.name = 'Groceries'
+        budgets = MagicMock()
+        budgets.data = [rent, groceries]
+        mock_client.get_budgets.return_value = budgets
+
+        empty = MagicMock()
+        empty.data = []
+        mock_client.get_budget_limits.return_value = empty
+
+        created = MagicMock()
+        created.data = _make_limit_read('7', '3', date(2026, 6, 1), date(2026, 6, 30), '500.0')
+        mock_client.create_budget_limit.return_value = created
+
+        req = SetBudgetLimitRequest(
+            budget_name='groceries',
+            amount=500.0,
+            start_date=date(2026, 6, 1),
+            end_date=date(2026, 6, 30),
+        )
+        await service.set_budget_limit(req)
+
+        budget_id_arg, _ = mock_client.create_budget_limit.call_args[0]
+        assert budget_id_arg == '3'
+
+    @pytest.mark.asyncio
+    async def test_resolve_budget_name_not_found_raises(self, mock_service):
+        """Resolving an unknown budget name raises a clear ValueError."""
+        service, mock_client = mock_service
+
+        rent = MagicMock(id='1')
+        rent.attributes.name = 'Rent'
+        budgets = MagicMock()
+        budgets.data = [rent]
+        mock_client.get_budgets.return_value = budgets
+
+        req = ListBudgetLimitsRequest(budget_name='Nonexistent')
+        with pytest.raises(ValueError, match='No budget found'):
+            await service.list_budget_limits(req)
+
+    @pytest.mark.asyncio
+    async def test_list_budget_limits_maps_results(self, mock_service):
+        """list_budget_limits maps the array to BudgetLimit models, parsing spent."""
+        service, mock_client = mock_service
+
+        limits = MagicMock()
+        limits.data = [
+            _make_limit_read(
+                '7', '3', date(2026, 6, 1), date(2026, 6, 30), '500.0', spent_sums=['-120.0']
+            ),
+            _make_limit_read(
+                '8', '3', date(2026, 7, 1), date(2026, 7, 31), '400.0', spent_sums=None
+            ),
+        ]
+        mock_client.get_budget_limits.return_value = limits
+
+        req = ListBudgetLimitsRequest(budget_id='3')
+        result = await service.list_budget_limits(req)
+
+        assert len(result) == 2
+        assert result[0].id == '7'
+        assert result[0].amount == 500.0
+        assert result[0].spent == 120.0  # abs of -120.0
+        assert result[1].id == '8'
+        assert result[1].spent is None
+
+    @pytest.mark.asyncio
+    async def test_delete_budget_limit_found(self, mock_service):
+        """delete_budget_limit deletes the matching limit and returns True."""
+        service, mock_client = mock_service
+
+        existing = MagicMock()
+        existing.data = [_make_limit_read('9', '3', date(2026, 6, 1), date(2026, 6, 30), '100.0')]
+        mock_client.get_budget_limits.return_value = existing
+        mock_client.delete_budget_limit.return_value = True
+
+        req = DeleteBudgetLimitRequest(
+            budget_id='3', start_date=date(2026, 6, 1), end_date=date(2026, 6, 30)
+        )
+        result = await service.delete_budget_limit(req)
+
+        assert result is True
+        mock_client.delete_budget_limit.assert_called_once_with('3', '9')
+
+    @pytest.mark.asyncio
+    async def test_delete_budget_limit_not_found_raises(self, mock_service):
+        """delete_budget_limit raises ValueError when no limit exists for the period."""
+        service, mock_client = mock_service
+
+        empty = MagicMock()
+        empty.data = []
+        mock_client.get_budget_limits.return_value = empty
+
+        req = DeleteBudgetLimitRequest(
+            budget_id='3', start_date=date(2026, 6, 1), end_date=date(2026, 6, 30)
+        )
+        with pytest.raises(ValueError, match='No budget limit set'):
+            await service.delete_budget_limit(req)
+        mock_client.delete_budget_limit.assert_not_called()

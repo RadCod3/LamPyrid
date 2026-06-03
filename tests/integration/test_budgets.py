@@ -8,7 +8,13 @@ from dirty_equals import IsInt, IsStr
 from fastmcp import Client
 from inline_snapshot import snapshot
 
-from lampyrid.models.lampyrid_models import AvailableBudget, Budget, BudgetSpending, BudgetSummary
+from lampyrid.models.lampyrid_models import (
+    AvailableBudget,
+    Budget,
+    BudgetLimit,
+    BudgetSpending,
+    BudgetSummary,
+)
 
 
 @pytest.mark.asyncio
@@ -291,3 +297,197 @@ async def test_create_budget_rollover(mcp_client: Client, budget_cleanup: List[s
             'order': IsInt(ge=1),
         }
     )
+
+
+# =============================================================================
+# Budget Limit Tests (set / list / delete)
+# =============================================================================
+
+
+def _current_month() -> tuple[date, date]:
+    """Return (first, last) day of the current calendar month."""
+    start = date.today().replace(day=1)
+    next_month = start.replace(day=28) + timedelta(days=4)
+    end = next_month.replace(day=1) - timedelta(days=1)
+    return start, end
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_set_budget_limit_creates(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """Setting a limit on a budget with no existing limit creates one."""
+    start, end = _current_month()
+
+    result = await mcp_client.call_tool(
+        'set_budget_limit',
+        {
+            'req': {
+                'budget_id': test_budget.id,
+                'amount': 500.0,
+                'start_date': start.isoformat(),
+                'end_date': end.isoformat(),
+            }
+        },
+    )
+    limit = BudgetLimit.model_validate(result.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
+
+    assert limit.id is not None
+    assert limit.budget_id == test_budget.id
+    assert limit.amount == 500.0
+    assert limit.start_date == start
+    assert limit.end_date == end
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_set_budget_limit_updates(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """Setting a limit twice for the same period updates it (upsert, no duplicate)."""
+    start, end = _current_month()
+    period = {'start_date': start.isoformat(), 'end_date': end.isoformat()}
+
+    first = await mcp_client.call_tool(
+        'set_budget_limit',
+        {'req': {'budget_id': test_budget.id, 'amount': 300.0, **period}},
+    )
+    first_limit = BudgetLimit.model_validate(first.structured_content)
+    budget_limit_cleanup.append((first_limit.budget_id, first_limit.id))
+
+    second = await mcp_client.call_tool(
+        'set_budget_limit',
+        {'req': {'budget_id': test_budget.id, 'amount': 650.0, **period}},
+    )
+    second_limit = BudgetLimit.model_validate(second.structured_content)
+    budget_limit_cleanup.append((second_limit.budget_id, second_limit.id))
+
+    assert second_limit.amount == 650.0
+
+    # Upsert: only one limit should exist for this period
+    listed = await mcp_client.call_tool(
+        'list_budget_limits',
+        {'req': {'budget_id': test_budget.id, **period}},
+    )
+    limits = listed.structured_content['result']
+    assert len(limits) == 1
+    assert limits[0]['amount'] == 650.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_set_budget_limit_by_name(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """A budget limit can be set by referencing the budget by name."""
+    start, end = _current_month()
+
+    result = await mcp_client.call_tool(
+        'set_budget_limit',
+        {
+            'req': {
+                'budget_name': test_budget.name,
+                'amount': 450.0,
+                'start_date': start.isoformat(),
+                'end_date': end.isoformat(),
+            }
+        },
+    )
+    limit = BudgetLimit.model_validate(result.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
+
+    assert limit.budget_id == test_budget.id
+    assert limit.amount == 450.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_list_budget_limits(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """Listing budget limits returns a previously created limit."""
+    start, end = _current_month()
+
+    created = await mcp_client.call_tool(
+        'set_budget_limit',
+        {
+            'req': {
+                'budget_id': test_budget.id,
+                'amount': 250.0,
+                'start_date': start.isoformat(),
+                'end_date': end.isoformat(),
+            }
+        },
+    )
+    limit = BudgetLimit.model_validate(created.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
+
+    listed = await mcp_client.call_tool(
+        'list_budget_limits', {'req': {'budget_id': test_budget.id}}
+    )
+    limits = listed.structured_content['result']
+    assert any(item['id'] == limit.id and item['amount'] == 250.0 for item in limits)
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_budget_spending_reflects_limit(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """After setting a limit, get_budget_spending reports budgeted/remaining."""
+    start, end = _current_month()
+    period = {'start_date': start.isoformat(), 'end_date': end.isoformat()}
+
+    created = await mcp_client.call_tool(
+        'set_budget_limit',
+        {'req': {'budget_id': test_budget.id, 'amount': 1000.0, **period}},
+    )
+    limit = BudgetLimit.model_validate(created.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
+
+    spending_result = await mcp_client.call_tool(
+        'get_budget_spending',
+        {'req': {'budget_id': test_budget.id, **period}},
+    )
+    spending = BudgetSpending.model_validate(spending_result.structured_content)
+
+    assert spending.budgeted == 1000.0
+    assert spending.remaining is not None
+    assert spending.percentage_spent is not None
+
+
+@pytest.mark.asyncio
+@pytest.mark.budgets
+@pytest.mark.integration
+async def test_delete_budget_limit(
+    mcp_client: Client, test_budget: Budget, budget_limit_cleanup: List[tuple[str, str]]
+):
+    """Deleting a budget limit removes it for the period."""
+    start, end = _current_month()
+    period = {'start_date': start.isoformat(), 'end_date': end.isoformat()}
+
+    created = await mcp_client.call_tool(
+        'set_budget_limit',
+        {'req': {'budget_id': test_budget.id, 'amount': 200.0, **period}},
+    )
+    limit = BudgetLimit.model_validate(created.structured_content)
+    budget_limit_cleanup.append((limit.budget_id, limit.id))
+
+    deleted = await mcp_client.call_tool(
+        'delete_budget_limit', {'req': {'budget_id': test_budget.id, **period}}
+    )
+    assert deleted.structured_content['result'] is True
+
+    listed = await mcp_client.call_tool(
+        'list_budget_limits',
+        {'req': {'budget_id': test_budget.id, **period}},
+    )
+    limits = listed.structured_content['result']
+    assert all(not (date.fromisoformat(item['start_date']) == start) for item in limits)

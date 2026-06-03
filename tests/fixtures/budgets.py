@@ -5,11 +5,14 @@ from typing import Literal
 
 from lampyrid.models.lampyrid_models import (
     CreateBudgetRequest,
+    DeleteBudgetLimitRequest,
     GetAvailableBudgetRequest,
     GetBudgetRequest,
     GetBudgetSpendingRequest,
     GetBudgetSummaryRequest,
+    ListBudgetLimitsRequest,
     ListBudgetsRequest,
+    SetBudgetLimitRequest,
 )
 
 
@@ -87,4 +90,67 @@ def make_create_budget_request(
         auto_budget_currency_code=auto_budget_currency_code,
         active=active,
         notes=notes,
+    )
+
+
+def _default_month() -> tuple[date, date]:
+    """Return (first, last) day of the current calendar month."""
+    start = date.today().replace(day=1)
+    next_month = start.replace(day=28) + timedelta(days=4)
+    end = next_month.replace(day=1) - timedelta(days=1)
+    return start, end
+
+
+def make_set_budget_limit_request(
+    amount: float,
+    budget_id: str | None = None,
+    budget_name: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+    currency_code: str | None = None,
+    notes: str | None = None,
+) -> SetBudgetLimitRequest:
+    """Create a SetBudgetLimitRequest for testing (defaults to current month)."""
+    if start is None and end is None:
+        start, end = _default_month()
+    return SetBudgetLimitRequest(
+        budget_id=budget_id,
+        budget_name=budget_name,
+        amount=amount,
+        start_date=start,
+        end_date=end,
+        currency_code=currency_code,
+        notes=notes,
+    )
+
+
+def make_list_budget_limits_request(
+    budget_id: str | None = None,
+    budget_name: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+) -> ListBudgetLimitsRequest:
+    """Create a ListBudgetLimitsRequest for testing."""
+    return ListBudgetLimitsRequest(
+        budget_id=budget_id,
+        budget_name=budget_name,
+        start_date=start,
+        end_date=end,
+    )
+
+
+def make_delete_budget_limit_request(
+    budget_id: str | None = None,
+    budget_name: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+) -> DeleteBudgetLimitRequest:
+    """Create a DeleteBudgetLimitRequest for testing (defaults to current month)."""
+    if start is None and end is None:
+        start, end = _default_month()
+    return DeleteBudgetLimitRequest(
+        budget_id=budget_id,
+        budget_name=budget_name,
+        start_date=start,
+        end_date=end,
     )

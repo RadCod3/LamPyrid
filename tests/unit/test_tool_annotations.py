@@ -34,6 +34,7 @@ def _assert_mutating_tool(
     title: str,
     *,
     destructive: bool = False,
+    idempotent: bool = False,
 ) -> None:
     """Assert standard annotations for mutating tools."""
     annotations = tool.annotations
@@ -42,7 +43,7 @@ def _assert_mutating_tool(
     assert annotations.title == title
     assert annotations.readOnlyHint is False
     assert annotations.destructiveHint is destructive
-    assert annotations.idempotentHint is False
+    assert annotations.idempotentHint is idempotent
     assert annotations.openWorldHint is False
 
 
@@ -70,7 +71,10 @@ class TestToolAnnotations:
         _assert_readonly_tool(tools['get_budget_spending'], 'Get Budget Spending')
         _assert_readonly_tool(tools['get_budget_summary'], 'Get Budget Summary')
         _assert_readonly_tool(tools['get_available_budget'], 'Get Available Budget')
+        _assert_readonly_tool(tools['list_budget_limits'], 'List Budget Limits')
         _assert_mutating_tool(tools['create_budget'], 'Create Budget')
+        _assert_mutating_tool(tools['set_budget_limit'], 'Set Budget Limit', idempotent=True)
+        _assert_mutating_tool(tools['delete_budget_limit'], 'Delete Budget Limit', destructive=True)
 
     @pytest.mark.asyncio
     async def test_insight_tools_have_readonly_annotations(self):

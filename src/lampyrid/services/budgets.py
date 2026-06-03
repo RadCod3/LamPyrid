@@ -4,8 +4,8 @@ This service handles budget-related business logic and orchestrates
 operations between the MCP tools and the Firefly III client.
 """
 
-from datetime import date
-from typing import List
+from datetime import date, timedelta
+from typing import List, Optional, Tuple
 
 from ..clients.firefly import FireflyClient
 from ..models.firefly_models import (
@@ -13,19 +13,26 @@ from ..models.firefly_models import (
     AutoBudgetPeriodEnum,
     AutoBudgetType,
     AutoBudgetTypeEnum,
+    BudgetLimitRead,
+    BudgetLimitStore,
+    BudgetLimitUpdate,
     BudgetStore,
 )
 from ..models.lampyrid_models import (
     AvailableBudget,
     Budget,
+    BudgetLimit,
     BudgetSpending,
     BudgetSummary,
     CreateBudgetRequest,
+    DeleteBudgetLimitRequest,
     GetAvailableBudgetRequest,
     GetBudgetRequest,
     GetBudgetSpendingRequest,
     GetBudgetSummaryRequest,
+    ListBudgetLimitsRequest,
     ListBudgetsRequest,
+    SetBudgetLimitRequest,
 )
 
 
@@ -235,3 +242,147 @@ class BudgetService:
 
         budget_single = await self._client.create_budget(budget_store)
         return Budget.from_budget_read(budget_single.data)
+
+    async def _resolve_budget_id(self, budget_id: Optional[str], budget_name: Optional[str]) -> str:
+        """Resolve a budget reference (ID or name) to a budget ID.
+
+        If budget_id is provided it is returned as-is. Otherwise the budget is looked up
+        by name (case-insensitive exact match) from the list of all budgets.
+
+        Raises:
+                ValueError: If no budget reference is given, the name is not found, or the
+                        name matches more than one budget.
+
+        """
+        if budget_id is not None:
+            return budget_id
+
+        if budget_name is None:
+            raise ValueError('Provide either budget_id or budget_name.')
+
+        budgets_array = await self._client.get_budgets()
+        matches = [
+            budget
+            for budget in budgets_array.data
+            if budget.attributes.name.lower() == budget_name.lower()
+        ]
+
+        if not matches:
+            raise ValueError(f'No budget found with name {budget_name!r}.')
+        if len(matches) > 1:
+            raise ValueError(
+                f'Multiple budgets match name {budget_name!r}; use budget_id to disambiguate.'
+            )
+        return matches[0].id
+
+    @staticmethod
+    def _resolve_period(start_date: Optional[date], end_date: Optional[date]) -> Tuple[date, date]:
+        """Resolve a period, defaulting to the current calendar month when omitted.
+
+        Both dates must be provided together or neither. The request models already
+        enforce this, but the helper validates it too in case it is called directly.
+        """
+        if (start_date is None) != (end_date is None):
+            raise ValueError('Provide both start_date and end_date, or neither.')
+
+        if start_date is not None and end_date is not None:
+            return start_date, end_date
+
+        today = date.today()
+        first = today.replace(day=1)
+        last = (first.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+        return first, last
+
+    async def _find_limit_for_period(
+        self, budget_id: str, start: date, end: date
+    ) -> Optional[BudgetLimitRead]:
+        """Find an existing budget limit that exactly matches the given period."""
+        limits_array = await self._client.get_budget_limits(budget_id, start, end)
+        for limit in limits_array.data:
+            attrs = limit.attributes
+            if (
+                attrs.start is not None
+                and attrs.end is not None
+                and attrs.start.date() == start
+                and attrs.end.date() == end
+            ):
+                return limit
+        return None
+
+    async def set_budget_limit(self, req: SetBudgetLimitRequest) -> BudgetLimit:
+        """Set (create or update) a budget limit for a budget and period.
+
+        If a limit already exists for the exact period it is updated; otherwise a new
+        limit is created. This makes the operation an idempotent upsert from the
+        caller's perspective.
+
+        Args:
+                req: Request containing the budget reference, amount, and optional period.
+
+        Returns:
+                The created or updated budget limit.
+
+        """
+        budget_id = await self._resolve_budget_id(req.budget_id, req.budget_name)
+        start, end = self._resolve_period(req.start_date, req.end_date)
+
+        existing = await self._find_limit_for_period(budget_id, start, end)
+
+        if existing is not None:
+            limit_update = BudgetLimitUpdate(amount=str(req.amount))
+            if req.notes is not None:
+                limit_update.notes = req.notes
+            limit_single = await self._client.update_budget_limit(
+                budget_id, existing.id, limit_update
+            )
+        else:
+            limit_store = BudgetLimitStore(
+                budget_id=budget_id,
+                start=start,
+                end=end,
+                amount=str(req.amount),
+                currency_code=req.currency_code,
+                notes=req.notes,
+            )
+            limit_single = await self._client.create_budget_limit(budget_id, limit_store)
+
+        return BudgetLimit.from_budget_limit_read(limit_single.data)
+
+    async def list_budget_limits(self, req: ListBudgetLimitsRequest) -> List[BudgetLimit]:
+        """List budget limits for a budget, optionally filtered by date range.
+
+        Args:
+                req: Request containing the budget reference and optional date range.
+
+        Returns:
+                List of budget limits set for the budget.
+
+        """
+        budget_id = await self._resolve_budget_id(req.budget_id, req.budget_name)
+        limits_array = await self._client.get_budget_limits(budget_id, req.start_date, req.end_date)
+        return [BudgetLimit.from_budget_limit_read(limit) for limit in limits_array.data]
+
+    async def delete_budget_limit(self, req: DeleteBudgetLimitRequest) -> bool:
+        """Delete the budget limit for a budget and period.
+
+        Args:
+                req: Request containing the budget reference and optional period.
+
+        Returns:
+                True if the limit was deleted.
+
+        Raises:
+                ValueError: If no limit exists for the resolved period.
+
+        """
+        budget_id = await self._resolve_budget_id(req.budget_id, req.budget_name)
+        start, end = self._resolve_period(req.start_date, req.end_date)
+
+        existing = await self._find_limit_for_period(budget_id, start, end)
+        if existing is None:
+            raise ValueError(
+                f'No budget limit set for budget {budget_id} for period '
+                f'{start.isoformat()} to {end.isoformat()}.'
+            )
+
+        return await self._client.delete_budget_limit(budget_id, existing.id)
