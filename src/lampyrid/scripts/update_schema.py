@@ -180,6 +180,76 @@ def regenerate_models() -> bool:
         return False
 
 
+def apply_manual_fixes() -> bool:
+    """Re-apply manual patches to the freshly generated models file.
+
+    datamodel-codegen overwrites firefly_models.py from the OpenAPI spec, which
+    drops any hand-written workarounds for known Firefly III API bugs. This
+    re-injects them idempotently so they survive every regeneration.
+
+    Currently applied fixes:
+    - Issue #43: the API returns ``currency_id`` as an int in spent/pc_spent
+      (ArrayEntryWithCurrencyAndSum) arrays, but the spec types it as a string.
+      A ``BeforeValidator`` coerces int -> str so validation does not fail.
+
+    Returns:
+        True if the file was modified, False if fixes were already present.
+
+    """
+    models_path = PROJECT_ROOT / MODELS_OUTPUT
+    if not models_path.exists():
+        print(f'   Warning: {MODELS_OUTPUT} not found, skipping manual fixes')
+        return False
+
+    content = models_path.read_text()
+
+    # Idempotency guard: if the marker is already present, do nothing.
+    if '_coerce_to_str' in content:
+        return False
+
+    # 1. Add the imports needed by the validator.
+    content = content.replace(
+        'from typing import Any\n',
+        'from typing import Annotated, Any\n',
+        1,
+    )
+    content = content.replace(
+        'from pydantic import AnyUrl, AwareDatetime, BaseModel, EmailStr, Field, RootModel\n',
+        'from pydantic import (\n'
+        '    AnyUrl,\n'
+        '    AwareDatetime,\n'
+        '    BaseModel,\n'
+        '    BeforeValidator,\n'
+        '    EmailStr,\n'
+        '    Field,\n'
+        '    RootModel,\n'
+        ')\n'
+        '\n\n'
+        '# MANUAL FIX: Firefly III API bug (Issue #43) returns currency_id as int instead of\n'
+        '# str in spent/pc_spent (ArrayEntryWithCurrencyAndSum) arrays. Coerce int to str.\n'
+        'def _coerce_to_str(v):\n'
+        '    if v is None:\n'
+        '        return None\n'
+        '    return str(v)\n',
+        1,
+    )
+
+    # 2. Wrap ArrayEntryWithCurrencyAndSum.currency_id with the coercing validator.
+    content = content.replace(
+        'class ArrayEntryWithCurrencyAndSum(BaseModel):\n'
+        "    currency_id: str | None = Field(None, examples=['5'])\n",
+        'class ArrayEntryWithCurrencyAndSum(BaseModel):\n'
+        '    # MANUAL FIX: coerce int to str (Issue #43)\n'
+        '    currency_id: Annotated[str | None, BeforeValidator(_coerce_to_str)] = Field(\n'
+        "        None, examples=['5']\n"
+        '    )\n',
+        1,
+    )
+
+    models_path.write_text(content)
+    return True
+
+
 def cleanup_old_schema(old_version: str | None, new_version: str) -> bool:
     """Remove the old schema file if it exists and differs from new.
 
@@ -264,6 +334,13 @@ def main() -> int:
     print('\nRegenerating Pydantic models...')
     if regenerate_models():
         print(f'Models regenerated at {MODELS_OUTPUT}')
+
+        # Re-apply manual workarounds for known Firefly III API bugs
+        print('Applying manual fixes...')
+        if apply_manual_fixes():
+            print('Manual fixes applied')
+        else:
+            print('Manual fixes already present (or models file missing)')
 
         # Format the generated code
         print('Formatting generated code...')
