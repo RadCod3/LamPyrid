@@ -260,3 +260,81 @@ class TestUpdateSchemaScript:
         result = update_schema.regenerate_models()
 
         assert result is False
+
+    # --- apply_manual_fixes -------------------------------------------------
+
+    # Minimal stand-in for freshly generated firefly_models.py containing the
+    # exact anchors apply_manual_fixes() patches.
+    _GENERATED_STUB = (
+        'from __future__ import annotations\n\n'
+        'from typing import Any\n\n'
+        'from pydantic import AnyUrl, AwareDatetime, BaseModel, EmailStr, Field, RootModel\n\n\n'
+        'class ArrayEntryWithCurrencyAndSum(BaseModel):\n'
+        "    currency_id: str | None = Field(None, examples=['5'])\n"
+    )
+
+    def _stub_models_file(self, tmp_path, monkeypatch, content):
+        """Point update_schema at a temp models file containing ``content``."""
+        models_path = tmp_path / 'firefly_models.py'
+        models_path.write_text(content)
+        monkeypatch.setattr(update_schema, 'PROJECT_ROOT', tmp_path)
+        monkeypatch.setattr(update_schema, 'MODELS_OUTPUT', 'firefly_models.py')
+        return models_path
+
+    def test_apply_manual_fixes_patches_generated_file(self, tmp_path, monkeypatch):
+        """Fresh generated content is patched with the int->str coercion."""
+        models_path = self._stub_models_file(tmp_path, monkeypatch, self._GENERATED_STUB)
+
+        assert update_schema.apply_manual_fixes() is True
+
+        patched = models_path.read_text()
+        assert '_coerce_to_str' in patched
+        assert 'BeforeValidator' in patched
+        assert 'Annotated[str | None, BeforeValidator(_coerce_to_str)]' in patched
+
+    def test_apply_manual_fixes_is_idempotent(self, tmp_path, monkeypatch):
+        """Already-patched content is left untouched and reported as no-op."""
+        models_path = self._stub_models_file(tmp_path, monkeypatch, self._GENERATED_STUB)
+        update_schema.apply_manual_fixes()
+        patched = models_path.read_text()
+
+        assert update_schema.apply_manual_fixes() is False
+        assert models_path.read_text() == patched
+
+    def test_apply_manual_fixes_missing_anchor_raises(self, tmp_path, monkeypatch):
+        """A drifted generated file (anchor missing) fails loudly."""
+        drifted = self._GENERATED_STUB.replace(
+            'from typing import Any\n', 'from typing import List\n'
+        )
+        self._stub_models_file(tmp_path, monkeypatch, drifted)
+
+        with pytest.raises(RuntimeError, match='anchor not found'):
+            update_schema.apply_manual_fixes()
+
+    def test_apply_manual_fixes_missing_file_raises(self, tmp_path, monkeypatch):
+        """Missing models file fails loudly rather than silently skipping."""
+        monkeypatch.setattr(update_schema, 'PROJECT_ROOT', tmp_path)
+        monkeypatch.setattr(update_schema, 'MODELS_OUTPUT', 'does_not_exist.py')
+
+        with pytest.raises(FileNotFoundError):
+            update_schema.apply_manual_fixes()
+
+    @patch('subprocess.run')
+    def test_regenerate_models_applies_fixes(self, mock_run, tmp_path, monkeypatch):
+        """regenerate_models patches the file after a successful codegen run."""
+        mock_run.return_value = MagicMock(returncode=0)
+        models_path = self._stub_models_file(tmp_path, monkeypatch, self._GENERATED_STUB)
+
+        assert update_schema.regenerate_models() is True
+        assert '_coerce_to_str' in models_path.read_text()
+
+    @patch('subprocess.run')
+    def test_regenerate_models_fails_loud_on_drift(self, mock_run, tmp_path, monkeypatch):
+        """regenerate_models returns False if manual fixes cannot be applied."""
+        mock_run.return_value = MagicMock(returncode=0)
+        drifted = self._GENERATED_STUB.replace(
+            'from typing import Any\n', 'from typing import List\n'
+        )
+        self._stub_models_file(tmp_path, monkeypatch, drifted)
+
+        assert update_schema.regenerate_models() is False
