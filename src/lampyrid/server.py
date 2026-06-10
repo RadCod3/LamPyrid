@@ -8,7 +8,11 @@ from fastmcp.server.auth.auth import AuthProvider
 from fastmcp.server.auth.providers.google import GoogleProvider
 from fastmcp.utilities.logging import configure_logging
 from fastmcp.utilities.types import Image
-from key_value.aio.stores.filetree import FileTreeStore
+from key_value.aio.stores.filetree import (
+    FileTreeStore,
+    FileTreeV1CollectionSanitizationStrategy,
+    FileTreeV1KeySanitizationStrategy,
+)
 from key_value.aio.wrappers.encryption import FernetEncryptionWrapper
 from mcp.types import Icon
 
@@ -35,8 +39,20 @@ def _create_auth_provider() -> Optional[AuthProvider]:
             # Create storage directory if it doesn't exist
             settings.oauth_storage_path.mkdir(parents=True, exist_ok=True)
 
-            # Initialize file-tree storage with Fernet encryption
-            file_tree_store = FileTreeStore(data_directory=settings.oauth_storage_path)
+            # Initialize file-tree storage with Fernet encryption.
+            # Sanitize keys/collections so URL-based client_ids (e.g. Goose's CIMD
+            # client_id `https://.../client-metadata.json`) don't get interpreted as
+            # nested directory paths, which fails with FileNotFoundError. The default
+            # PassthroughStrategy leaves slashes untouched.
+            file_tree_store = FileTreeStore(
+                data_directory=settings.oauth_storage_path,
+                key_sanitization_strategy=FileTreeV1KeySanitizationStrategy(
+                    directory=settings.oauth_storage_path
+                ),
+                collection_sanitization_strategy=FileTreeV1CollectionSanitizationStrategy(
+                    directory=settings.oauth_storage_path
+                ),
+            )
             client_storage = FernetEncryptionWrapper(
                 key_value=file_tree_store,
                 fernet=Fernet(settings.oauth_storage_encryption_key),  # ty:ignore[invalid-argument-type]

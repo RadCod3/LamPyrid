@@ -63,10 +63,16 @@ class TestServer:
             with (
                 patch('lampyrid.server.GoogleProvider') as mock_google_provider,
                 patch('lampyrid.server.FileTreeStore') as mock_file_tree_store,
+                patch('lampyrid.server.FileTreeV1KeySanitizationStrategy') as mock_key_strategy,
+                patch(
+                    'lampyrid.server.FileTreeV1CollectionSanitizationStrategy'
+                ) as mock_collection_strategy,
                 patch('lampyrid.server.FernetEncryptionWrapper') as mock_encryption_wrapper,
             ):
                 mock_google_provider.return_value = MagicMock()
                 mock_file_tree_store.return_value = MagicMock()
+                mock_key_strategy.return_value = MagicMock()
+                mock_collection_strategy.return_value = MagicMock()
                 mock_encryption_wrapper.return_value = MagicMock()
 
                 result = _create_auth_provider()
@@ -78,7 +84,17 @@ class TestServer:
                 )
                 # Verify file tree store and encryption wrapper were initialized
                 mock_file_tree_store.assert_called_once_with(
-                    data_directory=mock_settings.oauth_storage_path
+                    data_directory=mock_settings.oauth_storage_path,
+                    key_sanitization_strategy=mock_key_strategy.return_value,
+                    collection_sanitization_strategy=mock_collection_strategy.return_value,
+                )
+                # Sanitization strategies must be built against the storage path so that
+                # URL-based client_ids (Goose CIMD) don't break filesystem persistence
+                mock_key_strategy.assert_called_once_with(
+                    directory=mock_settings.oauth_storage_path
+                )
+                mock_collection_strategy.assert_called_once_with(
+                    directory=mock_settings.oauth_storage_path
                 )
                 mock_encryption_wrapper.assert_called_once()
                 # Verify GoogleProvider was called with client_storage
