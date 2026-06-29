@@ -22,14 +22,23 @@ class TagService:
         self._client = client
 
     async def list_tags(self) -> List[Tag]:
-        """List all tags.
+        """List all tags, following pagination to return the full set.
 
         Returns:
                 List of tags.
 
         """
-        tag_array = await self._client.get_tags()
-        return [Tag.from_tag_read(tag) for tag in tag_array.data]
+        tags: List[Tag] = []
+        page = 1
+        while True:
+            tag_array = await self._client.get_tags(page=page)
+            tags.extend(Tag.from_tag_read(tag) for tag in tag_array.data)
+            pagination = tag_array.meta.pagination if tag_array.meta else None
+            total_pages = pagination.total_pages if pagination else None
+            if not tag_array.data or not total_pages or page >= total_pages:
+                break
+            page += 1
+        return tags
 
     async def get_tag(self, req: GetTagRequest) -> Tag:
         """Get a single tag by name or ID.

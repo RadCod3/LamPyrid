@@ -3,6 +3,7 @@
 import logging
 from datetime import date
 from typing import Any, Dict, Optional
+from urllib.parse import quote
 
 import httpx
 
@@ -399,7 +400,8 @@ class FireflyClient:
 
     async def get_tag(self, tag: str) -> TagSingle:
         """Get a single tag by its name or numeric ID."""
-        r = await self._client.get(f'tags/{tag}')
+        # Encode as a single path segment: tag names may contain '/', '?', '#', etc.
+        r = await self._client.get(f'tags/{quote(tag, safe="")}')
         self._handle_api_error(r)
         r.raise_for_status()
         return TagSingle.model_validate(r.json())
