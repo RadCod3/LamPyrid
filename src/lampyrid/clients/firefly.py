@@ -45,8 +45,11 @@ class FireflyClient:
     def __init__(self) -> None:
         """Initialize the Firefly III API client with authentication headers."""
         base = str(settings.firefly_base_url).rstrip('/')
+        # Append the API prefix here so individual methods use relative paths.
+        # Note: the trailing slash is required for httpx to join relative paths
+        # correctly (e.g. base '.../api/v1/' + 'accounts' -> '.../api/v1/accounts').
         self._client = httpx.AsyncClient(
-            base_url=base,
+            base_url=f'{base}/api/v1/',
             headers={
                 'Authorization': f'Bearer {settings.firefly_token}',
                 'Accept': 'application/json',
@@ -101,14 +104,14 @@ class FireflyClient:
         self, page: int = 1, type: AccountTypeFilter = AccountTypeFilter.all
     ) -> AccountArray:
         """List accounts with optional pagination and type filtering."""
-        r = await self._client.get('/api/v1/accounts', params={'page': page, 'type': type.value})
+        r = await self._client.get('accounts', params={'page': page, 'type': type.value})
         self._handle_api_error(r)
         r.raise_for_status()
         return AccountArray.model_validate(r.json())
 
     async def get_account(self, account_id: str) -> AccountSingle:
         """Get a single account by ID."""
-        r = await self._client.get(f'/api/v1/accounts/{account_id}')
+        r = await self._client.get(f'accounts/{account_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return AccountSingle.model_validate(r.json())
@@ -116,7 +119,7 @@ class FireflyClient:
     async def search_accounts(self, query: str, type: AccountTypeFilter) -> AccountArray:
         """Search accounts by name with optional type filtering."""
         r = await self._client.get(
-            '/api/v1/search/accounts',
+            'search/accounts',
             params={
                 'query': query,
                 'type': type.value,
@@ -131,7 +134,7 @@ class FireflyClient:
 
     async def create_account(self, account_store: AccountStore) -> AccountSingle:
         """Create a new account in Firefly III."""
-        r = await self._client.post('/api/v1/accounts', json=self._serialize_model(account_store))
+        r = await self._client.post('accounts', json=self._serialize_model(account_store))
         self._handle_api_error(r)
         r.raise_for_status()
         return AccountSingle.model_validate(r.json())
@@ -168,7 +171,7 @@ class FireflyClient:
             'limit': limit,
         }
 
-        r = await self._client.get('/api/v1/search/transactions', params=params)
+        r = await self._client.get('search/transactions', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return TransactionArray.model_validate(r.json())
@@ -176,7 +179,7 @@ class FireflyClient:
     async def create_transaction(self, transaction_store: TransactionStore) -> TransactionSingle:
         """Create a transaction with the given store data."""
         payload = self._serialize_model(transaction_store)
-        r = await self._client.post('/api/v1/transactions', json=payload)
+        r = await self._client.post('transactions', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return TransactionSingle.model_validate(r.json())
@@ -186,7 +189,7 @@ class FireflyClient:
     ) -> TransactionSingle:
         """Update an existing transaction."""
         payload = self._serialize_model(transaction_update, exclude_unset=True)
-        r = await self._client.put(f'/api/v1/transactions/{transaction_id}', json=payload)
+        r = await self._client.put(f'transactions/{transaction_id}', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return TransactionSingle.model_validate(r.json())
@@ -214,7 +217,7 @@ class FireflyClient:
         if transaction_type:
             params['type'] = transaction_type
 
-        r = await self._client.get('/api/v1/transactions', params=params)
+        r = await self._client.get('transactions', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return TransactionArray.model_validate(r.json())
@@ -243,35 +246,35 @@ class FireflyClient:
         if transaction_type:
             params['type'] = transaction_type
 
-        r = await self._client.get(f'/api/v1/accounts/{account_id}/transactions', params=params)
+        r = await self._client.get(f'accounts/{account_id}/transactions', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return TransactionArray.model_validate(r.json())
 
     async def get_transaction(self, transaction_id: str) -> TransactionSingle:
         """Get a single transaction by ID."""
-        r = await self._client.get(f'/api/v1/transactions/{transaction_id}')
+        r = await self._client.get(f'transactions/{transaction_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return TransactionSingle.model_validate(r.json())
 
     async def delete_transaction(self, transaction_id: str) -> bool:
         """Delete a transaction by ID."""
-        r = await self._client.delete(f'/api/v1/transactions/{transaction_id}')
+        r = await self._client.delete(f'transactions/{transaction_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return r.status_code == 204
 
     async def get_budgets(self) -> BudgetArray:
         """Get all budgets."""
-        r = await self._client.get('/api/v1/budgets')
+        r = await self._client.get('budgets')
         self._handle_api_error(r)
         r.raise_for_status()
         return BudgetArray.model_validate(r.json())
 
     async def get_budget(self, budget_id: str) -> BudgetSingle:
         """Get a single budget by ID."""
-        r = await self._client.get(f'/api/v1/budgets/{budget_id}')
+        r = await self._client.get(f'budgets/{budget_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return BudgetSingle.model_validate(r.json())
@@ -287,7 +290,7 @@ class FireflyClient:
         if end_date:
             params['end'] = end_date.strftime('%Y-%m-%d')
 
-        r = await self._client.get(f'/api/v1/budgets/{budget_id}/limits', params=params)
+        r = await self._client.get(f'budgets/{budget_id}/limits', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return BudgetLimitArray.model_validate(r.json())
@@ -297,7 +300,7 @@ class FireflyClient:
     ) -> BudgetLimitSingle:
         """Create a budget limit for a budget."""
         payload = self._serialize_model(budget_limit_store)
-        r = await self._client.post(f'/api/v1/budgets/{budget_id}/limits', json=payload)
+        r = await self._client.post(f'budgets/{budget_id}/limits', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return BudgetLimitSingle.model_validate(r.json())
@@ -307,14 +310,14 @@ class FireflyClient:
     ) -> BudgetLimitSingle:
         """Update an existing budget limit."""
         payload = self._serialize_model(budget_limit_update, exclude_unset=True)
-        r = await self._client.put(f'/api/v1/budgets/{budget_id}/limits/{limit_id}', json=payload)
+        r = await self._client.put(f'budgets/{budget_id}/limits/{limit_id}', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return BudgetLimitSingle.model_validate(r.json())
 
     async def delete_budget_limit(self, budget_id: str, limit_id: str) -> bool:
         """Delete a budget limit by ID."""
-        r = await self._client.delete(f'/api/v1/budgets/{budget_id}/limits/{limit_id}')
+        r = await self._client.delete(f'budgets/{budget_id}/limits/{limit_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return r.status_code == 204
@@ -322,14 +325,14 @@ class FireflyClient:
     async def create_budget(self, budget_store: BudgetStore) -> BudgetSingle:
         """Create a new budget."""
         payload = self._serialize_model(budget_store)
-        r = await self._client.post('/api/v1/budgets', json=payload)
+        r = await self._client.post('budgets', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return BudgetSingle.model_validate(r.json())
 
     async def delete_budget(self, budget_id: str) -> bool:
         """Delete a budget by ID."""
-        r = await self._client.delete(f'/api/v1/budgets/{budget_id}')
+        r = await self._client.delete(f'budgets/{budget_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return r.status_code == 204
@@ -345,7 +348,7 @@ class FireflyClient:
         if end_date:
             params['end'] = end_date.strftime('%Y-%m-%d')
 
-        r = await self._client.get('/api/v1/available-budgets', params=params)
+        r = await self._client.get('available-budgets', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return AvailableBudgetArray.model_validate(r.json())
@@ -356,7 +359,7 @@ class FireflyClient:
 
     async def get_categories(self, page: int = 1) -> CategoryArray:
         """Get all categories."""
-        r = await self._client.get('/api/v1/categories', params={'page': page})
+        r = await self._client.get('categories', params={'page': page})
         self._handle_api_error(r)
         r.raise_for_status()
         return CategoryArray.model_validate(r.json())
@@ -378,7 +381,7 @@ class FireflyClient:
         if end_date:
             params['end'] = end_date.strftime('%Y-%m-%d')
 
-        r = await self._client.get(f'/api/v1/categories/{category_id}', params=params)
+        r = await self._client.get(f'categories/{category_id}', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return CategorySingle.model_validate(r.json())
@@ -389,14 +392,14 @@ class FireflyClient:
 
     async def get_tags(self, page: int = 1) -> TagArray:
         """Get all tags."""
-        r = await self._client.get('/api/v1/tags', params={'page': page})
+        r = await self._client.get('tags', params={'page': page})
         self._handle_api_error(r)
         r.raise_for_status()
         return TagArray.model_validate(r.json())
 
     async def get_tag(self, tag: str) -> TagSingle:
         """Get a single tag by its name or numeric ID."""
-        r = await self._client.get(f'/api/v1/tags/{tag}')
+        r = await self._client.get(f'tags/{tag}')
         self._handle_api_error(r)
         r.raise_for_status()
         return TagSingle.model_validate(r.json())
@@ -430,7 +433,7 @@ class FireflyClient:
     ) -> InsightTotal:
         """Get total expenses for a period."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/expense/total', params=params)
+        r = await self._client.get('insight/expense/total', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTotal.model_validate(r.json())
@@ -443,7 +446,7 @@ class FireflyClient:
     ) -> InsightGroup:
         """Get expenses grouped by expense account (vendor/payee)."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/expense/expense', params=params)
+        r = await self._client.get('insight/expense/expense', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightGroup.model_validate(r.json())
@@ -456,7 +459,7 @@ class FireflyClient:
     ) -> InsightGroup:
         """Get expenses grouped by asset account (source)."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/expense/asset', params=params)
+        r = await self._client.get('insight/expense/asset', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightGroup.model_validate(r.json())
@@ -472,7 +475,7 @@ class FireflyClient:
         params = self._build_insight_params(start_date, end_date, account_ids)
         if budget_ids:
             params['budgets[]'] = budget_ids
-        r = await self._client.get('/api/v1/insight/expense/budget', params=params)
+        r = await self._client.get('insight/expense/budget', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightGroup.model_validate(r.json())
@@ -485,7 +488,7 @@ class FireflyClient:
     ) -> InsightTotal:
         """Get expenses without any budget assigned."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/expense/no-budget', params=params)
+        r = await self._client.get('insight/expense/no-budget', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTotal.model_validate(r.json())
@@ -500,7 +503,7 @@ class FireflyClient:
     ) -> InsightTotal:
         """Get total income for a period."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/income/total', params=params)
+        r = await self._client.get('insight/income/total', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTotal.model_validate(r.json())
@@ -513,7 +516,7 @@ class FireflyClient:
     ) -> InsightGroup:
         """Get income grouped by revenue account (income source)."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/income/revenue', params=params)
+        r = await self._client.get('insight/income/revenue', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightGroup.model_validate(r.json())
@@ -526,7 +529,7 @@ class FireflyClient:
     ) -> InsightGroup:
         """Get income grouped by asset account (receiving account)."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/income/asset', params=params)
+        r = await self._client.get('insight/income/asset', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightGroup.model_validate(r.json())
@@ -541,7 +544,7 @@ class FireflyClient:
     ) -> InsightTotal:
         """Get total transfers for a period."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/transfer/total', params=params)
+        r = await self._client.get('insight/transfer/total', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTotal.model_validate(r.json())
@@ -554,7 +557,7 @@ class FireflyClient:
     ) -> InsightTransfer:
         """Get transfers grouped by asset account with in/out breakdown."""
         params = self._build_insight_params(start_date, end_date, account_ids)
-        r = await self._client.get('/api/v1/insight/transfer/asset', params=params)
+        r = await self._client.get('insight/transfer/asset', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return InsightTransfer.model_validate(r.json())
@@ -565,14 +568,14 @@ class FireflyClient:
 
     async def get_rules(self, page: int = 1) -> RuleArray:
         """Get all rules with pagination."""
-        r = await self._client.get('/api/v1/rules', params={'page': page})
+        r = await self._client.get('rules', params={'page': page})
         self._handle_api_error(r)
         r.raise_for_status()
         return RuleArray.model_validate(r.json())
 
     async def get_rule(self, rule_id: str) -> RuleSingle:
         """Get a single rule by ID."""
-        r = await self._client.get(f'/api/v1/rules/{rule_id}')
+        r = await self._client.get(f'rules/{rule_id}')
         self._handle_api_error(r)
         r.raise_for_status()
         return RuleSingle.model_validate(r.json())
@@ -580,7 +583,7 @@ class FireflyClient:
     async def update_rule(self, rule_id: str, rule_update: RuleUpdate) -> RuleSingle:
         """Update an existing rule."""
         payload = self._serialize_model(rule_update, exclude_unset=True)
-        r = await self._client.put(f'/api/v1/rules/{rule_id}', json=payload)
+        r = await self._client.put(f'rules/{rule_id}', json=payload)
         self._handle_api_error(r, payload)
         r.raise_for_status()
         return RuleSingle.model_validate(r.json())
@@ -611,7 +614,7 @@ class FireflyClient:
         if account_ids:
             params['accounts[]'] = account_ids
 
-        r = await self._client.get(f'/api/v1/rules/{rule_id}/test', params=params)
+        r = await self._client.get(f'rules/{rule_id}/test', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return TransactionArray.model_validate(r.json())
@@ -642,7 +645,7 @@ class FireflyClient:
         if account_ids:
             params['accounts[]'] = account_ids
 
-        r = await self._client.post(f'/api/v1/rules/{rule_id}/trigger', params=params)
+        r = await self._client.post(f'rules/{rule_id}/trigger', params=params)
         self._handle_api_error(r)
         r.raise_for_status()
         return r.status_code == 204

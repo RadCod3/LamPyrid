@@ -45,8 +45,9 @@ class TestFireflyClient:
 
             client = FireflyClient()
 
-            # Verify the client was initialized with correct base URL
-            assert client._client.base_url == 'https://firefly.example.com'
+            # Verify the client was initialized with correct base URL.
+            # The /api/v1/ prefix is appended so methods can use relative paths.
+            assert client._client.base_url == 'https://firefly.example.com/api/v1/'
 
     def test_init_with_trailing_slash(self):
         """Test FireflyClient initialization with trailing slash."""
@@ -84,7 +85,8 @@ class TestFireflyClient:
         call_args = mock_http_client.post.call_args
 
         # Check that it was called with correct relative URL
-        assert '/api/v1/accounts' in str(call_args[0])
+        # (the /api/v1/ prefix lives in the client's base_url)
+        assert 'accounts' in str(call_args[0])
         assert 'json' in call_args[1]
 
         # Verify result is validated
@@ -249,7 +251,8 @@ class TestFireflyClient:
         call_args = mock_http_client.post.call_args
 
         # Check that it was called with correct relative URL
-        assert '/api/v1/budgets' in str(call_args[0])
+        # (the /api/v1/ prefix lives in the client's base_url)
+        assert 'budgets' in str(call_args[0])
         assert 'json' in call_args[1]
 
         # Verify result is validated
