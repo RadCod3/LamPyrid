@@ -20,12 +20,16 @@ from ..models.firefly_models import (
     BudgetLimitUpdate,
     BudgetSingle,
     BudgetStore,
+    CategoryArray,
+    CategorySingle,
     InsightGroup,
     InsightTotal,
     InsightTransfer,
     RuleArray,
     RuleSingle,
     RuleUpdate,
+    TagArray,
+    TagSingle,
     TransactionArray,
     TransactionSingle,
     TransactionStore,
@@ -345,6 +349,57 @@ class FireflyClient:
         self._handle_api_error(r)
         r.raise_for_status()
         return AvailableBudgetArray.model_validate(r.json())
+
+    # =========================================================================
+    # Category API Methods
+    # =========================================================================
+
+    async def get_categories(self, page: int = 1) -> CategoryArray:
+        """Get all categories."""
+        r = await self._client.get('/api/v1/categories', params={'page': page})
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return CategoryArray.model_validate(r.json())
+
+    async def get_category(
+        self,
+        category_id: str,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> CategorySingle:
+        """Get a single category by ID.
+
+        When start_date and end_date are provided, the response includes spending
+        and earning totals for that period.
+        """
+        params: Dict[str, Any] = {}
+        if start_date:
+            params['start'] = start_date.strftime('%Y-%m-%d')
+        if end_date:
+            params['end'] = end_date.strftime('%Y-%m-%d')
+
+        r = await self._client.get(f'/api/v1/categories/{category_id}', params=params)
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return CategorySingle.model_validate(r.json())
+
+    # =========================================================================
+    # Tag API Methods
+    # =========================================================================
+
+    async def get_tags(self, page: int = 1) -> TagArray:
+        """Get all tags."""
+        r = await self._client.get('/api/v1/tags', params={'page': page})
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return TagArray.model_validate(r.json())
+
+    async def get_tag(self, tag: str) -> TagSingle:
+        """Get a single tag by its name or numeric ID."""
+        r = await self._client.get(f'/api/v1/tags/{tag}')
+        self._handle_api_error(r)
+        r.raise_for_status()
+        return TagSingle.model_validate(r.json())
 
     # =========================================================================
     # Insight API Methods

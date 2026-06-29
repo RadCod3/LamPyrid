@@ -7,7 +7,16 @@ domain-specific business logic, aggregations, and multi-call operations.
 
 from .accounts import AccountService
 from .budgets import BudgetService
+from .categories import CategoryService
 from .insights import InsightService
+from .tags import TagService
 from .transactions import TransactionService
 
-__all__ = ['AccountService', 'BudgetService', 'InsightService', 'TransactionService']
+__all__ = [
+    'AccountService',
+    'BudgetService',
+    'CategoryService',
+    'InsightService',
+    'TagService',
+    'TransactionService',
+]

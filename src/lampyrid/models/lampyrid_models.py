@@ -10,10 +10,12 @@ from .firefly_models import (
     AccountTypeFilter,
     BudgetLimitRead,
     BudgetRead,
+    CategoryRead,
     RuleActionKeyword,
     RuleRead,
     RuleTriggerKeyword,
     ShortAccountTypeProperty,
+    TagRead,
     TransactionArray,
     TransactionRead,
     TransactionSingle,
@@ -21,6 +23,10 @@ from .firefly_models import (
     TransactionTypeFilter,
     TransactionTypeProperty,
 )
+
+# Alias so models can annotate a field literally named ``date`` without the
+# field name shadowing the ``date`` type within the class body.
+_DateType = date
 
 
 def utc_now():
@@ -117,6 +123,21 @@ class Transaction(BaseModel):
     currency_code: Optional[str] = Field(None, description='Currency code')
     budget_id: Optional[str] = Field(None, description='ID of the budget for this transaction')
     budget_name: Optional[str] = Field(None, description='Name of the budget for this transaction')
+    category_id: Optional[str] = Field(None, description='ID of the category for this transaction')
+    category_name: Optional[str] = Field(
+        None,
+        description=(
+            'Finer-grained classification of the transaction (e.g. "vegetables", '
+            '"personal hygiene"). One per transaction; complements the budget.'
+        ),
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Cross-cutting labels grouping transactions across budgets/categories/time '
+            '(e.g. a trip name, a project, a tax year). Multiple allowed.'
+        ),
+    )
 
     @classmethod
     def from_transaction_single(cls, trx: TransactionSingle) -> 'Transaction':
@@ -135,6 +156,9 @@ class Transaction(BaseModel):
             currency_code=inner_trx.currency_code,
             budget_id=inner_trx.budget_id,
             budget_name=inner_trx.budget_name,
+            category_id=inner_trx.category_id,
+            category_name=inner_trx.category_name,
+            tags=inner_trx.tags,
         )
 
     @classmethod
@@ -154,6 +178,9 @@ class Transaction(BaseModel):
             currency_code=first_trx.currency_code,
             budget_id=first_trx.budget_id,
             budget_name=first_trx.budget_name,
+            category_id=first_trx.category_id,
+            category_name=first_trx.category_name,
+            tags=first_trx.tags,
         )
 
     def to_transaction_split_store(self) -> TransactionSplitStore:
@@ -169,6 +196,9 @@ class Transaction(BaseModel):
             destination_name=self.destination_name,
             budget_id=self.budget_id,
             budget_name=self.budget_name,
+            category_id=self.category_id,
+            category_name=self.category_name,
+            tags=self.tags,
         )
 
 
@@ -259,6 +289,26 @@ class CreateWithdrawalRequest(BaseModel):
         None,
         description='Name of budget if ID is unknown. Will use ID if both provided.',
     )
+    category_id: Optional[str] = Field(
+        None,
+        description='ID of an existing category to classify this expense (from list_categories).',
+    )
+    category_name: Optional[str] = Field(
+        None,
+        description=(
+            'Finer-grained classification of the expense (e.g. "vegetables", '
+            '"personal hygiene"). Complements the budget. Unknown names are auto-created. '
+            'If both id and name are given, the id wins.'
+        ),
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Cross-cutting labels grouping transactions across budgets/categories/time '
+            '(e.g. a trip name, a project, a tax year). Multiple allowed; '
+            'unknown tags are auto-created.'
+        ),
+    )
 
     @model_validator(mode='after')
     def validate_destination_mutual_exclusivity(self):
@@ -308,6 +358,24 @@ class CreateDepositRequest(BaseModel):
             'Must be an asset account you own.'
         ),
     )
+    category_id: Optional[str] = Field(
+        None,
+        description='ID of an existing category to classify this income (from list_categories).',
+    )
+    category_name: Optional[str] = Field(
+        None,
+        description=(
+            'Finer-grained classification of the income (e.g. "salary", "refund"). '
+            'Unknown names are auto-created. If both id and name are given, the id wins.'
+        ),
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Cross-cutting labels grouping transactions across budgets/categories/time. '
+            'Multiple allowed; unknown tags are auto-created.'
+        ),
+    )
 
     @model_validator(mode='after')
     def validate_source_mutual_exclusivity(self):
@@ -340,6 +408,24 @@ class CreateTransferRequest(BaseModel):
     destination_id: str = Field(
         ...,
         description='ID of your account receiving the money. Must be an asset account you own.',
+    )
+    category_id: Optional[str] = Field(
+        None,
+        description='ID of an existing category to classify this transfer (from list_categories).',
+    )
+    category_name: Optional[str] = Field(
+        None,
+        description=(
+            'Finer-grained classification of the transfer. Unknown names are auto-created. '
+            'If both id and name are given, the id wins.'
+        ),
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description=(
+            'Cross-cutting labels grouping transactions across budgets/categories/time. '
+            'Multiple allowed; unknown tags are auto-created.'
+        ),
     )
 
 
@@ -451,6 +537,14 @@ class SearchTransactionsRequest(BaseModel):
         description='Budget name to filter by (exact match)',
         examples=['Groceries', 'Dining Out'],
     )
+    tags: list[str] | None = Field(
+        None,
+        description=(
+            'Tag name(s) to filter by (exact match). When multiple are given, only '
+            'transactions carrying all of them are returned (AND logic).'
+        ),
+        examples=[['holiday-2024'], ['tax-deductible', 'business']],
+    )
 
     # Account filters
     account_contains: str | None = Field(
@@ -492,13 +586,16 @@ class SearchTransactionsRequest(BaseModel):
             self.account_contains,
             self.account_id,
         ]
-        # Consider a field provided if: (a) it's not None and not a string, or
+        # Consider a field provided if: (a) it's not None and not a string/list, or
         # (b) it's a string and not empty/whitespace-only
         has_criteria = any(
             (field is not None and not isinstance(field, str))
             or (isinstance(field, str) and field.strip() != '')
             for field in search_fields
         )
+        # Tags: provided only if the list is non-empty
+        if self.tags:
+            has_criteria = True
         if not has_criteria:
             raise ValueError('At least one search criterion must be provided')
         return self
@@ -933,8 +1030,23 @@ class UpdateTransactionRequest(BaseModel):
     budget_id: Optional[str] = Field(
         None, description='New budget ID to assign, or None to remove budget assignment'
     )
+    category_id: Optional[str] = Field(
+        None,
+        description='New category ID to assign (from list_categories). Overrules category_name.',
+    )
     category_name: Optional[str] = Field(
-        None, description='New category name for transaction classification'
+        None,
+        description=(
+            'New category name for transaction classification. Unknown names are auto-created.'
+        ),
+    )
+    tags: Optional[List[str]] = Field(
+        None,
+        description=(
+            'New set of tags for the transaction. REPLACES all existing tags on the '
+            'transaction; omit this field to leave existing tags unchanged. '
+            'Pass an empty list to clear all tags. Unknown tags are auto-created.'
+        ),
     )
 
 
@@ -1473,4 +1585,136 @@ class RuleExecuteResult(BaseModel):
             'The rule is queued but may still be processing. Check the rule '
             'later to confirm changes.'
         ),
+    )
+
+
+# =============================================================================
+# Category Models - Request and Response models for category management
+# =============================================================================
+
+
+def _sum_currency_entries(entries: Optional[List[Any]]) -> Optional[float]:
+    """Sum the absolute amounts of a Firefly currency/sum array (e.g. spent, earned).
+
+    Returns None when no entries are present (i.e. no date range was requested).
+    """
+    if not entries:
+        return None
+    total = 0.0
+    for entry in entries:
+        if entry.sum:
+            total += abs(float(entry.sum))
+    return total
+
+
+class Category(BaseModel):
+    """Simplified category model for MCP responses."""
+
+    id: str = Field(..., description='Unique identifier for the category', examples=['2'])
+    name: str = Field(..., description='Display name of the category', examples=['Groceries'])
+    notes: Optional[str] = Field(
+        None, description='Optional notes or description about this category'
+    )
+    spent: Optional[float] = Field(
+        None,
+        description=(
+            'Total spent in this category for the requested period (positive number). '
+            'Only present when a date range is requested.'
+        ),
+        examples=[120.0],
+    )
+    earned: Optional[float] = Field(
+        None,
+        description=(
+            'Total earned in this category for the requested period (positive number). '
+            'Only present when a date range is requested.'
+        ),
+        examples=[0.0],
+    )
+
+    @classmethod
+    def from_category_read(cls, category_read: 'CategoryRead') -> 'Category':
+        """Create a Category instance from a Firefly CategoryRead object."""
+        attrs = category_read.attributes
+        return cls(
+            id=category_read.id,
+            name=attrs.name,
+            notes=attrs.notes,
+            spent=_sum_currency_entries(attrs.spent),
+            earned=_sum_currency_entries(attrs.earned),
+        )
+
+
+class GetCategoryRequest(BaseModel):
+    """Request for getting a single category by ID, with optional spending period."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    id: str = Field(..., description='Unique identifier of the category to get details for')
+    start_date: Optional[date] = Field(
+        None,
+        description=(
+            'Start date (YYYY-MM-DD) for spending/earning totals, inclusive. '
+            'Must be provided together with end_date.'
+        ),
+    )
+    end_date: Optional[date] = Field(
+        None,
+        description=(
+            'End date (YYYY-MM-DD) for spending/earning totals, inclusive. '
+            'Must be provided together with start_date.'
+        ),
+    )
+
+    @model_validator(mode='after')
+    def _validate_period(self) -> 'GetCategoryRequest':
+        """Ensure start and end dates are provided together and ordered."""
+        if (self.start_date is None) != (self.end_date is None):
+            raise ValueError('Provide both start_date and end_date, or neither.')
+        if (
+            self.start_date is not None
+            and self.end_date is not None
+            and self.end_date < self.start_date
+        ):
+            raise ValueError('end_date must not be before start_date.')
+        return self
+
+
+# =============================================================================
+# Tag Models - Request and Response models for tag management
+# =============================================================================
+
+
+class Tag(BaseModel):
+    """Simplified tag model for MCP responses."""
+
+    id: str = Field(..., description='Unique identifier for the tag', examples=['2'])
+    tag: str = Field(..., description='The tag name', examples=['holiday-2024'])
+    description: Optional[str] = Field(None, description='Optional description of the tag')
+    # Annotate with _DateType to avoid the field name `date` shadowing the `date` type.
+    date: Optional[_DateType] = Field(
+        None, description='Optional date the tag is applicable to (YYYY-MM-DD)'
+    )
+
+    @classmethod
+    def from_tag_read(cls, tag_read: 'TagRead') -> 'Tag':
+        """Create a Tag instance from a Firefly TagRead object."""
+        attrs = tag_read.attributes
+        return cls(
+            id=tag_read.id,
+            tag=attrs.tag,
+            description=attrs.description,
+            date=attrs.date,
+        )
+
+
+class GetTagRequest(BaseModel):
+    """Request for getting a single tag by name or ID."""
+
+    model_config = ConfigDict(extra='forbid')
+
+    tag: str = Field(
+        ...,
+        description='The tag name (e.g. "holiday-2024") or its numeric ID.',
+        min_length=1,
     )
