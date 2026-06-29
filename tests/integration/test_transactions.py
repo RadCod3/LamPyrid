@@ -1642,6 +1642,7 @@ async def test_create_withdrawal_with_category_and_tags(
         },
     )
     transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
 
     assert transaction.category_name == 'Txn Category'
@@ -1680,6 +1681,7 @@ async def test_create_deposit_with_category_and_tags(
         },
     )
     transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
 
     assert transaction.category_name == 'Income Category'
@@ -1710,6 +1712,7 @@ async def test_update_transaction_replaces_and_clears_tags(
         },
     )
     transaction = Transaction.model_validate(create.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
     assert set(transaction.tags or []) == {'original-a', 'original-b'}
 
@@ -1755,9 +1758,53 @@ async def test_search_transactions_by_tag(
         },
     )
     transaction = Transaction.model_validate(create.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
 
     found = await mcp_client.call_tool('search_transactions', {'req': {'tags': [unique_tag]}})
     response = TransactionListResponse.model_validate(found.structured_content)
     ids = {t.id for t in response.transactions}
     assert transaction.id in ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_by_multiple_tags_uses_and(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Searching by multiple tags returns only transactions carrying all of them."""
+    tag_a = 'multi-and-tag-a'
+    tag_b = 'multi-and-tag-b'
+
+    async def _make(description: str, tags: list[str]) -> str:
+        result = await mcp_client.call_tool(
+            'create_withdrawal',
+            {
+                'req': {
+                    'amount': 11.0,
+                    'description': description,
+                    'source_id': test_asset_account.id,
+                    'destination_name': test_expense_account,
+                    'tags': tags,
+                    'date': datetime.now(timezone.utc).isoformat(),
+                }
+            },
+        )
+        txn = Transaction.model_validate(result.structured_content)
+        assert txn.id is not None
+        transaction_cleanup.append(txn.id)
+        return txn.id
+
+    both_id = await _make('Has both tags', [tag_a, tag_b])
+    only_a_id = await _make('Has only tag a', [tag_a])
+
+    # Searching for both tags (AND) must return only the transaction carrying both.
+    found = await mcp_client.call_tool('search_transactions', {'req': {'tags': [tag_a, tag_b]}})
+    response = TransactionListResponse.model_validate(found.structured_content)
+    ids = {t.id for t in response.transactions}
+    assert both_id in ids
+    assert only_a_id not in ids

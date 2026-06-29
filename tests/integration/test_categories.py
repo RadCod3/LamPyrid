@@ -5,7 +5,7 @@ that categories submitted on transactions are auto-created and that spending
 totals are reported for a requested period.
 """
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from typing import List
 
 import pytest
@@ -16,8 +16,12 @@ from lampyrid.models.lampyrid_models import Account, Category, Transaction
 
 
 def _month_bounds() -> tuple[str, str]:
-    """Return (first-of-month, today) ISO date strings for the current month."""
-    today = date.today()
+    """Return (first-of-month, today) ISO date strings for the current UTC month.
+
+    Uses UTC to stay consistent with the UTC timestamps used when creating the
+    test transactions, avoiding month-boundary flakiness in non-UTC timezones.
+    """
+    today = datetime.now(timezone.utc).date()
     return today.replace(day=1).isoformat(), today.isoformat()
 
 
@@ -47,6 +51,7 @@ async def test_category_auto_created_and_listed(
         },
     )
     transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
 
     # The transaction carries the category, with a freshly assigned id.
@@ -87,6 +92,7 @@ async def test_get_category_reports_period_spending(
         },
     )
     transaction = Transaction.model_validate(create.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
     category_id = transaction.category_id
     assert category_id is not None

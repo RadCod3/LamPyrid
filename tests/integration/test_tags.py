@@ -41,6 +41,7 @@ async def test_tags_auto_created_and_listed(
         },
     )
     transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
     assert set(transaction.tags or []) == set(tags)
 
@@ -58,7 +59,7 @@ async def test_get_tag_by_name(
     test_expense_account: str,
     transaction_cleanup: List[str],
 ):
-    """A tag can be retrieved by its name."""
+    """A tag can be retrieved by its name and by its numeric ID."""
     tag_name = 'integration-tag-getbyname'
 
     result = await mcp_client.call_tool(
@@ -75,12 +76,20 @@ async def test_get_tag_by_name(
         },
     )
     transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
     transaction_cleanup.append(transaction.id)
 
-    fetched = await mcp_client.call_tool('get_tag', {'req': {'tag': tag_name}})
-    tag = Tag.model_validate(fetched.structured_content)
+    # Lookup by name.
+    by_name = await mcp_client.call_tool('get_tag', {'req': {'tag': tag_name}})
+    tag = Tag.model_validate(by_name.structured_content)
     assert tag.tag == tag_name
     assert tag.id is not None
+
+    # Lookup by the numeric ID returns the same tag.
+    by_id = await mcp_client.call_tool('get_tag', {'req': {'tag': tag.id}})
+    same_tag = Tag.model_validate(by_id.structured_content)
+    assert same_tag.id == tag.id
+    assert same_tag.tag == tag_name
 
 
 @pytest.mark.asyncio
