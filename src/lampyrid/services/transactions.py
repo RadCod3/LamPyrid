@@ -65,6 +65,9 @@ class TransactionService:
             destination_name=req.destination_name,
             budget_id=req.budget_id,
             budget_name=req.budget_name,
+            category_id=req.category_id,
+            category_name=req.category_name,
+            tags=req.tags,
         )
         trx_store = TransactionStore(
             transactions=[trx],
@@ -94,6 +97,9 @@ class TransactionService:
             source_id=req.source_id,
             source_name=req.source_name,
             destination_id=req.destination_id,
+            category_id=req.category_id,
+            category_name=req.category_name,
+            tags=req.tags,
         )
         trx_store = TransactionStore(
             transactions=[trx],
@@ -122,6 +128,9 @@ class TransactionService:
             date=req.date,
             source_id=req.source_id,
             destination_id=req.destination_id,
+            category_id=req.category_id,
+            category_name=req.category_name,
+            tags=req.tags,
         )
         trx_store = TransactionStore(
             transactions=[trx],
@@ -326,6 +335,10 @@ class TransactionService:
         if req.budget:
             sanitized = FireflyClient._sanitize_value(req.budget)
             query_parts.append(f'budget_is:{sanitized}')
+        if req.tags:
+            for tag in req.tags:
+                sanitized = FireflyClient._sanitize_value(tag)
+                query_parts.append(f'tag_is:{sanitized}')
 
         # Account filters - sanitize user-provided values to escape special characters
         if req.account_contains:
@@ -370,8 +383,13 @@ class TransactionService:
             update_kwargs['destination_id'] = req.destination_id
         if req.budget_id is not None:
             update_kwargs['budget_id'] = req.budget_id
+        if req.category_id is not None:
+            update_kwargs['category_id'] = req.category_id
         if req.category_name is not None:
             update_kwargs['category_name'] = req.category_name
+        # tags uses replace semantics: an empty list clears all tags, None leaves unchanged
+        if req.tags is not None:
+            update_kwargs['tags'] = req.tags
 
         trx_split_update = TransactionSplitUpdate(**update_kwargs)
 

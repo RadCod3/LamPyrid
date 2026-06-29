@@ -27,6 +27,9 @@ def make_create_withdrawal_request(
     destination_name: str | None = None,
     destination_id: str | None = None,
     budget_id: str | None = None,
+    category_name: str | None = None,
+    category_id: str | None = None,
+    tags: List[str] | None = None,
     date: datetime | None = None,
 ) -> CreateWithdrawalRequest:
     """Create a CreateWithdrawalRequest for testing.
@@ -38,6 +41,9 @@ def make_create_withdrawal_request(
         destination_name: Name of expense account (optional, exclusive with destination_id)
         destination_id: ID of expense account (optional, exclusive with destination_name)
         budget_id: Optional budget ID
+        category_name: Optional category name (auto-created if unknown)
+        category_id: Optional category ID
+        tags: Optional list of tags (auto-created if unknown)
         date: Transaction date (defaults to now)
 
     """
@@ -52,6 +58,9 @@ def make_create_withdrawal_request(
         destination_id=destination_id,
         destination_name=destination_name,
         budget_id=budget_id,
+        category_name=category_name,
+        category_id=category_id,
+        tags=tags,
     )
 
 
@@ -62,6 +71,8 @@ def make_create_deposit_request(
     *,
     source_name: str | None = None,
     source_id: str | None = None,
+    category_name: str | None = None,
+    tags: List[str] | None = None,
     date: datetime | None = None,
 ) -> CreateDepositRequest:
     """Create a CreateDepositRequest for testing.
@@ -72,6 +83,8 @@ def make_create_deposit_request(
         destination_id: ID of the destination asset account
         source_name: Name of the revenue account (optional, mutually exclusive with source_id)
         source_id: ID of the revenue account (optional, mutually exclusive with source_name)
+        category_name: Optional category name (auto-created if unknown)
+        tags: Optional list of tags (auto-created if unknown)
         date: Transaction date (defaults to now)
 
     """
@@ -85,6 +98,8 @@ def make_create_deposit_request(
         source_id=source_id,
         source_name=source_name,
         destination_id=destination_id,
+        category_name=category_name,
+        tags=tags,
     )
 
 
@@ -152,6 +167,7 @@ def make_search_transactions_request(
     transaction_type: str | None = None,
     category: str | None = None,
     budget: str | None = None,
+    tags: List[str] | None = None,
     account_contains: str | None = None,
     page: int = 1,
     limit: int = 50,
@@ -169,6 +185,7 @@ def make_search_transactions_request(
         type=transaction_type,  # ty:ignore[invalid-argument-type]
         category=category,
         budget=budget,
+        tags=tags,
         account_contains=account_contains,
         page=page,
         limit=limit,
@@ -184,6 +201,8 @@ def make_update_transaction_request(
     destination_id: str | None = None,
     budget_id: str | None = None,
     category_name: str | None = None,
+    category_id: str | None = None,
+    tags: List[str] | None = None,
 ) -> UpdateTransactionRequest:
     """Create an UpdateTransactionRequest for testing."""
     return UpdateTransactionRequest(
@@ -195,6 +214,8 @@ def make_update_transaction_request(
         destination_id=destination_id,
         budget_id=budget_id,
         category_name=category_name,
+        category_id=category_id,
+        tags=tags,
     )
 
 

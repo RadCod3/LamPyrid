@@ -64,6 +64,9 @@ async def test_create_withdrawal_basic(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -112,6 +115,9 @@ async def test_create_withdrawal_with_budget(
             'currency_code': 'USD',
             'budget_id': '1',
             'budget_name': 'Test Budget',
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -192,6 +198,9 @@ async def test_create_deposit_basic(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -272,6 +281,9 @@ async def test_create_transfer_basic(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -347,6 +359,9 @@ async def test_create_bulk_transactions(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
     assert bulk_result.successful[1].model_dump() == snapshot(
@@ -363,6 +378,9 @@ async def test_create_bulk_transactions(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
     assert bulk_result.successful[2].model_dump() == snapshot(
@@ -379,6 +397,9 @@ async def test_create_bulk_transactions(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -438,6 +459,9 @@ async def test_get_transaction(
             'currency_code': 'USD',
             'budget_id': None,
             'budget_name': None,
+            'category_id': None,
+            'category_name': None,
+            'tags': [],
         }
     )
 
@@ -1197,6 +1221,9 @@ async def test_bulk_update_transactions_with_failure(
                     'currency_code': 'USD',
                     'budget_id': None,
                     'budget_name': None,
+                    'category_id': None,
+                    'category_name': None,
+                    'tags': [],
                 }
             ],
             'failed': [
@@ -1336,6 +1363,9 @@ async def test_create_bulk_transactions_non_atomic_partial_success(
                     'currency_code': 'USD',
                     'budget_id': None,
                     'budget_name': None,
+                    'category_id': None,
+                    'category_name': None,
+                    'tags': [],
                 },
                 {
                     'id': IsStr(min_length=1),
@@ -1350,6 +1380,9 @@ async def test_create_bulk_transactions_non_atomic_partial_success(
                     'currency_code': 'USD',
                     'budget_id': None,
                     'budget_name': None,
+                    'category_id': None,
+                    'category_name': None,
+                    'tags': [],
                 },
             ],
             'failed': [
@@ -1510,6 +1543,9 @@ async def test_bulk_update_transactions_partial_success(
                     'currency_code': 'USD',
                     'budget_id': None,
                     'budget_name': None,
+                    'category_id': None,
+                    'category_name': None,
+                    'tags': [],
                 },
                 {
                     'id': IsStr(min_length=1),
@@ -1524,6 +1560,9 @@ async def test_bulk_update_transactions_partial_success(
                     'currency_code': 'USD',
                     'budget_id': None,
                     'budget_name': None,
+                    'category_id': None,
+                    'category_name': None,
+                    'tags': [],
                 },
             ],
             'failed': [
@@ -1573,3 +1612,199 @@ async def test_bulk_update_transactions_all_fail(
     assert str(exc_info.value) == snapshot(
         "Error calling tool 'bulk_update_transactions': All 2 transaction updates failed"
     )
+
+
+# ==================== Category & Tag Operations ====================
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_withdrawal_with_category_and_tags(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """A withdrawal can be created with a category and tags, and they round-trip."""
+    result = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 18.0,
+                'description': 'Withdrawal with category and tags',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'category_name': 'Txn Category',
+                'tags': ['txn-tag-1', 'txn-tag-2'],
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+
+    assert transaction.category_name == 'Txn Category'
+    assert transaction.category_id is not None
+    assert set(transaction.tags or []) == {'txn-tag-1', 'txn-tag-2'}
+
+    # Round-trip: fetching the transaction returns the same metadata.
+    fetched = await mcp_client.call_tool('get_transaction', {'req': {'id': transaction.id}})
+    fetched_txn = Transaction.model_validate(fetched.structured_content)
+    assert fetched_txn.category_name == 'Txn Category'
+    assert set(fetched_txn.tags or []) == {'txn-tag-1', 'txn-tag-2'}
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_create_deposit_with_category_and_tags(
+    mcp_client: Client,
+    test_revenue_account: str,
+    test_asset_account: Account,
+    transaction_cleanup: List[str],
+):
+    """A deposit can be created with a category and tags."""
+    result = await mcp_client.call_tool(
+        'create_deposit',
+        {
+            'req': {
+                'amount': 220.0,
+                'description': 'Deposit with category and tags',
+                'source_name': test_revenue_account,
+                'destination_id': test_asset_account.id,
+                'category_name': 'Income Category',
+                'tags': ['income-tag'],
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(result.structured_content)
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+
+    assert transaction.category_name == 'Income Category'
+    assert transaction.tags == ['income-tag']
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_update_transaction_replaces_and_clears_tags(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Updating tags replaces the full set; an empty list clears them."""
+    create = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 9.0,
+                'description': 'Withdrawal for tag replacement',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'tags': ['original-a', 'original-b'],
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(create.structured_content)
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+    assert set(transaction.tags or []) == {'original-a', 'original-b'}
+
+    # Replace: new tag set fully supersedes the old one.
+    replaced = await mcp_client.call_tool(
+        'update_transaction',
+        {'req': {'transaction_id': transaction.id, 'tags': ['replacement']}},
+    )
+    replaced_txn = Transaction.model_validate(replaced.structured_content)
+    assert replaced_txn.tags == ['replacement']
+
+    # Clear: an empty list removes all tags.
+    cleared = await mcp_client.call_tool(
+        'update_transaction',
+        {'req': {'transaction_id': transaction.id, 'tags': []}},
+    )
+    cleared_txn = Transaction.model_validate(cleared.structured_content)
+    assert (cleared_txn.tags or []) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_by_tag(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Transactions can be found by searching for one of their tags."""
+    unique_tag = 'search-by-tag-unique'
+    create = await mcp_client.call_tool(
+        'create_withdrawal',
+        {
+            'req': {
+                'amount': 14.0,
+                'description': 'Withdrawal findable by tag',
+                'source_id': test_asset_account.id,
+                'destination_name': test_expense_account,
+                'tags': [unique_tag],
+                'date': datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    transaction = Transaction.model_validate(create.structured_content)
+    assert transaction.id is not None
+    transaction_cleanup.append(transaction.id)
+
+    found = await mcp_client.call_tool('search_transactions', {'req': {'tags': [unique_tag]}})
+    response = TransactionListResponse.model_validate(found.structured_content)
+    ids = {t.id for t in response.transactions}
+    assert transaction.id in ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.transactions
+@pytest.mark.integration
+async def test_search_transactions_by_multiple_tags_uses_and(
+    mcp_client: Client,
+    test_asset_account: Account,
+    test_expense_account: str,
+    transaction_cleanup: List[str],
+):
+    """Searching by multiple tags returns only transactions carrying all of them."""
+    tag_a = 'multi-and-tag-a'
+    tag_b = 'multi-and-tag-b'
+
+    async def _make(description: str, tags: list[str]) -> str:
+        result = await mcp_client.call_tool(
+            'create_withdrawal',
+            {
+                'req': {
+                    'amount': 11.0,
+                    'description': description,
+                    'source_id': test_asset_account.id,
+                    'destination_name': test_expense_account,
+                    'tags': tags,
+                    'date': datetime.now(timezone.utc).isoformat(),
+                }
+            },
+        )
+        txn = Transaction.model_validate(result.structured_content)
+        assert txn.id is not None
+        transaction_cleanup.append(txn.id)
+        return txn.id
+
+    both_id = await _make('Has both tags', [tag_a, tag_b])
+    only_a_id = await _make('Has only tag a', [tag_a])
+
+    # Searching for both tags (AND) must return only the transaction carrying both.
+    found = await mcp_client.call_tool('search_transactions', {'req': {'tags': [tag_a, tag_b]}})
+    response = TransactionListResponse.model_validate(found.structured_content)
+    ids = {t.id for t in response.transactions}
+    assert both_id in ids
+    assert only_a_id not in ids

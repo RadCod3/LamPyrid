@@ -66,6 +66,8 @@ markers = [
   "budgets: budget-related tests",
   "insights: insight analysis tests",
   "rules: rule management tests",
+  "categories: category management tests",
+  "tags: tag management tests",
   "unit: marks tests as unit tests",
 ]
 

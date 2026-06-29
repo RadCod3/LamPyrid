@@ -22,7 +22,7 @@ async def _ensure_rule_group(firefly_client: FireflyClient) -> str:
         return _test_rule_group_id
 
     # Check for existing rule groups
-    r = await firefly_client._client.get('/api/v1/rule-groups')
+    r = await firefly_client._client.get('rule-groups')
     r.raise_for_status()
     groups = r.json().get('data', [])
     if groups:
@@ -31,7 +31,7 @@ async def _ensure_rule_group(firefly_client: FireflyClient) -> str:
 
     # Create one if none exist
     r = await firefly_client._client.post(
-        '/api/v1/rule-groups',
+        'rule-groups',
         json={'title': 'Test Rules', 'order': 1},
     )
     r.raise_for_status()
@@ -51,7 +51,7 @@ async def _create_rule_via_api(
     """Create a rule directly via Firefly III API and return its ID."""
     rule_group_id = await _ensure_rule_group(firefly_client)
     r = await firefly_client._client.post(
-        '/api/v1/rules',
+        'rules',
         json={
             'title': title,
             'rule_group_id': rule_group_id,
@@ -73,7 +73,7 @@ async def _create_rule_via_api(
 
 async def _delete_rule_via_api(firefly_client: FireflyClient, rule_id: str) -> None:
     """Delete a rule directly via Firefly III API."""
-    r = await firefly_client._client.delete(f'/api/v1/rules/{rule_id}')
+    r = await firefly_client._client.delete(f'rules/{rule_id}')
     r.raise_for_status()
 
 
