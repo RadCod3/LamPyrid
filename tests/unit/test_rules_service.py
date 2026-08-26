@@ -1,7 +1,7 @@
 """Unit tests for RuleService."""
 
 from datetime import date
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, call
 
 import pytest
 
@@ -141,17 +141,22 @@ def _make_asset_account(account_id: str, name: str) -> AccountRead:
     )
 
 
-def _asset_account_array(*accounts: AccountRead) -> AccountArray:
+def _asset_account_array(
+    *accounts: AccountRead,
+    current_page: int = 1,
+    total_pages: int = 1,
+    total: int | None = None,
+) -> AccountArray:
     """Wrap asset accounts in the AccountArray envelope Firefly III returns."""
     return AccountArray(
         data=list(accounts),
         meta=Meta(
             pagination=Pagination(
-                total=len(accounts),
+                total=len(accounts) if total is None else total,
                 count=len(accounts),
                 per_page=50,
-                current_page=1,
-                total_pages=1,
+                current_page=current_page,
+                total_pages=total_pages,
             )
         ),
     )
@@ -443,6 +448,9 @@ class TestRuleService:
         """Test the test_rule method (preview mode)."""
         rule_single = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
         mock_client.get_rule.return_value = rule_single
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'BBVA principal')
+        )
 
         # Mock empty transaction array
         mock_client.test_rule.return_value = TransactionArray(
@@ -498,8 +506,79 @@ class TestRuleService:
         )
         await service.test_rule(req)
 
-        mock_client.list_accounts.assert_awaited_once_with(type=AccountTypeFilter.asset)
+        mock_client.list_accounts.assert_awaited_once_with(page=1, type=AccountTypeFilter.asset)
         mock_client.test_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
+
+    @pytest.mark.asyncio
+    async def test_test_rule_follows_asset_account_pagination(self, service, mock_client):
+        """Asset accounts spanning several pages must all reach the filter.
+
+        Stopping at page one would silently drop accounts from the preview, the
+        same class of silent omission this filter exists to prevent.
+        """
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
+        mock_client.list_accounts.side_effect = [
+            _asset_account_array(
+                _make_asset_account('4', 'BBVA principal'),
+                current_page=1,
+                total_pages=2,
+                total=2,
+            ),
+            _asset_account_array(
+                _make_asset_account('6', 'BBVA diaria'),
+                current_page=2,
+                total_pages=2,
+                total=2,
+            ),
+        ]
+        mock_client.test_rule.return_value = _empty_transaction_array()
+
+        req = TestRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+        )
+        await service.test_rule(req)
+
+        assert mock_client.list_accounts.await_args_list == [
+            call(page=1, type=AccountTypeFilter.asset),
+            call(page=2, type=AccountTypeFilter.asset),
+        ]
+        mock_client.test_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
+
+    @pytest.mark.asyncio
+    async def test_execute_rule_follows_asset_account_pagination(self, service, mock_client):
+        """execute_rule must cover every page too, or it diverges from the preview."""
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
+        mock_client.list_accounts.side_effect = [
+            _asset_account_array(
+                _make_asset_account('4', 'BBVA principal'),
+                current_page=1,
+                total_pages=2,
+                total=2,
+            ),
+            _asset_account_array(
+                _make_asset_account('6', 'BBVA diaria'),
+                current_page=2,
+                total_pages=2,
+                total=2,
+            ),
+        ]
+        mock_client.trigger_rule.return_value = True
+
+        req = ExecuteRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+            confirm=True,
+        )
+        await service.execute_rule(req)
+
+        mock_client.trigger_rule.assert_awaited_once_with(
             '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
         )
 
@@ -539,6 +618,9 @@ class TestRuleService:
         """Test executing a rule with proper confirmation."""
         rule_single = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
         mock_client.get_rule.return_value = rule_single
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'BBVA principal')
+        )
         mock_client.trigger_rule.return_value = True
 
         req = ExecuteRuleRequest(

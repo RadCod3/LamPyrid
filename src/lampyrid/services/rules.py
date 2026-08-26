@@ -204,8 +204,19 @@ class RuleService:
         if account_ids:
             return account_ids
 
-        accounts = await self._client.list_accounts(type=AccountTypeFilter.asset)
-        return [account.id for account in accounts.data]
+        resolved: List[str] = []
+        page = 1
+        while True:
+            account_array = await self._client.list_accounts(
+                page=page, type=AccountTypeFilter.asset
+            )
+            resolved.extend(account.id for account in account_array.data)
+            pagination = account_array.meta.pagination if account_array.meta else None
+            total_pages = pagination.total_pages if pagination else None
+            if not account_array.data or not total_pages or page >= total_pages:
+                break
+            page += 1
+        return resolved
 
     async def test_rule(self, req: TestRuleRequest) -> RuleTestResult:
         """Test a rule in preview mode (show matches without changes).
