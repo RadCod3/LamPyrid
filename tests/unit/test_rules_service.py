@@ -449,7 +449,7 @@ class TestRuleService:
         rule_single = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
         mock_client.get_rule.return_value = rule_single
         mock_client.list_accounts.return_value = _asset_account_array(
-            _make_asset_account('4', 'BBVA principal')
+            _make_asset_account('4', 'Test Checking')
         )
 
         # Mock empty transaction array
@@ -494,8 +494,8 @@ class TestRuleService:
         """
         mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
         mock_client.list_accounts.return_value = _asset_account_array(
-            _make_asset_account('4', 'BBVA principal'),
-            _make_asset_account('6', 'BBVA diaria'),
+            _make_asset_account('4', 'Test Checking'),
+            _make_asset_account('6', 'Test Savings'),
         )
         mock_client.test_rule.return_value = _empty_transaction_array()
 
@@ -521,13 +521,13 @@ class TestRuleService:
         mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
         mock_client.list_accounts.side_effect = [
             _asset_account_array(
-                _make_asset_account('4', 'BBVA principal'),
+                _make_asset_account('4', 'Test Checking'),
                 current_page=1,
                 total_pages=2,
                 total=2,
             ),
             _asset_account_array(
-                _make_asset_account('6', 'BBVA diaria'),
+                _make_asset_account('6', 'Test Savings'),
                 current_page=2,
                 total_pages=2,
                 total=2,
@@ -556,13 +556,13 @@ class TestRuleService:
         mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
         mock_client.list_accounts.side_effect = [
             _asset_account_array(
-                _make_asset_account('4', 'BBVA principal'),
+                _make_asset_account('4', 'Test Checking'),
                 current_page=1,
                 total_pages=2,
                 total=2,
             ),
             _asset_account_array(
-                _make_asset_account('6', 'BBVA diaria'),
+                _make_asset_account('6', 'Test Savings'),
                 current_page=2,
                 total_pages=2,
                 total=2,
@@ -619,7 +619,7 @@ class TestRuleService:
         rule_single = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
         mock_client.get_rule.return_value = rule_single
         mock_client.list_accounts.return_value = _asset_account_array(
-            _make_asset_account('4', 'BBVA principal')
+            _make_asset_account('4', 'Test Checking')
         )
         mock_client.trigger_rule.return_value = True
 
@@ -648,8 +648,8 @@ class TestRuleService:
         """
         mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
         mock_client.list_accounts.return_value = _asset_account_array(
-            _make_asset_account('4', 'BBVA principal'),
-            _make_asset_account('6', 'BBVA diaria'),
+            _make_asset_account('4', 'Test Checking'),
+            _make_asset_account('6', 'Test Savings'),
         )
         mock_client.trigger_rule.return_value = True
 
