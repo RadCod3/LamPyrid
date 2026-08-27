@@ -5,12 +5,17 @@ operations between the MCP tools and the Firefly III client.
 """
 
 import re
-from typing import List
+from typing import List, Optional
 
 from pydantic import ValidationError
 
 from ..clients.firefly import FireflyClient
-from ..models.firefly_models import RuleActionUpdate, RuleTriggerUpdate, RuleUpdate
+from ..models.firefly_models import (
+    AccountTypeFilter,
+    RuleActionUpdate,
+    RuleTriggerUpdate,
+    RuleUpdate,
+)
 from ..models.lampyrid_models import (
     ExecuteRuleRequest,
     GetRuleRequest,
@@ -181,6 +186,38 @@ class RuleService:
         rule_single = await self._client.update_rule(req.rule_id, rule_update)
         return Rule.from_rule_read(rule_single.data)
 
+    async def _resolve_account_ids(self, account_ids: Optional[List[str]]) -> List[str]:
+        """Resolve the account filter Firefly III requires for rule endpoints.
+
+        Firefly III's ``/rules/{id}/test`` and ``/rules/{id}/trigger`` endpoints
+        return an empty result set when no ``accounts[]`` filter is supplied --
+        with HTTP 200 and no warning. An omitted filter must therefore be
+        expanded to every asset account, which is what the web interface does.
+
+        Args:
+            account_ids: Caller-supplied account IDs, or None to use every asset account.
+
+        Returns:
+            The account IDs to send to Firefly III.
+
+        """
+        if account_ids:
+            return account_ids
+
+        resolved: List[str] = []
+        page = 1
+        while True:
+            account_array = await self._client.list_accounts(
+                page=page, type=AccountTypeFilter.asset
+            )
+            resolved.extend(account.id for account in account_array.data)
+            pagination = account_array.meta.pagination if account_array.meta else None
+            total_pages = pagination.total_pages if pagination else None
+            if not account_array.data or not total_pages or page >= total_pages:
+                break
+            page += 1
+        return resolved
+
     async def test_rule(self, req: TestRuleRequest) -> RuleTestResult:
         """Test a rule in preview mode (show matches without changes).
 
@@ -196,8 +233,9 @@ class RuleService:
         rule_title = rule_single.data.attributes.title
 
         # Test the rule on the transactions
+        account_ids = await self._resolve_account_ids(req.account_ids)
         transaction_array = await self._client.test_rule(
-            req.rule_id, req.start_date, req.end_date, req.account_ids
+            req.rule_id, req.start_date, req.end_date, account_ids
         )
 
         # Convert transactions to simplified models
@@ -236,9 +274,10 @@ class RuleService:
         rule_single = await self._client.get_rule(req.rule_id)
         rule_title = rule_single.data.attributes.title
 
-        # Execute the rule
+        # Execute the rule over the same accounts test_rule previews
+        account_ids = await self._resolve_account_ids(req.account_ids)
         success = await self._client.trigger_rule(
-            req.rule_id, req.start_date, req.end_date, req.account_ids
+            req.rule_id, req.start_date, req.end_date, account_ids
         )
 
         return RuleExecuteResult(

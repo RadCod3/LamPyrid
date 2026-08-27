@@ -1,11 +1,15 @@
 """Unit tests for RuleService."""
 
 from datetime import date
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, call
 
 import pytest
 
 from lampyrid.models.firefly_models import (
+    AccountArray,
+    AccountProperties,
+    AccountRead,
+    AccountTypeFilter,
     Meta,
     ObjectLink,
     PageLink,
@@ -18,6 +22,7 @@ from lampyrid.models.firefly_models import (
     RuleTrigger,
     RuleTriggerKeyword,
     RuleTriggerType,
+    ShortAccountTypeProperty,
     TransactionArray,
 )
 from lampyrid.models.firefly_models import (
@@ -102,6 +107,57 @@ def _make_rule_array(rules: list[RuleRead]) -> RuleArray:
             self='http://example.com',
             first='http://example.com?page=1',
             last='http://example.com?page=1',
+        ),
+    )
+
+
+def _empty_transaction_array() -> TransactionArray:
+    """Build an empty TransactionArray, the shape Firefly III returns for no matches."""
+    return TransactionArray(
+        data=[],
+        meta=Meta(
+            pagination=Pagination(
+                total=0,
+                count=0,
+                per_page=50,
+                current_page=1,
+                total_pages=1,
+            )
+        ),
+        links=PageLink(
+            self='http://example.com',
+            first='http://example.com',
+            last='http://example.com',
+        ),
+    )
+
+
+def _make_asset_account(account_id: str, name: str) -> AccountRead:
+    """Build a minimal asset AccountRead for account-resolution tests."""
+    return AccountRead(
+        type='accounts',
+        id=account_id,
+        attributes=AccountProperties(name=name, type=ShortAccountTypeProperty.asset),
+    )
+
+
+def _asset_account_array(
+    *accounts: AccountRead,
+    current_page: int = 1,
+    total_pages: int = 1,
+    total: int | None = None,
+) -> AccountArray:
+    """Wrap asset accounts in the AccountArray envelope Firefly III returns."""
+    return AccountArray(
+        data=list(accounts),
+        meta=Meta(
+            pagination=Pagination(
+                total=len(accounts) if total is None else total,
+                count=len(accounts),
+                per_page=50,
+                current_page=current_page,
+                total_pages=total_pages,
+            )
         ),
     )
 
@@ -392,6 +448,9 @@ class TestRuleService:
         """Test the test_rule method (preview mode)."""
         rule_single = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
         mock_client.get_rule.return_value = rule_single
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'Test Checking')
+        )
 
         # Mock empty transaction array
         mock_client.test_rule.return_value = TransactionArray(
@@ -427,6 +486,122 @@ class TestRuleService:
         mock_client.test_rule.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_test_rule_defaults_to_every_asset_account(self, service, mock_client):
+        """Firefly III returns zero matches when accounts[] is absent.
+
+        An omitted account_ids must therefore be resolved to every asset
+        account, otherwise the preview silently reports "nothing matches".
+        """
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'Test Checking'),
+            _make_asset_account('6', 'Test Savings'),
+        )
+        mock_client.test_rule.return_value = _empty_transaction_array()
+
+        req = TestRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+        )
+        await service.test_rule(req)
+
+        mock_client.list_accounts.assert_awaited_once_with(page=1, type=AccountTypeFilter.asset)
+        mock_client.test_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
+
+    @pytest.mark.asyncio
+    async def test_test_rule_follows_asset_account_pagination(self, service, mock_client):
+        """Asset accounts spanning several pages must all reach the filter.
+
+        Stopping at page one would silently drop accounts from the preview, the
+        same class of silent omission this filter exists to prevent.
+        """
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
+        mock_client.list_accounts.side_effect = [
+            _asset_account_array(
+                _make_asset_account('4', 'Test Checking'),
+                current_page=1,
+                total_pages=2,
+                total=2,
+            ),
+            _asset_account_array(
+                _make_asset_account('6', 'Test Savings'),
+                current_page=2,
+                total_pages=2,
+                total=2,
+            ),
+        ]
+        mock_client.test_rule.return_value = _empty_transaction_array()
+
+        req = TestRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+        )
+        await service.test_rule(req)
+
+        assert mock_client.list_accounts.await_args_list == [
+            call(page=1, type=AccountTypeFilter.asset),
+            call(page=2, type=AccountTypeFilter.asset),
+        ]
+        mock_client.test_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
+
+    @pytest.mark.asyncio
+    async def test_execute_rule_follows_asset_account_pagination(self, service, mock_client):
+        """execute_rule must cover every page too, or it diverges from the preview."""
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
+        mock_client.list_accounts.side_effect = [
+            _asset_account_array(
+                _make_asset_account('4', 'Test Checking'),
+                current_page=1,
+                total_pages=2,
+                total=2,
+            ),
+            _asset_account_array(
+                _make_asset_account('6', 'Test Savings'),
+                current_page=2,
+                total_pages=2,
+                total=2,
+            ),
+        ]
+        mock_client.trigger_rule.return_value = True
+
+        req = ExecuteRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+            confirm=True,
+        )
+        await service.execute_rule(req)
+
+        mock_client.trigger_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
+
+    @pytest.mark.asyncio
+    async def test_test_rule_keeps_explicit_account_ids(self, service, mock_client):
+        """An explicit account_ids must be forwarded untouched, with no lookup."""
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Test Rule'))
+        mock_client.test_rule.return_value = _empty_transaction_array()
+
+        req = TestRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+            account_ids=['6'],
+        )
+        await service.test_rule(req)
+
+        mock_client.list_accounts.assert_not_awaited()
+        mock_client.test_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['6']
+        )
+
+    @pytest.mark.asyncio
     async def test_execute_rule_without_confirm(self, service, mock_client):
         """Test that execute_rule without confirm=True raises ValueError."""
         req = ExecuteRuleRequest(
@@ -443,6 +618,9 @@ class TestRuleService:
         """Test executing a rule with proper confirmation."""
         rule_single = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
         mock_client.get_rule.return_value = rule_single
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'Test Checking')
+        )
         mock_client.trigger_rule.return_value = True
 
         req = ExecuteRuleRequest(
@@ -459,6 +637,33 @@ class TestRuleService:
         assert 'asynchronously' in result.message
         mock_client.get_rule.assert_called_once_with('42')
         mock_client.trigger_rule.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_execute_rule_defaults_to_every_asset_account(self, service, mock_client):
+        """execute_rule must resolve accounts exactly like test_rule.
+
+        If the preview and the execution disagree on which accounts they cover,
+        the confirm gate stops meaning anything: a preview showing no matches
+        would be followed by an execution that changes transactions.
+        """
+        mock_client.get_rule.return_value = RuleSingle(data=_make_rule_read('42', 'Execute Rule'))
+        mock_client.list_accounts.return_value = _asset_account_array(
+            _make_asset_account('4', 'Test Checking'),
+            _make_asset_account('6', 'Test Savings'),
+        )
+        mock_client.trigger_rule.return_value = True
+
+        req = ExecuteRuleRequest(
+            rule_id='42',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 31),
+            confirm=True,
+        )
+        await service.execute_rule(req)
+
+        mock_client.trigger_rule.assert_awaited_once_with(
+            '42', date(2024, 1, 1), date(2024, 12, 31), ['4', '6']
+        )
 
     @pytest.mark.asyncio
     async def test_search_rules_no_criteria(self):

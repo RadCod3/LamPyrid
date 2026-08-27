@@ -364,6 +364,49 @@ async def test_test_rule_preview(
 @pytest.mark.asyncio
 @pytest.mark.rules
 @pytest.mark.integration
+async def test_test_rule_finds_matching_transactions(
+    mcp_client: Client,
+    firefly_client: FireflyClient,
+    rule_cleanup: List[str],
+):
+    """Test previewing a rule that matches the seeded transactions.
+
+    Firefly III's /rules/{id}/test returns an empty result set when no accounts[]
+    filter is supplied -- HTTP 200, total 0, no warning -- so without that filter
+    every preview reports zero matches regardless of the rule.
+    """
+    rule_id = await _create_rule_via_api(
+        firefly_client,
+        title='Integration Test - Matching Transactions',
+        trigger_type='description_contains',
+        trigger_value='Seed: Unbudgeted expense',
+    )
+    rule_cleanup.append(rule_id)
+
+    today = date.today()
+    start_of_month = today.replace(day=1)
+
+    result = await mcp_client.call_tool(
+        'test_rule',
+        {
+            'req': {
+                'rule_id': rule_id,
+                'start_date': start_of_month.isoformat(),
+                'end_date': today.isoformat(),
+            }
+        },
+    )
+    test_result = result.structured_content
+
+    assert test_result['matched_transaction_count'] > 0
+    assert len(test_result['matched_transactions']) == test_result['matched_transaction_count']
+    for transaction in test_result['matched_transactions']:
+        assert 'Seed: Unbudgeted expense' in transaction['description']
+
+
+@pytest.mark.asyncio
+@pytest.mark.rules
+@pytest.mark.integration
 async def test_test_rule_no_matches(
     mcp_client: Client,
     firefly_client: FireflyClient,
